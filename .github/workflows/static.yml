@@ -1,43 +1,128 @@
-# Simple workflow for deploying static content to GitHub Pages
+# Validate, build, and deploy the Ultra Zoom static site to GitHub Pages.
+#
+# Pipeline:
+#   validate  → catch HTML errors and broken links early
+#   build     → minify HTML/CSS, optimize images, produce clean _site/ output
+#   deploy    → push _site/ to GitHub Pages (main branch only)
+
 name: Deploy static content to Pages
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
-
-  # Allows you to run this workflow manually from the Actions tab
+  pull_request:
+    branches: ["main"]
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
-  group: "pages"
+  group: "pages-${{ github.ref }}"
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # ── Validate ────────────────────────────────────────────
+  validate:
+    name: Validate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate HTML
+        run: npx --yes html-validate *.html
+
+      - name: Check links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --offline --no-progress '*.html'
+          fail: true
+
+  # ── Build & Optimize ────────────────────────────────────
+  build:
+    name: Build
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install build tools
+        run: npm install --no-save clean-css-cli html-minifier-terser
+
+      - name: Create output directory
+        run: mkdir -p _site/images
+
+      - name: Minify CSS
+        run: npx cleancss -o _site/styles.css styles.css
+
+      - name: Minify HTML
+        run: |
+          for file in *.html; do
+            npx html-minifier-terser \
+              --collapse-whitespace \
+              --remove-comments \
+              --remove-redundant-attributes \
+              --remove-script-type-attributes \
+              --remove-style-link-type-attributes \
+              --minify-css true \
+              --minify-urls true \
+              --output "_site/$file" \
+              "$file"
+          done
+
+      - name: Optimize images
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq optipng > /dev/null 2>&1
+          cp images/* _site/images/
+          optipng -quiet -o2 _site/images/*.png
+
+      - name: Report build sizes
+        run: |
+          echo "### Build output" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| File | Size |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|------|------|" >> "$GITHUB_STEP_SUMMARY"
+          for f in _site/*.html _site/*.css _site/images/*; do
+            size=$(du -h "$f" | cut -f1)
+            name=${f#_site/}
+            echo "| \`$name\` | $size |" >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Total:** $(du -sh _site | cut -f1)" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: '.'
+          path: _site
+
+  # ── Deploy ──────────────────────────────────────────────
+  deploy:
+    name: Deploy
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
