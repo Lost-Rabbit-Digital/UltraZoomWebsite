@@ -327,6 +327,128 @@ img {
     color: var(--text-muted);
 }
 
+/* ── Payment Banners ──────────────────────────────── */
+
+.payment-banner-top,
+.payment-banner-bottom {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.5rem;
+    text-align: center;
+}
+
+.payment-banner-bottom {
+    border-top: 1px solid var(--border);
+    border-bottom: none;
+}
+
+.payment-banner-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.payment-banner-title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #e05c5c;
+    letter-spacing: 0.03em;
+}
+
+.payment-banner-body {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    max-width: 480px;
+}
+
+.payment-btn {
+    display: inline-block;
+    background: var(--brand);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 0.55rem 1.5rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: background-color 0.2s, transform 0.15s;
+}
+
+.payment-btn:hover {
+    background: var(--brand-dark);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* ── Quick Guide & FAQ ────────────────────────────── */
+
+.guide-faq {
+    padding: 2.5rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.guide-faq h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--brand-light);
+}
+
+.faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.faq-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    transition: border-color 0.2s;
+}
+
+.faq-item:hover {
+    border-color: var(--brand);
+}
+
+.faq-item h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.4rem;
+}
+
+.faq-item p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
+}
+
+/* ── Contacts ─────────────────────────────────────── */
+
+.contacts-section {
+    padding: 2rem 0 2.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.contacts-section h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--brand-light);
+}
+
+.contacts-section p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    line-height: 1.65;
+}
+
 /* ── Content Pages (Privacy, Terms) ───────────────── */
 
 .page-content h1 {
