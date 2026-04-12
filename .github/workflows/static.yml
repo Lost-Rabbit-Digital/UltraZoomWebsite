@@ -143,8 +143,16 @@ jobs:
           LIGHTHOUSE_LINKS: ${{ steps.lighthouse.outputs.links }}
         with:
           script: |
-            const results = JSON.parse(process.env.LIGHTHOUSE_MANIFEST);
-            const links   = JSON.parse(process.env.LIGHTHOUSE_LINKS);
+            const manifestRaw = process.env.LIGHTHOUSE_MANIFEST;
+            const linksRaw   = process.env.LIGHTHOUSE_LINKS;
+
+            if (!manifestRaw) {
+              core.warning('No Lighthouse results available — skipping summary.');
+              return;
+            }
+
+            const results = JSON.parse(manifestRaw);
+            const links   = linksRaw ? JSON.parse(linksRaw) : {};
 
             const score = (v) => Math.round(v * 100);
             const emoji = (v) => v >= 0.9 ? '🟢' : v >= 0.5 ? '🟠' : '🔴';
