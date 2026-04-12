@@ -1,9 +1,10 @@
 # Validate, build, and deploy the Ultra Zoom static site to GitHub Pages.
 #
 # Pipeline:
-#   validate  → catch HTML errors and broken links early
-#   build     → minify HTML/CSS, optimize images, produce clean _site/ output
-#   deploy    → push _site/ to GitHub Pages (main branch only)
+#   validate   → catch HTML errors and broken links early
+#   build      → minify HTML/CSS, optimize images, produce clean _site/ output
+#   lighthouse → run Lighthouse audit and post a performance summary
+#   deploy     → push _site/ to GitHub Pages (main branch only)
 
 name: Deploy static content to Pages
 
@@ -109,6 +110,60 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
+
+  # ── Lighthouse ───────────────────────────────────────────
+  lighthouse:
+    name: Lighthouse
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: _artifact
+
+      - name: Extract artifact
+        run: mkdir -p _site && tar -xf _artifact/artifact.tar -C _site
+
+      - name: Lighthouse audit
+        id: lighthouse
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          uploadArtifacts: true
+          configPath: .github/lighthouse/lighthouserc.json
+
+      - name: Format Lighthouse summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const results = ${{ steps.lighthouse.outputs.manifest }};
+            const links   = ${{ steps.lighthouse.outputs.links }};
+
+            const score = (v) => Math.round(v * 100);
+            const emoji = (v) => v >= 0.9 ? '🟢' : v >= 0.5 ? '🟠' : '🔴';
+
+            let body = '### ⚡ Lighthouse Report\n\n';
+            body += '| Category | Score |\n|----------|-------|\n';
+
+            for (const result of results) {
+              const { summary } = result;
+              for (const [key, value] of Object.entries(summary)) {
+                const label = key.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                body += `| ${emoji(value)} ${label} | ${score(value)} |\n`;
+              }
+            }
+
+            if (Object.keys(links).length) {
+              body += '\n**Full reports:** ';
+              body += Object.entries(links).map(([url, link]) => `[${new URL(url).pathname || '/'}](${link})`).join(' · ');
+              body += '\n';
+            }
+
+            core.summary.addRaw(body).write();
 
   # ── Deploy ──────────────────────────────────────────────
   deploy:
