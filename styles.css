@@ -1,0 +1,395 @@
+/* Ultra Zoom — Dark Reader-inspired static site */
+
+/* ── Reset & Base ─────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-primary: #181a20;
+    --bg-secondary: #1e2028;
+    --bg-card: #232530;
+    --text-primary: #e8e6e3;
+    --text-secondary: #b0aca6;
+    --text-muted: #8a8680;
+    --brand: #6172f3;
+    --brand-light: #8098f9;
+    --brand-dark: #444ce7;
+    --border: #2e3040;
+    --link: #6172f3;
+    --link-hover: #8098f9;
+    --chrome-green: #4caf50;
+    --firefox-orange: #ff9500;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-sans);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+a {
+    color: var(--link);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--link-hover);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ── Screen-reader only ───────────────────────────── */
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ── Header / Navigation ──────────────────────────── */
+
+.header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 1.125rem;
+}
+
+.nav-logo:hover {
+    color: var(--brand-light);
+}
+
+.nav-logo img {
+    border-radius: 6px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.nav-links a {
+    color: var(--text-secondary);
+}
+
+.nav-links a:hover {
+    color: var(--text-primary);
+}
+
+/* ── Main Content ─────────────────────────────────── */
+
+.main {
+    flex: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+    width: 100%;
+}
+
+/* ── Hero ──────────────────────────────────────────── */
+
+.hero {
+    text-align: center;
+    padding: 2rem 0 2.5rem;
+}
+
+.hero h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--text-primary);
+    max-width: 720px;
+    margin: 0 auto 1.25rem;
+}
+
+.hero-description {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    line-height: 1.7;
+}
+
+.hero-description strong {
+    color: var(--text-primary);
+}
+
+.screenshot-container {
+    display: flex;
+    justify-content: center;
+    margin: 1.5rem 0;
+}
+
+.screenshot {
+    border-radius: 12px;
+    filter: drop-shadow(0 4px 24px rgba(97, 114, 243, 0.25));
+}
+
+/* ── Install Buttons ──────────────────────────────── */
+
+.install {
+    padding: 1rem 0 2.5rem;
+}
+
+.install-links {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.install-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    transition: transform 0.15s, box-shadow 0.2s, background-color 0.2s;
+    min-width: 160px;
+    justify-content: center;
+}
+
+.install-button:hover {
+    transform: translateY(-2px);
+    color: #fff;
+}
+
+.install-button.chrome {
+    background: var(--brand);
+    box-shadow: 0 4px 16px rgba(97, 114, 243, 0.3);
+}
+
+.install-button.chrome:hover {
+    background: var(--brand-dark);
+    box-shadow: 0 6px 24px rgba(97, 114, 243, 0.45);
+}
+
+.install-button.firefox {
+    background: var(--brand);
+    box-shadow: 0 4px 16px rgba(97, 114, 243, 0.3);
+}
+
+.install-button.firefox:hover {
+    background: var(--brand-dark);
+    box-shadow: 0 6px 24px rgba(97, 114, 243, 0.45);
+}
+
+.install-icon {
+    flex-shrink: 0;
+}
+
+/* ── Features / Trust ─────────────────────────────── */
+
+.features {
+    padding: 2rem 0;
+}
+
+.trust-text {
+    text-align: center;
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    max-width: 640px;
+    margin: 0 auto 2rem;
+    line-height: 1.7;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.feature-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    transition: border-color 0.2s;
+}
+
+.feature-card:hover {
+    border-color: var(--brand);
+}
+
+.feature-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.feature-card p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.pro-note {
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    padding: 1rem 1.5rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.pro-note strong {
+    color: var(--brand-light);
+}
+
+/* ── Footer ───────────────────────────────────────── */
+
+.footer {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    padding: 1.5rem;
+}
+
+.footer-content {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.footer-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.footer-links a {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.footer-links a:hover {
+    color: var(--text-primary);
+}
+
+.footer-copy {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* ── Content Pages (Privacy, Terms) ───────────────── */
+
+.page-content h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    padding-top: 1rem;
+}
+
+.page-content h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.page-content p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.7;
+}
+
+.page-content code {
+    background: var(--bg-card);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+/* ── Responsive ───────────────────────────────────── */
+
+@media (max-width: 640px) {
+    .hero h1 {
+        font-size: 1.35rem;
+    }
+
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .install-links {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .install-button {
+        width: 100%;
+        max-width: 280px;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 0.75rem;
+        text-align: center;
+    }
+
+    .nav {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .nav-links {
+        gap: 1rem;
+    }
+}
