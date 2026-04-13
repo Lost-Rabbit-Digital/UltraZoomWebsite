@@ -143,8 +143,8 @@ jobs:
           LIGHTHOUSE_LINKS: ${{ steps.lighthouse.outputs.links }}
         with:
           script: |
-            const manifestRaw = process.env.LIGHTHOUSE_MANIFEST;
-            const linksRaw   = process.env.LIGHTHOUSE_LINKS;
+            const manifestRaw = (process.env.LIGHTHOUSE_MANIFEST || '').trim();
+            const linksRaw   = (process.env.LIGHTHOUSE_LINKS   || '').trim();
 
             if (!manifestRaw) {
               core.warning('No Lighthouse results available — skipping summary.');
