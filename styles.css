@@ -367,7 +367,6 @@ img {
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border);
     padding: 1rem 1.5rem;
-    text-align: center;
 }
 
 .payment-banner-bottom {
@@ -380,39 +379,69 @@ img {
     margin: 0 auto;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     gap: 1.5rem;
     flex-wrap: wrap;
 }
 
+.payment-banner-text {
+    flex: 1;
+    min-width: 200px;
+}
+
 .payment-banner-title {
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: #e05c5c;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.2rem;
 }
 
 .payment-banner-body {
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     color: var(--text-secondary);
-    max-width: 480px;
+    line-height: 1.5;
+}
+
+.payment-banner-btns {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
 .payment-btn {
     display: inline-block;
-    background: var(--brand-dark);
-    color: #fff;
     font-weight: 700;
-    font-size: 0.95rem;
-    padding: 0.55rem 1.5rem;
+    font-size: 0.9rem;
+    padding: 0.55rem 1.25rem;
     border-radius: 6px;
     white-space: nowrap;
     transition: background-color 0.2s, transform 0.15s;
+    text-decoration: none;
 }
 
-.payment-btn:hover {
+.payment-btn--onetime {
+    background: var(--brand-dark);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(68, 76, 231, 0.3);
+}
+
+.payment-btn--onetime:hover {
     background: #3035b8;
     color: #fff;
+    transform: translateY(-1px);
+}
+
+.payment-btn--sub {
+    background: transparent;
+    color: var(--brand-light);
+    border: 1px solid var(--brand);
+}
+
+.payment-btn--sub:hover {
+    background: rgba(97, 114, 243, 0.12);
+    color: var(--link-hover);
     transform: translateY(-1px);
 }
 
@@ -1007,5 +1036,20 @@ kbd {
     .help-toc ul {
         flex-direction: column;
         gap: 0.3rem;
+    }
+
+    .payment-banner-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .payment-banner-btns {
+        width: 100%;
+    }
+
+    .payment-btn {
+        flex: 1;
+        text-align: center;
     }
 }
