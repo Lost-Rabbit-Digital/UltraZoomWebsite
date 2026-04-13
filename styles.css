@@ -273,7 +273,7 @@ img {
     font-size: 1.05rem;
     color: var(--text-secondary);
     max-width: 640px;
-    margin: 0 auto 2rem;
+    margin: 1rem auto 2rem;
     line-height: 1.7;
 }
 
