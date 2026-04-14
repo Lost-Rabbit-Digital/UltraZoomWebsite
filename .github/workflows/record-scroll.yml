@@ -1,0 +1,108 @@
+# Record a smooth-scroll trailer video of the index page.
+#
+# Trigger manually from the Actions tab, or automatically on PRs that change
+# the site's visual content (HTML, CSS, images).
+#
+# The final MP4 is uploaded as a workflow artifact you can download and use
+# directly in store listings, social posts, or README demos.
+
+name: Record scroll trailer
+
+on:
+  workflow_dispatch:
+    inputs:
+      scroll_speed:
+        description: "Scroll speed in pixels per second (lower = slower)"
+        required: false
+        default: "180"
+      resolution:
+        description: "Resolution (WIDTHxHEIGHT)"
+        required: false
+        default: "1920x1080"
+      pause_ms:
+        description: "Pause at top and bottom in milliseconds"
+        required: false
+        default: "2000"
+
+permissions:
+  contents: read
+
+jobs:
+  record:
+    name: Record
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install build tools
+        run: npm install --no-save clean-css-cli html-minifier-terser
+
+      - name: Build site
+        run: |
+          mkdir -p _site/images
+
+          npx cleancss -o _site/styles.css styles.css
+
+          for file in *.html; do
+            npx html-minifier-terser \
+              --collapse-whitespace \
+              --remove-comments \
+              --remove-redundant-attributes \
+              --remove-script-type-attributes \
+              --remove-style-link-type-attributes \
+              --minify-css true \
+              --minify-urls true \
+              --output "_site/$file" \
+              "$file"
+          done
+
+          cp images/* _site/images/
+
+      - name: Install Playwright
+        run: npx --yes playwright install --with-deps chromium
+
+      - name: Parse resolution input
+        id: res
+        run: |
+          RES="${{ github.event.inputs.resolution || '1920x1080' }}"
+          echo "width=${RES%x*}"  >> "$GITHUB_OUTPUT"
+          echo "height=${RES#*x}" >> "$GITHUB_OUTPUT"
+
+      - name: Record scroll video
+        run: |
+          node .github/scripts/record-scroll.mjs
+        env:
+          SITE_DIR: _site
+          OUT_DIR: recordings
+          WIDTH: ${{ steps.res.outputs.width }}
+          HEIGHT: ${{ steps.res.outputs.height }}
+          SCROLL_PPS: ${{ github.event.inputs.scroll_speed || '180' }}
+          PAUSE_MS: ${{ github.event.inputs.pause_ms || '2000' }}
+
+      - name: Convert to MP4
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null 2>&1
+          for webm in recordings/*.webm; do
+            mp4="${webm%.webm}.mp4"
+            ffmpeg -i "$webm" \
+              -c:v libx264 -preset slow -crf 18 \
+              -pix_fmt yuv420p \
+              -movflags +faststart \
+              -an \
+              "$mp4"
+          done
+
+      - name: Upload recording
+        uses: actions/upload-artifact@v4
+        with:
+          name: scroll-trailer
+          path: |
+            recordings/*.mp4
+            recordings/*.webm
+          retention-days: 90
