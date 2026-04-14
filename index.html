@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Ultra Zoom Help — Learn how to use the Ultra Zoom browser extension to hover-zoom images on 60+ websites.">
+    <meta name="description" content="Ultra Zoom — Instant hover-to-zoom for images across 60+ websites. Free browser extension for Chrome and Firefox.">
     <meta name="theme-color" content="#181a20">
-    <title>Ultra Zoom — Help &amp; Documentation</title>
+    <title>Ultra Zoom — Hover-to-Zoom for 60+ Websites</title>
     <link rel="icon" type="image/png" href="images/icon-48.png">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -13,276 +13,78 @@
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <header class="header">
         <nav class="nav" aria-label="Main navigation">
-            <a href="https://lost-rabbit-digital.github.io/UltraZoomWebsite/" class="nav-logo">
+            <a href="index.html" class="nav-logo">
                 <img src="images/icon-48.png" alt="Ultra Zoom" width="32" height="32">
                 <span>Ultra Zoom</span>
             </a>
             <div class="nav-links">
-                <a href="#getting-started">Getting Started</a>
-                <a href="#faq">FAQ</a>
+                <a href="help.html">Help</a>
+                <a href="blog.html">Blog</a>
                 <a href="terms.html">Terms of Use</a>
-                <a href="privacy.html">Privacy Policy</a>
+                <a href="privacy.html">Privacy</a>
                 <a href="contact.html">Contact</a>
             </div>
         </nav>
     </header>
 
-    <div class="payment-banner-top">
-        <div class="payment-banner-inner">
-            <div class="payment-banner-personal">
-                <h2 class="payment-personal-title">PLEASE PAY FOR ULTRA ZOOM</h2>
-                <p class="payment-personal-body">
-                    Today is <strong class="payment-date"></strong>, and we kindly ask you to complete a payment to
-                    keep Ultra Zoom going. <strong>Every day</strong>, Ultra Zoom helps thousands of users browse and zoom
-                    images effortlessly across <strong>60+ websites</strong>. Please <strong>make a payment now</strong>.
-                    Take part in keeping Ultra Zoom maintained and making image browsing better for everyone.
+    <main class="landing" id="main-content">
+        <section class="landing-hero">
+            <img src="images/icon-128.png" alt="" class="landing-logo" width="128" height="128">
+            <h1 class="landing-title">Ultra Zoom</h1>
+            <p class="landing-tagline">Instant hover-to-zoom for images across <strong>60+ websites</strong>.</p>
+
+            <ul class="install-links landing-install">
+                <li>
+                    <a href="https://chromewebstore.google.com/detail/ultra-zoom" class="install-button chrome" target="_blank" rel="noopener">
+                        <svg class="install-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false">
+                            <path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29zm13.342 2.166a5.446 5.446 0 0 1 1.45 7.09l.002.001-3.953 6.848c.313.03.63.047.951.047 6.627 0 12-5.373 12-12 0-1.034-.135-2.035-.377-2.986zM12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/>
+                        </svg>
+                        Install for Chrome
+                    </a>
+                </li>
+                <li>
+                    <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/" class="install-button firefox" target="_blank" rel="noopener">
+                        <svg class="install-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false">
+                            <path d="M22.207 5.534a11.18 11.18 0 0 0-2.455-3.218c.472.869.744 1.79.864 2.352a9.597 9.597 0 0 0-3.678-3.533c-2.057-1.17-4.228-1.32-5.2-1.238a9.747 9.747 0 0 0-5.393 2.138c-.346.3-1.178 1.095-1.884 2.268-.58 1.024-.876 1.963-1.034 2.608a10.783 10.783 0 0 1 2.873-3.312c3.617-2.746 8.239-2.227 8.694-2.174l.03.003c-2.282.103-4.267.8-5.725 1.753A10.143 10.143 0 0 0 6.32 6.8 8.505 8.505 0 0 0 4.25 9.87a7.106 7.106 0 0 0-.143 4.093 8.154 8.154 0 0 0 1.446 3.143 8.482 8.482 0 0 0 2.875 2.455A8.91 8.91 0 0 0 12 20.634a8.62 8.62 0 0 0 3.71-.818 8.177 8.177 0 0 0 2.925-2.283 7.775 7.775 0 0 0 1.503-3.2 7.236 7.236 0 0 0-.115-3.582 6.687 6.687 0 0 0-1.57-2.815c.216.407.37.838.467 1.283a5.845 5.845 0 0 1-.453 3.677 6.11 6.11 0 0 1-2.36 2.629A6.47 6.47 0 0 1 12 16.638a6.596 6.596 0 0 1-2.735-.59 6.17 6.17 0 0 1-2.187-1.703 5.763 5.763 0 0 1-1.147-2.421 5.217 5.217 0 0 1 .146-2.8 5.494 5.494 0 0 1 1.39-2.25c.22-.21.461-.406.72-.577a4.58 4.58 0 0 1 1.604-.72A3.764 3.764 0 0 1 12 6a3.72 3.72 0 0 1 2.18.686 3.51 3.51 0 0 1 1.28 1.74c.084.26.13.53.137.802a2.333 2.333 0 0 0-.764-.822A2.23 2.23 0 0 0 13.6 8.06a2.189 2.189 0 0 0-1.625.687 2.226 2.226 0 0 0-.617 1.657c0 .91.554 1.695 1.343 2.033a2.47 2.47 0 0 0 .939.195 2.404 2.404 0 0 0 1.703-.725 2.494 2.494 0 0 0 .697-1.812c0-.044 0-.088-.003-.132.005.002.397 1.04.095 2.324a4.084 4.084 0 0 1-1.286 2.14 4.32 4.32 0 0 1-2.416 1.065 4.476 4.476 0 0 1-2.655-.42 4.207 4.207 0 0 1-1.866-1.735 4.017 4.017 0 0 1-.535-2.458c.055-.855.35-1.67.85-2.35a4.85 4.85 0 0 1 .953-.93c-1.3.41-2.347 1.255-3.015 2.308A5.593 5.593 0 0 0 5.3 13.357a5.53 5.53 0 0 0 .882 3.27 5.834 5.834 0 0 0 2.603 2.178 6.216 6.216 0 0 0 3.353.522 6.022 6.022 0 0 0 3.094-1.298 5.683 5.683 0 0 0 1.829-2.84c.027-.09.049-.182.07-.273l.003.003a8.063 8.063 0 0 0 .319-2.39c-.012-1.043-.225-2.044-.654-2.914a7.14 7.14 0 0 0-3.903-3.6A7.61 7.61 0 0 0 9.39 5.31a7.18 7.18 0 0 0-3.355 1.588A7.034 7.034 0 0 0 3.99 9.91a6.786 6.786 0 0 0-.154 3.598 6.998 6.998 0 0 0 1.562 3.157 7.399 7.399 0 0 0 3.005 2.201A7.813 7.813 0 0 0 12 19.5a7.667 7.667 0 0 0 3.737-.936 7.26 7.26 0 0 0 2.752-2.592 6.885 6.885 0 0 0 1.135-3.545 6.655 6.655 0 0 0-.717-3.374 7.518 7.518 0 0 0-1.14-1.546c.61.16 1.206.443 1.762.854.443.333.852.714 1.237 1.132a9.53 9.53 0 0 1-.062-2.403c.06-.456.15-.898.284-1.322-.42-.42-.887-.817-1.393-1.178-.534-.378-1.098-.698-1.68-.96.007-.037.013-.075.022-.112a6.793 6.793 0 0 0-.028-3.204 11.018 11.018 0 0 1 4.297 4.22z"/>
+                        </svg>
+                        Install for Firefox
+                    </a>
+                </li>
+            </ul>
+
+            <p class="landing-blurb">
+                Hover any image &mdash; the full-size version appears instantly. Works on Google Images, Reddit,
+                Twitter/X, Instagram, Amazon, Pinterest, and dozens more. Free and open to use, with optional
+                Pro features for power users.
+            </p>
+
+            <p class="landing-help-link">
+                Need setup help? Visit the <a href="help.html">Help page</a> or read the <a href="blog.html">blog</a>.
+            </p>
+        </section>
+
+        <section class="support-strip" aria-label="Support Ultra Zoom">
+            <div class="support-strip-inner">
+                <p class="support-strip-text">
+                    <strong>Support Ultra Zoom.</strong>
+                    Today is <strong class="payment-date"></strong> &mdash; help keep hover-zoom alive with a one-time payment.
                 </p>
-                <div class="payment-personal-action">
-                    <p class="payment-personal-check">&#10003; One-time payment per user</p>
-                    <a href="#" class="payment-btn-hero">Pay $12.99</a>
-                </div>
-                <p class="payment-personal-or">or <a href="#">$3.99 / month</a></p>
-            </div>
-        </div>
-    </div>
-
-    <main class="main" id="main-content">
-
-        <section class="help-hero">
-            <div class="help-hero-text">
-                <h1>Ultra Zoom Help</h1>
-                <p>Everything you need to get the most out of Ultra Zoom — the hover-to-zoom extension for power browsers.</p>
-                <ul class="install-links">
-                    <li>
-                        <a href="https://chromewebstore.google.com/detail/ultra-zoom" class="install-button chrome" target="_blank" rel="noopener">
-                            <svg class="install-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false">
-                                <path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29zm13.342 2.166a5.446 5.446 0 0 1 1.45 7.09l.002.001-3.953 6.848c.313.03.63.047.951.047 6.627 0 12-5.373 12-12 0-1.034-.135-2.035-.377-2.986zM12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/>
-                            </svg>
-                            Install for Chrome
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/" class="install-button firefox" target="_blank" rel="noopener">
-                            <svg class="install-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false">
-                                <path d="M22.207 5.534a11.18 11.18 0 0 0-2.455-3.218c.472.869.744 1.79.864 2.352a9.597 9.597 0 0 0-3.678-3.533c-2.057-1.17-4.228-1.32-5.2-1.238a9.747 9.747 0 0 0-5.393 2.138c-.346.3-1.178 1.095-1.884 2.268-.58 1.024-.876 1.963-1.034 2.608a10.783 10.783 0 0 1 2.873-3.312c3.617-2.746 8.239-2.227 8.694-2.174l.03.003c-2.282.103-4.267.8-5.725 1.753A10.143 10.143 0 0 0 6.32 6.8 8.505 8.505 0 0 0 4.25 9.87a7.106 7.106 0 0 0-.143 4.093 8.154 8.154 0 0 0 1.446 3.143 8.482 8.482 0 0 0 2.875 2.455A8.91 8.91 0 0 0 12 20.634a8.62 8.62 0 0 0 3.71-.818 8.177 8.177 0 0 0 2.925-2.283 7.775 7.775 0 0 0 1.503-3.2 7.236 7.236 0 0 0-.115-3.582 6.687 6.687 0 0 0-1.57-2.815c.216.407.37.838.467 1.283a5.845 5.845 0 0 1-.453 3.677 6.11 6.11 0 0 1-2.36 2.629A6.47 6.47 0 0 1 12 16.638a6.596 6.596 0 0 1-2.735-.59 6.17 6.17 0 0 1-2.187-1.703 5.763 5.763 0 0 1-1.147-2.421 5.217 5.217 0 0 1 .146-2.8 5.494 5.494 0 0 1 1.39-2.25c.22-.21.461-.406.72-.577a4.58 4.58 0 0 1 1.604-.72A3.764 3.764 0 0 1 12 6a3.72 3.72 0 0 1 2.18.686 3.51 3.51 0 0 1 1.28 1.74c.084.26.13.53.137.802a2.333 2.333 0 0 0-.764-.822A2.23 2.23 0 0 0 13.6 8.06a2.189 2.189 0 0 0-1.625.687 2.226 2.226 0 0 0-.617 1.657c0 .91.554 1.695 1.343 2.033a2.47 2.47 0 0 0 .939.195 2.404 2.404 0 0 0 1.703-.725 2.494 2.494 0 0 0 .697-1.812c0-.044 0-.088-.003-.132.005.002.397 1.04.095 2.324a4.084 4.084 0 0 1-1.286 2.14 4.32 4.32 0 0 1-2.416 1.065 4.476 4.476 0 0 1-2.655-.42 4.207 4.207 0 0 1-1.866-1.735 4.017 4.017 0 0 1-.535-2.458c.055-.855.35-1.67.85-2.35a4.85 4.85 0 0 1 .953-.93c-1.3.41-2.347 1.255-3.015 2.308A5.593 5.593 0 0 0 5.3 13.357a5.53 5.53 0 0 0 .882 3.27 5.834 5.834 0 0 0 2.603 2.178 6.216 6.216 0 0 0 3.353.522 6.022 6.022 0 0 0 3.094-1.298 5.683 5.683 0 0 0 1.829-2.84c.027-.09.049-.182.07-.273l.003.003a8.063 8.063 0 0 0 .319-2.39c-.012-1.043-.225-2.044-.654-2.914a7.14 7.14 0 0 0-3.903-3.6A7.61 7.61 0 0 0 9.39 5.31a7.18 7.18 0 0 0-3.355 1.588A7.034 7.034 0 0 0 3.99 9.91a6.786 6.786 0 0 0-.154 3.598 6.998 6.998 0 0 0 1.562 3.157 7.399 7.399 0 0 0 3.005 2.201A7.813 7.813 0 0 0 12 19.5a7.667 7.667 0 0 0 3.737-.936 7.26 7.26 0 0 0 2.752-2.592 6.885 6.885 0 0 0 1.135-3.545 6.655 6.655 0 0 0-.717-3.374 7.518 7.518 0 0 0-1.14-1.546c.61.16 1.206.443 1.762.854.443.333.852.714 1.237 1.132a9.53 9.53 0 0 1-.062-2.403c.06-.456.15-.898.284-1.322-.42-.42-.887-.817-1.393-1.178-.534-.378-1.098-.698-1.68-.96.007-.037.013-.075.022-.112a6.793 6.793 0 0 0-.028-3.204 11.018 11.018 0 0 1 4.297 4.22z"/>
-                            </svg>
-                            Install for Firefox
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <img src="images/icon-128.png" alt="Ultra Zoom extension icon" class="help-hero-icon" width="96" height="96">
-        </section>
-
-<section class="help-section" id="getting-started">
-            <h2>Getting Started</h2>
-            <p>Ultra Zoom adds instant hover-to-zoom to images across 60+ websites. Follow these steps to get set up:</p>
-            <ol class="steps">
-                <li class="step-item">
-                    <span class="step-number">1</span>
-                    <div class="step-content">
-                        <strong>Install the extension</strong>
-                        <p>Add Ultra Zoom from the <a href="https://chromewebstore.google.com/detail/ultra-zoom" target="_blank" rel="noopener">Chrome Web Store</a> or <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/" target="_blank" rel="noopener">Firefox Add-ons</a>.</p>
-                    </div>
-                </li>
-                <li class="step-item">
-                    <span class="step-number">2</span>
-                    <div class="step-content">
-                        <strong>Visit any supported site</strong>
-                        <p>Go to Google Images, Amazon, Reddit, Twitter/X, Instagram, YouTube, or any of the 60+ supported websites.</p>
-                    </div>
-                </li>
-                <li class="step-item">
-                    <span class="step-number">3</span>
-                    <div class="step-content">
-                        <strong>Hover over an image</strong>
-                        <p>Move your mouse over any image thumbnail. The full-size version appears instantly in an overlay.</p>
-                    </div>
-                </li>
-                <li class="step-item">
-                    <span class="step-number">4</span>
-                    <div class="step-content">
-                        <strong>Dismiss the overlay</strong>
-                        <p>Move your mouse away or press <code>Esc</code> to close the zoomed view.</p>
-                    </div>
-                </li>
-            </ol>
-        </section>
-
-        <section class="help-section" id="keyboard-shortcuts">
-            <h2>Keyboard Shortcuts</h2>
-            <p>Ultra Zoom is built for power users. These shortcuts work while an image overlay is active:</p>
-            <table class="shortcuts-table">
-                <thead>
-                    <tr>
-                        <th>Shortcut</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><kbd>Esc</kbd></td>
-                        <td>Close the current zoom overlay</td>
-                    </tr>
-                    <tr>
-                        <td><kbd>Scroll Up / Down</kbd></td>
-                        <td>Zoom in or out on the displayed image</td>
-                    </tr>
-                    <tr>
-                        <td><kbd>←</kbd> / <kbd>→</kbd></td>
-                        <td>Navigate to the previous or next image in a gallery</td>
-                    </tr>
-                    <tr>
-                        <td><kbd>Ctrl</kbd> + <kbd>C</kbd></td>
-                        <td>Copy current image at the adjusted size <span class="badge-pro">Pro</span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
-
-        <section class="help-section" id="supported-sites">
-            <h2>Supported Sites</h2>
-            <p>Ultra Zoom ships with optimized plugins for these websites, with more added regularly:</p>
-            <ul class="site-grid">
-                <li>Google Images</li>
-                <li>Amazon</li>
-                <li>Reddit</li>
-                <li>Twitter / X</li>
-                <li>Instagram</li>
-                <li>Facebook</li>
-                <li>YouTube</li>
-                <li>Tumblr</li>
-                <li>DeviantArt</li>
-                <li>Pinterest</li>
-                <li>Flickr</li>
-                <li>Imgur</li>
-                <li>ArtStation</li>
-                <li>Pixiv</li>
-                <li>eBay</li>
-                <li>Etsy</li>
-                <li>Steam</li>
-                <li>Wikipedia</li>
-                <li>GitHub</li>
-                <li>and 40+ more…</li>
-            </ul>
-            <p class="help-note">Ultra Zoom can also be enabled globally for any website not on the list via the extension popup.</p>
-        </section>
-
-        <section class="help-section" id="per-site-control">
-            <h2>Per-Site Control</h2>
-            <p>You decide where Ultra Zoom is active:</p>
-            <ul class="help-list">
-                <li><strong>Master toggle</strong> — click the Ultra Zoom toolbar icon and flip the main switch to enable or disable the extension everywhere.</li>
-                <li><strong>Per-site toggle</strong> — while on any website, click the toolbar icon and use the site-specific switch to disable Ultra Zoom for that domain only.</li>
-                <li><strong>Global mode</strong> — enable "All sites" in the popup to activate Ultra Zoom on websites that don't have a dedicated plugin.</li>
-            </ul>
-        </section>
-
-        <section class="help-section" id="pro-features">
-            <h2>Pro Features</h2>
-            <p>Upgrade to Pro to unlock additional capabilities:</p>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <h3>Video Preview</h3>
-                    <p>Hover over video thumbnails on YouTube, Twitter/X, and other supported sites to preview the video without opening it.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Gallery Navigation</h3>
-                    <p>Use arrow keys to browse through image galleries on Reddit, Instagram, and more without leaving the page.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Image Copy</h3>
-                    <p>Press <kbd>Ctrl</kbd> + <kbd>C</kbd> while an image is zoomed to copy it at the adjusted size directly to your clipboard.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Caption Overlays</h3>
-                    <p>View image titles, alt text, and captions in a readable overlay while hovering.</p>
-                </div>
-            </div>
-            <p class="pro-note">Pro is available for <strong>$12.99 one-time</strong> or <strong>$3.99/month</strong>. Managed through Stripe, supports up to 3 devices.</p>
-        </section>
-
-        <section class="help-section" id="troubleshooting">
-            <h2>Troubleshooting</h2>
-            <div class="faq-list">
-                <div class="faq-item">
-                    <h3>Ultra Zoom isn't working on a site I expect it to support</h3>
-                    <p>Click the toolbar icon and make sure the extension is enabled both globally and for that specific site. If the site isn't in the supported list, try enabling "All sites" mode in the popup.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>The zoom overlay flickers or disappears immediately</h3>
-                    <p>This can happen on sites with aggressive hover styles. Try moving your mouse slowly and steadily over the image rather than quickly. If the issue persists on a specific site, <a href="#contacts">let us know</a> and we'll investigate.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>The extension toolbar icon is missing</h3>
-                    <p>Click the puzzle-piece icon in Chrome or the extensions menu in Firefox to find Ultra Zoom and pin it to your toolbar.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Ultra Zoom conflicts with another extension</h3>
-                    <p>Try disabling other extensions one at a time to identify the conflict. Common conflicts occur with other image-handling or zoom extensions. <a href="#contacts">Report the conflict</a> so we can investigate a fix.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>My Pro license isn't being recognized</h3>
-                    <p>Make sure you're logged in with the same account used during purchase. If the problem continues, contact us at <a href="mailto:boden@lostrabbitdigital.com">boden@lostrabbitdigital.com</a> with your order details.</p>
+                <div class="support-strip-actions">
+                    <a href="#" class="payment-btn-hero support-strip-btn">Pay $12.99</a>
+                    <span class="support-strip-or">or <a href="#">$3.99/month</a></span>
                 </div>
             </div>
         </section>
-
-        <section class="help-section guide-faq" id="faq">
-            <h2>FAQ</h2>
-            <div class="faq-list">
-                <div class="faq-item">
-                    <h3>Is Ultra Zoom free?</h3>
-                    <p>Yes. Core hover-to-zoom across 60+ sites is completely free. <a href="#pro-features">Pro features</a> (video preview, gallery nav, download, captions) are available for $12.99 one-time or $3.99/month.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Does Ultra Zoom collect my data?</h3>
-                    <p>No. Ultra Zoom does not collect, store, or transmit any personal data or browsing history. It operates entirely within your browser. See our <a href="privacy.html">Privacy Policy</a> for full details.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Which browsers are supported?</h3>
-                    <p>Ultra Zoom works on Chrome, Edge, Brave, and other Chromium-based browsers via the Chrome Web Store, and on Firefox via Firefox Add-ons.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>How do I request support for a new website?</h3>
-                    <p>Send us the site URL at <a href="mailto:boden@lostrabbitdigital.com">boden@lostrabbitdigital.com</a> and we'll update the extension to support it.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Can I use Ultra Zoom on sites not in the supported list?</h3>
-                    <p>Yes. Enable "All sites" mode in the extension popup to activate basic hover-to-zoom on any website. Results may vary depending on how the site structures its images.</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="contacts-section" id="contacts">
-            <h2>Contacts</h2>
-            <p>Have a question or need help? Use our <a href="contact.html">contact form</a> or email us directly at <a href="mailto:boden@lostrabbitdigital.com">boden@lostrabbitdigital.com</a>.</p>
-        </section>
-
     </main>
-
-    <div class="payment-banner-bottom">
-        <div class="payment-banner-inner">
-            <div class="payment-banner-personal">
-                <h2 class="payment-personal-title">PLEASE PAY FOR ULTRA ZOOM</h2>
-                <p class="payment-personal-body">
-                    Today is <strong class="payment-date"></strong>, and we kindly ask you to complete a payment to
-                    keep Ultra Zoom going. <strong>Every day</strong>, Ultra Zoom helps thousands of users browse and zoom
-                    images effortlessly across <strong>60+ websites</strong>. Please <strong>make a payment now</strong>.
-                    Take part in keeping Ultra Zoom maintained and making image browsing better for everyone.
-                </p>
-                <div class="payment-personal-action">
-                    <p class="payment-personal-check">&#10003; One-time payment per user</p>
-                    <a href="#" class="payment-btn-hero">Pay $12.99</a>
-                </div>
-                <p class="payment-personal-or">or <a href="#">$3.99 / month</a></p>
-            </div>
-        </div>
-    </div>
 
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-links">
+                <a href="help.html">Help</a>
+                <a href="blog.html">Blog</a>
+                <a href="terms.html">Terms</a>
+                <a href="privacy.html">Privacy</a>
+                <a href="contact.html">Contact</a>
                 <a href="https://bsky.app/profile/bodengamedev.bsky.social" target="_blank" rel="noopener">Bluesky</a>
             </div>
             <p class="footer-copy">&copy; 2025 Lost Rabbit Digital LLC. All rights reserved.</p>
