@@ -877,6 +877,11 @@ kbd {
     font-size: 0.875rem;
     color: var(--text-secondary);
     text-align: center;
+    transition: border-color 0.2s;
+}
+
+.site-grid li:hover {
+    border-color: var(--brand);
 }
 
 /* ── Help List ────────────────────────────────────── */
