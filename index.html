@@ -29,13 +29,19 @@
 
     <div class="payment-banner-top">
         <div class="payment-banner-inner">
-            <div class="payment-banner-text">
-                <p class="payment-banner-title">SUPPORT ULTRA ZOOM</p>
-                <p class="payment-banner-body">Keep Ultra Zoom maintained and growing. Choose the option that works for you.</p>
-            </div>
-            <div class="payment-banner-btns">
-                <a href="#" class="payment-btn payment-btn--onetime">$12.99 one-time</a>
-                <a href="#" class="payment-btn payment-btn--sub">$3.99 / month</a>
+            <div class="payment-banner-personal">
+                <h2 class="payment-personal-title">PLEASE PAY FOR ULTRA ZOOM</h2>
+                <p class="payment-personal-body">
+                    Today is <strong class="payment-date"></strong>, and we kindly ask you to complete a payment to
+                    keep Ultra Zoom going. <strong>Every day</strong>, Ultra Zoom helps thousands of users browse and zoom
+                    images effortlessly across <strong>60+ websites</strong>. Please <strong>make a payment now</strong>.
+                    Take part in keeping Ultra Zoom maintained and making image browsing better for everyone.
+                </p>
+                <div class="payment-personal-action">
+                    <p class="payment-personal-check">&#10003; One-time payment per user</p>
+                    <a href="#" class="payment-btn-hero">Pay $12.99</a>
+                </div>
+                <p class="payment-personal-or">or <a href="#">$3.99 / month</a></p>
             </div>
         </div>
     </div>
@@ -257,13 +263,19 @@
 
     <div class="payment-banner-bottom">
         <div class="payment-banner-inner">
-            <div class="payment-banner-text">
-                <p class="payment-banner-title">SUPPORT ULTRA ZOOM</p>
-                <p class="payment-banner-body">Keep Ultra Zoom maintained and growing. Choose the option that works for you.</p>
-            </div>
-            <div class="payment-banner-btns">
-                <a href="#" class="payment-btn payment-btn--onetime">$12.99 one-time</a>
-                <a href="#" class="payment-btn payment-btn--sub">$3.99 / month</a>
+            <div class="payment-banner-personal">
+                <h2 class="payment-personal-title">PLEASE PAY FOR ULTRA ZOOM</h2>
+                <p class="payment-personal-body">
+                    Today is <strong class="payment-date"></strong>, and we kindly ask you to complete a payment to
+                    keep Ultra Zoom going. <strong>Every day</strong>, Ultra Zoom helps thousands of users browse and zoom
+                    images effortlessly across <strong>60+ websites</strong>. Please <strong>make a payment now</strong>.
+                    Take part in keeping Ultra Zoom maintained and making image browsing better for everyone.
+                </p>
+                <div class="payment-personal-action">
+                    <p class="payment-personal-check">&#10003; One-time payment per user</p>
+                    <a href="#" class="payment-btn-hero">Pay $12.99</a>
+                </div>
+                <p class="payment-personal-or">or <a href="#">$3.99 / month</a></p>
             </div>
         </div>
     </div>
@@ -276,5 +288,14 @@
             <p class="footer-copy">&copy; 2025 Lost Rabbit Digital LLC. All rights reserved.</p>
         </div>
     </footer>
+
+    <script>
+        document.querySelectorAll('.payment-date').forEach(function(el) {
+            var d = new Date();
+            var months = ['January','February','March','April','May','June',
+                          'July','August','September','October','November','December'];
+            el.textContent = months[d.getMonth()] + ' ' + d.getDate();
+        });
+    </script>
 </body>
 </html>

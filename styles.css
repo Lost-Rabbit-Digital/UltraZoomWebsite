@@ -288,6 +288,9 @@ img {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.25rem;
     margin-bottom: 2rem;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .feature-card {
@@ -372,7 +375,7 @@ img {
 .payment-banner-bottom {
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border);
-    padding: 1rem 1.5rem;
+    padding: 2.5rem 1.5rem;
 }
 
 .payment-banner-bottom {
@@ -381,74 +384,83 @@ img {
 }
 
 .payment-banner-inner {
-    max-width: 960px;
+    max-width: 700px;
     margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
-    flex-wrap: wrap;
 }
 
-.payment-banner-text {
-    flex: 1;
-    min-width: 200px;
+.payment-banner-personal {
+    text-align: center;
 }
 
-.payment-banner-title {
-    font-weight: 700;
-    font-size: 0.95rem;
+.payment-personal-title {
+    font-weight: 800;
+    font-size: 1.6rem;
     color: var(--error);
-    letter-spacing: 0.06em;
-    margin-bottom: 0.2rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 1rem;
 }
 
-.payment-banner-body {
-    font-size: 0.85rem;
+.payment-personal-body {
+    font-size: 1rem;
     color: var(--text-secondary);
-    line-height: 1.5;
+    line-height: 1.75;
+    margin-bottom: 1.75rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.payment-banner-btns {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    align-items: center;
+.payment-personal-body strong {
+    color: var(--text-primary);
 }
 
-.payment-btn {
-    display: inline-block;
+.payment-personal-body a {
+    color: var(--brand-light);
     font-weight: 700;
-    font-size: 0.9rem;
-    padding: 0.55rem 1.25rem;
-    border-radius: 6px;
-    white-space: nowrap;
-    transition: background-color 0.2s, transform 0.15s;
-    text-decoration: none;
 }
 
-.payment-btn--onetime {
+.payment-personal-action {
+    margin-bottom: 0.75rem;
+}
+
+.payment-personal-check {
+    font-size: 0.85rem;
+    color: var(--success);
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.payment-btn-hero {
+    display: inline-block;
     background: var(--brand-dark);
     color: var(--white);
-    box-shadow: 0 2px 10px rgba(31, 111, 235, 0.3);
+    font-weight: 700;
+    font-size: 1.15rem;
+    padding: 0.85rem 3.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    box-shadow: 0 4px 20px rgba(31, 111, 235, 0.35);
+    transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s;
 }
 
-.payment-btn--onetime:hover {
+.payment-btn-hero:hover {
     background: var(--brand-hover);
     color: var(--white);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(31, 111, 235, 0.5);
 }
 
-.payment-btn--sub {
-    background: transparent;
+.payment-personal-or {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 0.75rem;
+}
+
+.payment-personal-or a {
     color: var(--brand-light);
-    border: 1px solid var(--brand);
-}
-
-.payment-btn--sub:hover {
-    background: rgba(88, 166, 255, 0.12);
-    color: var(--link-hover);
-    transform: translateY(-1px);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
 }
 
 /* ── Quick Guide & FAQ ────────────────────────────── */
@@ -469,6 +481,9 @@ img {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .faq-item {
@@ -508,6 +523,7 @@ img {
     font-weight: 700;
     margin-bottom: 1rem;
     color: var(--brand-light);
+    text-align: center;
 }
 
 .contacts-section p {
@@ -515,6 +531,7 @@ img {
     color: var(--text-secondary);
     margin-bottom: 0.5rem;
     line-height: 1.65;
+    text-align: center;
 }
 
 /* ── Contact Form ─────────────────────────────────── */
@@ -705,15 +722,20 @@ img {
 .help-hero {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 2rem;
     padding: 2.5rem 0 2rem;
     border-bottom: 1px solid var(--border);
     margin-bottom: 0;
+    text-align: center;
+    flex-direction: column;
 }
 
 .help-hero-text {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .help-hero-text h1 {
@@ -729,7 +751,9 @@ img {
     color: var(--text-secondary);
     line-height: 1.7;
     margin-bottom: 1.5rem;
-    max-width: 520px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .help-hero-icon {
@@ -750,6 +774,7 @@ img {
     font-weight: 700;
     color: var(--brand-light);
     margin-bottom: 0.75rem;
+    text-align: center;
 }
 
 .help-section > p {
@@ -758,6 +783,9 @@ img {
     line-height: 1.7;
     margin-bottom: 1.25rem;
     max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
 }
 
 /* ── Steps ────────────────────────────────────────── */
@@ -767,6 +795,9 @@ img {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .step-item {
@@ -814,6 +845,9 @@ img {
     border-collapse: collapse;
     font-size: 0.9rem;
     margin-top: 0.5rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .shortcuts-table th {
@@ -873,6 +907,9 @@ kbd {
     grid-template-columns: repeat(4, 1fr);
     gap: 0.5rem;
     margin-bottom: 1.25rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .site-grid li {
@@ -898,6 +935,9 @@ kbd {
     flex-direction: column;
     gap: 0.75rem;
     padding: 0;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .help-list li {
@@ -930,6 +970,9 @@ kbd {
     border-left: 3px solid var(--brand);
     border-radius: 0 6px 6px 0;
     margin-top: 1rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* ── Responsive ───────────────────────────────────── */
@@ -940,8 +983,6 @@ kbd {
     }
 
     .help-hero {
-        flex-direction: column-reverse;
-        align-items: flex-start;
         gap: 1.25rem;
         padding: 1.5rem 0 1.5rem;
     }
@@ -965,7 +1006,7 @@ kbd {
 
     .install-links {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
     }
 
     .install-button {
@@ -1007,18 +1048,16 @@ kbd {
         padding: 0.5rem 0.75rem;
     }
 
-.payment-banner-inner {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
+    .payment-personal-title {
+        font-size: 1.25rem;
     }
 
-    .payment-banner-btns {
-        width: 100%;
+    .payment-personal-body {
+        font-size: 0.9rem;
     }
 
-    .payment-btn {
-        flex: 1;
-        text-align: center;
+    .payment-btn-hero {
+        padding: 0.75rem 2.5rem;
+        font-size: 1.05rem;
     }
 }
