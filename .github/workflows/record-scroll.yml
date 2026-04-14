@@ -65,7 +65,9 @@ jobs:
           cp images/* _site/images/
 
       - name: Install Playwright
-        run: npx --yes playwright install --with-deps chromium
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
 
       - name: Parse resolution input
         id: res
