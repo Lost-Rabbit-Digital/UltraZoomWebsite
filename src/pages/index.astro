@@ -1,45 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Ultra Zoom — Instant hover-to-zoom for images across 60+ websites. Free browser extension for Chrome and Firefox.">
-    <meta name="theme-color" content="#181a20">
-    <!-- Open Graph / Social -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://ultrazoom.app/">
-    <meta property="og:title" content="Ultra Zoom — Hover-to-Zoom for 60+ Websites">
-    <meta property="og:description" content="Instant hover-to-zoom for images across 60+ websites. Free browser extension for Chrome and Firefox.">
-    <meta property="og:image" content="https://ultrazoom.app/images/icon-128.png">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Ultra Zoom — Hover-to-Zoom for 60+ Websites">
-    <meta name="twitter:description" content="Instant hover-to-zoom for images across 60+ websites. Free browser extension for Chrome and Firefox.">
-    <meta name="twitter:image" content="https://ultrazoom.app/images/icon-128.png">
-    <title>Ultra Zoom — Hover-to-Zoom for 60+ Websites</title>
-    <link rel="icon" type="image/png" href="images/icon-48.png">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    <header class="header">
-        <nav class="nav" aria-label="Main navigation">
-            <a href="index.html" class="nav-logo">
-                <img src="images/icon-48.png" alt="Ultra Zoom" width="32" height="32">
-                <span>Ultra Zoom</span>
-            </a>
-            <div class="nav-links">
-                <a href="help.html">Help</a>
-                <a href="blog.html">Blog</a>
-                <a href="terms.html">Terms of Use</a>
-                <a href="privacy.html">Privacy</a>
-                <a href="contact.html">Contact</a>
-            </div>
-        </nav>
-    </header>
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
 
+<BaseLayout
+  title="Ultra Zoom — Hover-to-Zoom for 60+ Websites"
+  description="Ultra Zoom — Instant hover-to-zoom for images across 60+ websites. Free browser extension for Chrome and Firefox."
+  og={{
+    url: 'https://ultrazoom.app/',
+    title: 'Ultra Zoom — Hover-to-Zoom for 60+ Websites',
+    description: 'Instant hover-to-zoom for images across 60+ websites. Free browser extension for Chrome and Firefox.',
+    image: 'https://ultrazoom.app/images/icon-128.png',
+  }}
+>
     <main class="landing" id="main-content">
         <section class="landing-hero">
-            <img src="images/icon-128.png" alt="" class="landing-logo" width="128" height="128">
+            <img src="/images/icon-128.png" alt="" class="landing-logo" width="128" height="128">
             <h1 class="landing-title">Ultra Zoom</h1>
             <p class="landing-tagline">Instant hover-to-zoom for images across <strong>60+ websites</strong>.</p>
 
@@ -69,7 +44,7 @@
             </p>
 
             <p class="landing-help-link">
-                Need setup help? Visit the <a href="help.html">Help page</a> or read the <a href="blog.html">blog</a>.
+                Need setup help? Visit the <a href="/help">Help page</a> or read the <a href="/blog">blog</a>.
             </p>
         </section>
 
@@ -88,21 +63,7 @@
         </section>
     </main>
 
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-links">
-                <a href="help.html">Help</a>
-                <a href="blog.html">Blog</a>
-                <a href="terms.html">Terms</a>
-                <a href="privacy.html">Privacy</a>
-                <a href="contact.html">Contact</a>
-                <a href="https://bsky.app/profile/bodengamedev.bsky.social" target="_blank" rel="noopener">Bluesky</a>
-            </div>
-            <p class="footer-copy">Copyright &copy; 2026 Lost Rabbit Digital, LLC. All rights reserved.</p>
-        </div>
-    </footer>
-
-    <script>
+    <script is:inline>
         document.querySelectorAll('.payment-date').forEach(function(el) {
             var d = new Date();
             var months = ['January','February','March','April','May','June',
@@ -110,7 +71,6 @@
             el.textContent = months[d.getMonth()] + ' ' + d.getDate();
         });
 
-        // Checkout via Stripe
         document.querySelectorAll('[data-plan]').forEach(function(btn) {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -146,5 +106,4 @@
             });
         });
     </script>
-</body>
-</html>
+</BaseLayout>

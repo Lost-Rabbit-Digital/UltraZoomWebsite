@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Privacy Policy — Ultra Zoom"
+  description="Ultra Zoom Privacy Policy — Zero telemetry, zero tracking. How our browser extension handles your data."
+  currentPage="privacy"
+  og={{
+    url: 'https://ultrazoom.app/privacy',
+    title: 'Privacy Policy — Ultra Zoom',
+    description: 'Zero telemetry, zero tracking. How our browser extension handles your data.',
+    image: 'https://ultrazoom.app/images/icon-128.png',
+  }}
+>
+    <main class="main page-content" id="main-content">
+        <h1>Privacy Policy</h1>
+
+        <p>Last updated: April 14, 2026</p>
+
+        <h2>Personal Data</h2>
+        <p>Ultra Zoom has never collected and will never collect any personal data, browsing history, or information about the pages you visit. The extension runs entirely within your browser.</p>
+
+        <h2>Settings Storage</h2>
+        <p>Your extension preferences (zoom level, settings, etc.) are stored locally on your device using the browser's built-in Web Extensions Storage API. This data never leaves your browser and is not transmitted to any server.</p>
+
+        <h2>License Validation</h2>
+        <p>If you purchase a Pro subscription, the extension sends your license key to our validation server (<code>ultra-zoom-api.hailbytes.workers.dev</code>) solely to verify your subscription status. No personal data, browsing history, or page content is included in this request. The server is hosted on Cloudflare Workers.</p>
+
+        <h2>Payment Processing</h2>
+        <p>Pro subscriptions are processed through <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe</a>. Your email address may be used by Stripe for payment-related communications. We do not store or have access to your full payment details — all billing information is handled directly by Stripe.</p>
+
+        <h2>Permissions</h2>
+        <p>Ultra Zoom requests host permissions to inject content scripts that detect and interact with images on web pages. These scripts run locally in your browser and do not send page content, image data, or any other information to external servers.</p>
+
+        <h2>Website Analytics</h2>
+        <p>The ultrazoom.app website logs page visits and clicks for statistical purposes. Visitor language and timezone information may be transmitted anonymously to our servers to help us understand how people use the site.</p>
+
+        <h2>Contact</h2>
+        <p>Questions about this policy? Reach us at <a href="mailto:boden@lostrabbitdigital.com">boden@lostrabbitdigital.com</a>.</p>
+    </main>
+</BaseLayout>
