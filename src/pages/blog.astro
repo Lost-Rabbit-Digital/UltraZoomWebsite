@@ -1,5 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
 ---
 
 <BaseLayout
@@ -14,71 +19,32 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </header>
 
         <section class="blog-list" aria-label="Blog posts">
-            <article class="blog-post">
-                <header class="blog-post-header">
-                    <p class="blog-meta">
-                        <time datetime="2026-04-10">April 10, 2026</time>
-                        <span class="blog-dot" aria-hidden="true">&bull;</span>
-                        <span>Release notes</span>
-                    </p>
-                    <h2 class="blog-post-title">
-                        <a href="#ultra-zoom-launches">Ultra Zoom launches on Chrome and Firefox</a>
-                    </h2>
-                </header>
-                <div class="blog-post-body" id="ultra-zoom-launches">
-                    <p>
-                        After months of development, Ultra Zoom is now available on the Chrome Web Store and
-                        Firefox Add-ons. The first release ships with hover-to-zoom plugins for more than
-                        60 websites, including Google Images, Reddit, Twitter/X, Instagram, Amazon, and
-                        Pinterest.
-                    </p>
-                    <p>
-                        Our goal was simple: bring back the fast, frictionless image browsing that used to be
-                        standard before sites started locking thumbnails behind clicks and modals. Hover any
-                        image, see it full size. No click. No redirect. No tracking.
-                    </p>
-                    <p>
-                        Installation is one click &mdash; head to the <a href="/">homepage</a> and grab
-                        the extension for your browser. If you hit any snags, our <a href="/help">Help page</a>
-                        covers setup, per-site controls, and troubleshooting.
-                    </p>
-                </div>
-            </article>
+            {posts.map(post => {
+                const formattedDate = post.data.date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                });
+                const isoDate = post.data.date.toISOString().slice(0, 10);
 
-            <article class="blog-post">
-                <header class="blog-post-header">
-                    <p class="blog-meta">
-                        <time datetime="2026-04-02">April 2, 2026</time>
-                        <span class="blog-dot" aria-hidden="true">&bull;</span>
-                        <span>Tips &amp; tricks</span>
-                    </p>
-                    <h2 class="blog-post-title">
-                        <a href="#hover-zoom-power-tips">Power tips: making the most of hover-to-zoom</a>
-                    </h2>
-                </header>
-                <div class="blog-post-body" id="hover-zoom-power-tips">
-                    <p>
-                        Hover-to-zoom is one of those features that feels deceptively simple until you start
-                        using it every day. Here are a few shortcuts we've been leaning on internally.
-                    </p>
-                    <p>
-                        <strong>Scroll to zoom further.</strong> Once an image pops up, scroll the mouse wheel
-                        to zoom in or out. It's perfect for inspecting product photos on Amazon or Etsy.
-                    </p>
-                    <p>
-                        <strong>Arrow keys for galleries.</strong> On Reddit, Instagram, and Pinterest, use
-                        the left and right arrow keys to walk through a gallery without dismissing the overlay.
-                    </p>
-                    <p>
-                        <strong>Per-site toggle.</strong> If a website already has its own lightbox you like,
-                        click the Ultra Zoom toolbar icon and flip the site-specific switch. Ultra Zoom will
-                        stay out of the way there and keep working everywhere else.
-                    </p>
-                    <p>
-                        The full shortcut reference lives on the <a href="/help#keyboard-shortcuts">Help page</a>.
-                    </p>
-                </div>
-            </article>
+                return (
+                    <article class="blog-post">
+                        <header class="blog-post-header">
+                            <p class="blog-meta">
+                                <time datetime={isoDate}>{formattedDate}</time>
+                                <span class="blog-dot" aria-hidden="true">&bull;</span>
+                                <span>{post.data.category}</span>
+                            </p>
+                            <h2 class="blog-post-title">
+                                <a href={`/blog/${post.id}`}>{post.data.title}</a>
+                            </h2>
+                        </header>
+                        <div class="blog-post-body">
+                            <p>{post.data.description}</p>
+                        </div>
+                    </article>
+                );
+            })}
         </section>
     </main>
 </BaseLayout>
