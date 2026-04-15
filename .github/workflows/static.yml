@@ -1,10 +1,10 @@
-# Validate, build, and deploy the Ultra Zoom static site to GitHub Pages.
+# Validate, build, and deploy the Ultra Zoom static site to Cloudflare Pages.
 #
 # Pipeline:
 #   validate   → catch HTML errors and broken links early
 #   build      → minify HTML/CSS, optimize images, produce clean _site/ output
 #   lighthouse → run Lighthouse audit and post a performance summary
-#   deploy     → push _site/ to GitHub Pages (main branch only)
+#   deploy     → deploy _site/ to Cloudflare Pages (main branch only)
 
 name: Deploy static content to Pages
 
@@ -103,12 +103,10 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Total:** $(du -sh _site | cut -f1)" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
+          name: site-build
           path: _site
 
   # ── Lighthouse ───────────────────────────────────────────
@@ -123,11 +121,8 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: github-pages
-          path: _artifact
-
-      - name: Extract artifact
-        run: mkdir -p _site && tar -xf _artifact/artifact.tar -C _site
+          name: site-build
+          path: _site
 
       - name: Lighthouse audit
         id: lighthouse
@@ -176,19 +171,25 @@ jobs:
 
             core.summary.addRaw(body).write();
 
-  # ── Deploy ──────────────────────────────────────────────
+  # ── Deploy to Cloudflare Pages ───────────────────────────
   deploy:
     name: Deploy
     needs: build
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
     environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      name: production
+      url: https://ultrazoom.app
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: site-build
+          path: _site
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy _site --project-name=ultrazoom-website
