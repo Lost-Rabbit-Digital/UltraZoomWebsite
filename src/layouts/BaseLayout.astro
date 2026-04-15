@@ -1,0 +1,103 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+  og?: {
+    url?: string;
+    title?: string;
+    description?: string;
+    image?: string;
+  };
+  noindex?: boolean;
+  currentPage?: string;
+  mainClass?: string;
+  mainId?: string;
+}
+
+const {
+  title,
+  description,
+  og,
+  noindex = false,
+  currentPage,
+  mainClass = 'main',
+  mainId = 'main-content',
+} = Astro.props;
+
+const navLinks = [
+  { href: '/help', text: 'Help', page: 'help' },
+  { href: '/blog', text: 'Blog', page: 'blog' },
+  { href: '/terms', text: 'Terms of Use', page: 'terms' },
+  { href: '/privacy', text: 'Privacy', page: 'privacy' },
+  { href: '/contact', text: 'Contact', page: 'contact' },
+];
+
+const footerLinks = [
+  { href: '/help', text: 'Help' },
+  { href: '/blog', text: 'Blog' },
+  { href: '/terms', text: 'Terms' },
+  { href: '/privacy', text: 'Privacy' },
+  { href: '/contact', text: 'Contact' },
+  { href: 'https://bsky.app/profile/bodengamedev.bsky.social', text: 'Bluesky', external: true },
+];
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {description && <meta name="description" content={description}>}
+    <meta name="theme-color" content="#181a20">
+    {noindex && <meta name="robots" content="noindex">}
+    {og && (
+        <>
+            <meta property="og:type" content="website">
+            {og.url && <meta property="og:url" content={og.url}>}
+            {og.title && <meta property="og:title" content={og.title}>}
+            {og.description && <meta property="og:description" content={og.description}>}
+            {og.image && <meta property="og:image" content={og.image}>}
+            <meta name="twitter:card" content="summary">
+            {og.title && <meta name="twitter:title" content={og.title}>}
+            {og.description && <meta name="twitter:description" content={og.description}>}
+            {og.image && <meta name="twitter:image" content={og.image}>}
+        </>
+    )}
+    <title>{title}</title>
+    <link rel="icon" type="image/png" href="/images/icon-48.png">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <header class="header">
+        <nav class="nav" aria-label="Main navigation">
+            <a href="/" class="nav-logo">
+                <img src="/images/icon-48.png" alt="Ultra Zoom" width="32" height="32">
+                <span>Ultra Zoom</span>
+            </a>
+            <div class="nav-links">
+                {navLinks.map(link => (
+                    <a href={link.href} {...(currentPage === link.page ? { 'aria-current': 'page' } : {})}>
+                        {link.text}
+                    </a>
+                ))}
+            </div>
+        </nav>
+    </header>
+
+    <slot />
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                {footerLinks.map(link => (
+                    <a href={link.href} {...(link.external ? { target: '_blank', rel: 'noopener' } : {})}>
+                        {link.text}
+                    </a>
+                ))}
+            </div>
+            <p class="footer-copy">Copyright &copy; 2026 Lost Rabbit Digital, LLC. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

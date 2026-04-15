@@ -1,35 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Ultra Zoom — Instant hover-to-zoom for images across 60+ websites. Free browser extension for Chrome and Firefox.">
-    <meta name="theme-color" content="#181a20">
-    <title>Ultra Zoom — Hover-to-Zoom for 60+ Websites</title>
-    <link rel="icon" type="image/png" href="images/icon-48.png">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    <header class="header">
-        <nav class="nav" aria-label="Main navigation">
-            <a href="index.html" class="nav-logo">
-                <img src="images/icon-48.png" alt="Ultra Zoom" width="32" height="32">
-                <span>Ultra Zoom</span>
-            </a>
-            <div class="nav-links">
-                <a href="help.html">Help</a>
-                <a href="blog.html">Blog</a>
-                <a href="terms.html">Terms of Use</a>
-                <a href="privacy.html">Privacy</a>
-                <a href="contact.html">Contact</a>
-            </div>
-        </nav>
-    </header>
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
 
+<BaseLayout
+  title="Ultra Zoom — Hover-to-Zoom for 60+ Websites"
+  description="Ultra Zoom — Instant hover-to-zoom for images across 60+ websites. Free browser extension for Chrome and Firefox."
+  og={{
+    url: 'https://ultrazoom.app/',
+    title: 'Ultra Zoom — Hover-to-Zoom for 60+ Websites',
+    description: 'Instant hover-to-zoom for images across 60+ websites. Free browser extension for Chrome and Firefox.',
+    image: 'https://ultrazoom.app/images/icon-128.png',
+  }}
+>
     <main class="landing" id="main-content">
         <section class="landing-hero">
-            <img src="images/icon-128.png" alt="" class="landing-logo" width="128" height="128">
+            <img src="/images/icon-128.png" alt="" class="landing-logo" width="128" height="128">
             <h1 class="landing-title">Ultra Zoom</h1>
             <p class="landing-tagline">Instant hover-to-zoom for images across <strong>60+ websites</strong>.</p>
 
@@ -59,7 +44,7 @@
             </p>
 
             <p class="landing-help-link">
-                Need setup help? Visit the <a href="help.html">Help page</a> or read the <a href="blog.html">blog</a>.
+                Need setup help? Visit the <a href="/help">Help page</a> or read the <a href="/blog">blog</a>.
             </p>
         </section>
 
@@ -67,19 +52,19 @@
             <h2 class="gallery-title">See It in Action</h2>
             <div class="gallery-grid">
                 <figure class="gallery-item">
-                    <img src="images/ultra_zoom_screen_1.png" alt="Welcome page showing how Ultra Zoom works with step-by-step instructions" width="800" height="600" loading="lazy">
+                    <img src="/images/ultra_zoom_screen_1.png" alt="Welcome page showing how Ultra Zoom works with step-by-step instructions" width="800" height="600" loading="lazy">
                     <figcaption>Welcome page with quick-start guide</figcaption>
                 </figure>
                 <figure class="gallery-item">
-                    <img src="images/ultra_zoom_screen_2.png" alt="Settings page with display options like overlay opacity, size, and transition speed" width="800" height="600" loading="lazy">
+                    <img src="/images/ultra_zoom_screen_2.png" alt="Settings page with display options like overlay opacity, size, and transition speed" width="800" height="600" loading="lazy">
                     <figcaption>Fine-tune your zoom experience</figcaption>
                 </figure>
                 <figure class="gallery-item">
-                    <img src="images/ultra_zoom_screen_3.png" alt="Plugins tab showing per-site toggle switches for 60+ websites" width="800" height="600" loading="lazy">
+                    <img src="/images/ultra_zoom_screen_3.png" alt="Plugins tab showing per-site toggle switches for 60+ websites" width="800" height="600" loading="lazy">
                     <figcaption>Toggle plugins for 60+ sites</figcaption>
                 </figure>
                 <figure class="gallery-item">
-                    <img src="images/ultra_zoom_screen_4.png" alt="Account tab with Pro upgrade options and pricing tiers" width="800" height="600" loading="lazy">
+                    <img src="/images/ultra_zoom_screen_4.png" alt="Account tab with Pro upgrade options and pricing tiers" width="800" height="600" loading="lazy">
                     <figcaption>Upgrade to Pro for power features</figcaption>
                 </figure>
             </div>
@@ -92,34 +77,55 @@
                     Today is <strong class="payment-date"></strong> &mdash; help keep hover-zoom alive with a one-time payment.
                 </p>
                 <div class="support-strip-actions">
-                    <a href="#" class="payment-btn-hero support-strip-btn">Pay $59.99</a>
-                    <span class="support-strip-or">or <a href="#">$29.99/yr</a> · <a href="#">$3.99/mo</a> with 7-day free trial</span>
+                    <a href="#" class="payment-btn-hero support-strip-btn" data-plan="lifetime">Pay $59.99</a>
+                    <span class="support-strip-or">or <a href="#" data-plan="annual">$29.99/yr</a> &middot; <a href="#" data-plan="monthly">$3.99/mo</a> with 7-day free trial</span>
                 </div>
             </div>
+            <p id="checkout-error" class="checkout-error" hidden></p>
         </section>
     </main>
 
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-links">
-                <a href="help.html">Help</a>
-                <a href="blog.html">Blog</a>
-                <a href="terms.html">Terms</a>
-                <a href="privacy.html">Privacy</a>
-                <a href="contact.html">Contact</a>
-                <a href="https://bsky.app/profile/bodengamedev.bsky.social" target="_blank" rel="noopener">Bluesky</a>
-            </div>
-            <p class="footer-copy">Copyright &copy; 2026 Lost Rabbit Digital, LLC. All rights reserved.</p>
-        </div>
-    </footer>
-
-    <script>
+    <script is:inline>
         document.querySelectorAll('.payment-date').forEach(function(el) {
             var d = new Date();
             var months = ['January','February','March','April','May','June',
                           'July','August','September','October','November','December'];
             el.textContent = months[d.getMonth()] + ' ' + d.getDate();
         });
+
+        document.querySelectorAll('[data-plan]').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var plan = btn.getAttribute('data-plan');
+                var errEl = document.getElementById('checkout-error');
+                if (errEl) { errEl.hidden = true; errEl.textContent = ''; }
+                btn.style.opacity = '0.6';
+                btn.style.pointerEvents = 'none';
+
+                fetch('https://ultra-zoom-api.hailbytes.workers.dev/api/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ plan: plan })
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.url) {
+                        window.location.href = data.url;
+                    } else {
+                        throw new Error(data.error || 'Unable to start checkout');
+                    }
+                })
+                .catch(function(err) {
+                    if (errEl) {
+                        errEl.textContent = err.message || 'Something went wrong. Please try again.';
+                        errEl.hidden = false;
+                    }
+                })
+                .finally(function() {
+                    btn.style.opacity = '';
+                    btn.style.pointerEvents = '';
+                });
+            });
+        });
     </script>
-</body>
-</html>
+</BaseLayout>
