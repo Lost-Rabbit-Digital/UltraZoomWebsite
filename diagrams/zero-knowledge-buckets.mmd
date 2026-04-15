@@ -1,0 +1,33 @@
+%%{init: {'theme':'dark','themeVariables':{'fontFamily':'-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif','primaryColor':'#21262d','primaryTextColor':'#e6edf3','primaryBorderColor':'#30363d','lineColor':'#8b949e','background':'#0d1117','clusterBkg':'#161b22','clusterBorder':'#30363d'}}}%%
+flowchart TB
+    subgraph local["Stays on your machine"]
+        direction LR
+        prefs["Per-site preferences"]
+        toggles["Site toggles"]
+        history["Hover history"]
+        stats["Usage statistics"]
+        cache["License cache"]
+    end
+    subgraph network["Crosses the network"]
+        direction LR
+        img["Image requests<br/>direct to origin"]
+        license["License check<br/>once at activation"]
+    end
+    subgraph never["Never sent anywhere"]
+        direction LR
+        urls["Hovered image URLs"]
+        browsing["Browsing history"]
+        telemetry["Telemetry / analytics"]
+        behavior["Behavioral data"]
+    end
+    style prefs fill:#0d1f2d,stroke:#58a6ff,color:#e6edf3
+    style toggles fill:#0d1f2d,stroke:#58a6ff,color:#e6edf3
+    style history fill:#0d1f2d,stroke:#58a6ff,color:#e6edf3
+    style stats fill:#0d1f2d,stroke:#58a6ff,color:#e6edf3
+    style cache fill:#0d1f2d,stroke:#58a6ff,color:#e6edf3
+    style img fill:#2d2410,stroke:#d29922,color:#e6edf3
+    style license fill:#2d2410,stroke:#d29922,color:#e6edf3
+    style urls fill:#0d2010,stroke:#3fb950,color:#e6edf3
+    style browsing fill:#0d2010,stroke:#3fb950,color:#e6edf3
+    style telemetry fill:#0d2010,stroke:#3fb950,color:#e6edf3
+    style behavior fill:#0d2010,stroke:#3fb950,color:#e6edf3
