@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Ultra Zoom — Payment Successful"
+  noindex={true}
+>
+    <main class="main" id="main-content">
+        <div class="success-page">
+            <div class="success-icon" aria-hidden="true">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+            </div>
+            <h1>Payment Successful</h1>
+            <p class="success-subtitle">Thank you for supporting Ultra Zoom!</p>
+            <p class="success-body">
+                Your Pro subscription is now active. The Ultra Zoom extension will
+                detect your purchase automatically &mdash; just keep this tab open for
+                a moment while it activates.
+            </p>
+            <p class="success-body success-note">
+                If Pro doesn&rsquo;t activate within a few seconds, open the extension
+                settings and enter your email on the <strong>Account</strong> tab to
+                validate manually.
+            </p>
+            <a href="/" class="success-home-link">Back to Ultra Zoom</a>
+        </div>
+    </main>
+</BaseLayout>

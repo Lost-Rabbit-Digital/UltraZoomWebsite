@@ -1,42 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Ultra Zoom Help — Learn how to use the Ultra Zoom browser extension to hover-zoom images on 60+ websites.">
-    <meta name="theme-color" content="#181a20">
-    <!-- Open Graph / Social -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://ultrazoom.app/help.html">
-    <meta property="og:title" content="Help &amp; Documentation — Ultra Zoom">
-    <meta property="og:description" content="Setup, keyboard shortcuts, supported sites, and troubleshooting for the Ultra Zoom browser extension.">
-    <meta property="og:image" content="https://ultrazoom.app/images/icon-128.png">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Help &amp; Documentation — Ultra Zoom">
-    <meta name="twitter:description" content="Setup, keyboard shortcuts, supported sites, and troubleshooting for the Ultra Zoom browser extension.">
-    <meta name="twitter:image" content="https://ultrazoom.app/images/icon-128.png">
-    <title>Help &amp; Documentation — Ultra Zoom</title>
-    <link rel="icon" type="image/png" href="images/icon-48.png">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    <header class="header">
-        <nav class="nav" aria-label="Main navigation">
-            <a href="index.html" class="nav-logo">
-                <img src="images/icon-48.png" alt="Ultra Zoom" width="32" height="32">
-                <span>Ultra Zoom</span>
-            </a>
-            <div class="nav-links">
-                <a href="help.html" aria-current="page">Help</a>
-                <a href="blog.html">Blog</a>
-                <a href="terms.html">Terms of Use</a>
-                <a href="privacy.html">Privacy</a>
-                <a href="contact.html">Contact</a>
-            </div>
-        </nav>
-    </header>
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
 
+<BaseLayout
+  title="Help &amp; Documentation — Ultra Zoom"
+  description="Ultra Zoom Help — Learn how to use the Ultra Zoom browser extension to hover-zoom images on 60+ websites."
+  currentPage="help"
+  og={{
+    url: 'https://ultrazoom.app/help',
+    title: 'Help & Documentation — Ultra Zoom',
+    description: 'Setup, keyboard shortcuts, supported sites, and troubleshooting for the Ultra Zoom browser extension.',
+    image: 'https://ultrazoom.app/images/icon-128.png',
+  }}
+>
     <main class="main" id="main-content">
 
         <section class="help-hero">
@@ -62,7 +38,7 @@
                     </li>
                 </ul>
             </div>
-            <img src="images/icon-128.png" alt="Ultra Zoom extension icon" class="help-hero-icon" width="96" height="96">
+            <img src="/images/icon-128.png" alt="Ultra Zoom extension icon" class="help-hero-icon" width="96" height="96">
         </section>
 
         <section class="help-section" id="getting-started">
@@ -202,7 +178,7 @@
                 </div>
                 <div class="faq-item">
                     <h3>The zoom overlay flickers or disappears immediately</h3>
-                    <p>This can happen on sites with aggressive hover styles. Try moving your mouse slowly and steadily over the image rather than quickly. If the issue persists on a specific site, <a href="contact.html">let us know</a> and we'll investigate.</p>
+                    <p>This can happen on sites with aggressive hover styles. Try moving your mouse slowly and steadily over the image rather than quickly. If the issue persists on a specific site, <a href="/contact">let us know</a> and we'll investigate.</p>
                 </div>
                 <div class="faq-item">
                     <h3>The extension toolbar icon is missing</h3>
@@ -210,7 +186,7 @@
                 </div>
                 <div class="faq-item">
                     <h3>Ultra Zoom conflicts with another extension</h3>
-                    <p>Try disabling other extensions one at a time to identify the conflict. Common conflicts occur with other image-handling or zoom extensions. <a href="contact.html">Report the conflict</a> so we can investigate a fix.</p>
+                    <p>Try disabling other extensions one at a time to identify the conflict. Common conflicts occur with other image-handling or zoom extensions. <a href="/contact">Report the conflict</a> so we can investigate a fix.</p>
                 </div>
                 <div class="faq-item">
                     <h3>My Pro license isn't being recognized</h3>
@@ -228,7 +204,7 @@
                 </div>
                 <div class="faq-item">
                     <h3>Does Ultra Zoom collect my data?</h3>
-                    <p>No. Ultra Zoom does not collect, store, or transmit any personal data or browsing history. It operates entirely within your browser. See our <a href="privacy.html">Privacy Policy</a> for full details.</p>
+                    <p>No. Ultra Zoom does not collect, store, or transmit any personal data or browsing history. It operates entirely within your browser. See our <a href="/privacy">Privacy Policy</a> for full details.</p>
                 </div>
                 <div class="faq-item">
                     <h3>Which browsers are supported?</h3>
@@ -247,18 +223,8 @@
 
         <section class="contacts-section" id="contacts">
             <h2>Contacts</h2>
-            <p>Have a question or need help? Use our <a href="contact.html">contact form</a> or email us directly at <a href="mailto:boden@lostrabbitdigital.com">boden@lostrabbitdigital.com</a>.</p>
+            <p>Have a question or need help? Use our <a href="/contact">contact form</a> or email us directly at <a href="mailto:boden@lostrabbitdigital.com">boden@lostrabbitdigital.com</a>.</p>
         </section>
 
     </main>
-
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-links">
-                <a href="https://bsky.app/profile/bodengamedev.bsky.social" target="_blank" rel="noopener">Bluesky</a>
-            </div>
-            <p class="footer-copy">Copyright &copy; 2026 Lost Rabbit Digital, LLC. All rights reserved.</p>
-        </div>
-    </footer>
-</body>
-</html>
+</BaseLayout>
