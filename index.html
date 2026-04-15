@@ -80,10 +80,11 @@
                     Today is <strong class="payment-date"></strong> &mdash; help keep hover-zoom alive with a one-time payment.
                 </p>
                 <div class="support-strip-actions">
-                    <a href="#" class="payment-btn-hero support-strip-btn">Pay $59.99</a>
-                    <span class="support-strip-or">or <a href="#">$29.99/yr</a> &middot; <a href="#">$3.99/mo</a> with 7-day free trial</span>
+                    <a href="#" class="payment-btn-hero support-strip-btn" data-plan="lifetime">Pay $59.99</a>
+                    <span class="support-strip-or">or <a href="#" data-plan="annual">$29.99/yr</a> &middot; <a href="#" data-plan="monthly">$3.99/mo</a> with 7-day free trial</span>
                 </div>
             </div>
+            <p id="checkout-error" class="checkout-error" hidden></p>
         </section>
     </main>
 
@@ -107,6 +108,42 @@
             var months = ['January','February','March','April','May','June',
                           'July','August','September','October','November','December'];
             el.textContent = months[d.getMonth()] + ' ' + d.getDate();
+        });
+
+        // Checkout via Stripe
+        document.querySelectorAll('[data-plan]').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var plan = btn.getAttribute('data-plan');
+                var errEl = document.getElementById('checkout-error');
+                if (errEl) { errEl.hidden = true; errEl.textContent = ''; }
+                btn.style.opacity = '0.6';
+                btn.style.pointerEvents = 'none';
+
+                fetch('https://ultra-zoom-api.hailbytes.workers.dev/api/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ plan: plan })
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.url) {
+                        window.location.href = data.url;
+                    } else {
+                        throw new Error(data.error || 'Unable to start checkout');
+                    }
+                })
+                .catch(function(err) {
+                    if (errEl) {
+                        errEl.textContent = err.message || 'Something went wrong. Please try again.';
+                        errEl.hidden = false;
+                    }
+                })
+                .finally(function() {
+                    btn.style.opacity = '';
+                    btn.style.pointerEvents = '';
+                });
+            });
         });
     </script>
 </body>
