@@ -18,7 +18,7 @@ Browsers already ship every ingredient you'd need for a native hover-zoom featur
 - **Full-resolution image fetching.** The browser already knows how to request `srcset` candidates and pick a high-DPI source. It does this on every page load.
 - **CSS transforms.** `transform: scale()` has been in every shipping browser since at least 2012. It's hardware-accelerated and doesn't reflow the document.
 - **Pointer and hover events.** `mouseenter`, `mouseleave`, `pointermove` — all there, all stable, all handled by the compositor.
-- **Popover and dialog primitives.** The `popover` attribute and `<dialog>` element landed as web platform features specifically so developers could show floating UI without hacks.
+- **Popover and dialog primitives.** The `popover` attribute and the `dialog` element landed as web platform features specifically so developers could show floating UI without hacks.
 
 You can assemble a hover-zoom from these in an afternoon. The only thing missing is the browser deciding that images deserve a first-class zoom affordance.
 
@@ -52,7 +52,7 @@ A few reasons, none of them great:
 
 If Chromium or Firefox decided to ship image-zoom tomorrow, here's what we'd want:
 
-- **Hover or long-press triggers a transient overlay** that sources from the highest-resolution candidate the page makes available (`srcset`, `<a href>` linking to the full image, Open Graph image metadata).
+- **Hover or long-press triggers a transient overlay** that sources from the highest-resolution candidate the page makes available (`srcset`, anchor `href` linking to the full image, Open Graph image metadata).
 - **Scroll adjusts zoom level inside the overlay**, not the page.
 - **Arrow keys walk siblings in a gallery**, detected via DOM ordering.
 - **Escape dismisses**, no state persists to the page.

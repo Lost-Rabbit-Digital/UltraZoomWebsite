@@ -26,7 +26,7 @@ The content script is the only thing that loads on every page where Ultra Zoom i
 
 **20.6 KB gzipped, per page.** That's the cost of opening a tab with Ultra Zoom enabled. The browser parses and executes it before any hover interaction is possible.
 
-Inside that 58 KB are the hover detection loop, the overlay renderer, the keyboard shortcut handler, settings reads from `chrome.storage.local`, and the free-tier universal CDN matchers (imgur, Cloudfront, generic `<img srcset>` parsing). No framework runtime — the content script is plain TypeScript over DOM APIs. It has to be: running Preact on every tab would be a much harder sell.
+Inside that 58 KB are the hover detection loop, the overlay renderer, the keyboard shortcut handler, settings reads from `chrome.storage.local`, and the free-tier universal CDN matchers (imgur, Cloudfront, generic `img srcset` parsing). No framework runtime — the content script is plain TypeScript over DOM APIs. It has to be: running Preact on every tab would be a much harder sell.
 
 ## What ships on a toolbar click
 
@@ -95,7 +95,7 @@ Everything non-code in the extension is images, and images dominate the on-disk 
 - `ultra_zoom_screen_1.png` through `_4.png` — 422 KB combined
 - Icons (16/48/128) — 16 KB
 
-The GIF is the biggest single file we ship. It's only loaded on the welcome page, shown once at install time. Moving it to a streamed `<video>` or hosting it off the extension would save ~840 KB on the download, at the cost of requiring network access at welcome time. We've decided the install-time download cost is worth paying for an offline-capable welcome experience. It's a real tradeoff, not an oversight.
+The GIF is the biggest single file we ship. It's only loaded on the welcome page, shown once at install time. Moving it to a streamed `video` element or hosting it off the extension would save ~840 KB on the download, at the cost of requiring network access at welcome time. We've decided the install-time download cost is worth paying for an offline-capable welcome experience. It's a real tradeoff, not an oversight.
 
 ## The totals, honestly
 

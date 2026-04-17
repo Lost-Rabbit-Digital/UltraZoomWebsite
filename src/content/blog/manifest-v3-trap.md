@@ -15,7 +15,7 @@ Three changes matter for a hover-zoom extension:
 
 **Persistent background pages are gone.** In MV2, an extension could run a long-lived background page that held state, cached fetches, and intercepted network traffic. MV3 replaces that with service workers that the browser kills after ~30 seconds of inactivity. Any in-memory state evaporates between events.
 
-**Remote code execution is banned.** MV2 extensions routinely loaded JavaScript from a remote server at runtime. That's now a policy violation and a technical one — `eval`, remote `<script>` tags, and fetched-then-executed code will get an extension pulled from the Chrome Web Store.
+**Remote code execution is banned.** MV2 extensions routinely loaded JavaScript from a remote server at runtime. That's now a policy violation and a technical one — `eval`, remote `script` tags, and fetched-then-executed code will get an extension pulled from the Chrome Web Store.
 
 **`webRequest` is neutered.** The blocking `webRequest` API — the one that let extensions inspect, modify, or cancel network requests on the fly — is read-only for most developers. You're expected to use `declarativeNetRequest`, which takes static rule files and runs them in the browser's native networking stack.
 
