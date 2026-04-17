@@ -1,0 +1,329 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Zoom Score — How zoom-ready is any webpage? | Ultra Zoom"
+  description="Paste a product URL and get an instant Zoom Quality Score. We analyze source image resolution, hi-res variants, and detail density. Free, no install required."
+  currentPage="zoom-score"
+  og={{
+    url: 'https://ultrazoom.app/zoom-score',
+    title: 'Zoom Score — Grade any webpage\u2019s image quality in seconds',
+    description: 'How zoom-friendly is any product page? Paste a URL, get a score in 10 seconds. Free.',
+    image: 'https://ultrazoom.app/images/icon-128.png',
+  }}
+>
+  <main class="main zoom-score-page" id="main-content">
+    <section class="zs-hero">
+      <h1>Zoom Score</h1>
+      <p class="zs-sub">
+        How zoom-friendly is any webpage? Paste a URL \u2014 we check the source image resolution, hi-res variants, and detail density. In 10 seconds.
+      </p>
+
+      <form id="zs-form" class="zs-form" novalidate>
+        <label for="zs-url" class="zs-label">Product or image page URL</label>
+        <div class="zs-input-row">
+          <input
+            id="zs-url"
+            name="url"
+            type="url"
+            required
+            placeholder="https://www.etsy.com/listing/..."
+            autocomplete="off"
+            spellcheck="false"
+            inputmode="url"
+          />
+          <button type="submit" class="zs-submit">Get score</button>
+        </div>
+        <p class="zs-note">We fetch the page once and score it. We don\u2019t store your identity. Cached results are anonymous and expire in 30 days.</p>
+      </form>
+
+      <div id="zs-status" class="zs-status" hidden></div>
+    </section>
+
+    <section id="zs-result" class="zs-result" hidden></section>
+
+    <section class="zs-how">
+      <h2>How it works</h2>
+      <ol>
+        <li><strong>Source resolution (40 pts)</strong> \u2014 biggest native image we can reach on the page.</li>
+        <li><strong>Hi-res variants (20 pts)</strong> \u2014 does the site expose larger crops via srcset or CDN params?</li>
+        <li><strong>Image count (15 pts)</strong> \u2014 how many distinct product-worthy images are discoverable.</li>
+        <li><strong>Pixel density (15 pts)</strong> \u2014 pixels per byte \u2014 a proxy for compression quality.</li>
+        <li><strong>Lazy-load hygiene (10 pts)</strong> \u2014 modern formats (WebP/AVIF) and proper loading hints.</li>
+      </ol>
+      <p>Total maxes at 100. A+ \u2265 95. Letter grade shown next to your score.</p>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .zoom-score-page { max-width: 860px; margin: 0 auto; padding: 48px 24px; }
+  .zs-hero h1 { font-size: 42px; margin: 0 0 12px; }
+  .zs-sub { font-size: 17px; color: #8b949e; max-width: 620px; margin: 0 0 28px; line-height: 1.55; }
+  .zs-form { margin: 0 0 12px; }
+  .zs-label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: #c9d1d9; margin-bottom: 8px;
+  }
+  .zs-input-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  #zs-url {
+    flex: 1 1 320px; min-width: 0;
+    padding: 12px 14px; font-size: 15px;
+    background: #0d1117; color: #e6edf3;
+    border: 1px solid #30363d; border-radius: 8px;
+  }
+  #zs-url:focus {
+    outline: none; border-color: #58a6ff;
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+  }
+  .zs-submit {
+    padding: 12px 22px; font-size: 15px; font-weight: 600;
+    background: #58a6ff; color: #0d1117;
+    border: 0; border-radius: 8px; cursor: pointer;
+    transition: background 120ms ease;
+  }
+  .zs-submit:hover { background: #79b8ff; }
+  .zs-submit[disabled] { opacity: 0.5; cursor: not-allowed; }
+  .zs-note { font-size: 12px; color: #6e7681; margin: 10px 0 0; }
+
+  .zs-status { margin-top: 16px; padding: 14px 16px; border-radius: 8px; font-size: 14px; }
+  .zs-status.info { background: #161b22; border: 1px solid #30363d; color: #c9d1d9; }
+  .zs-status.err { background: rgba(248, 81, 73, 0.1); border: 1px solid rgba(248, 81, 73, 0.4); color: #f85149; }
+
+  .zs-result { margin: 32px 0; padding: 24px; background: #161b22; border: 1px solid #30363d; border-radius: 12px; }
+  .zs-result h2 { margin-top: 0; }
+  .zs-headline {
+    display: flex; gap: 24px; align-items: baseline; flex-wrap: wrap;
+    padding-bottom: 16px; border-bottom: 1px solid #30363d; margin-bottom: 16px;
+  }
+  .zs-score-num {
+    font-size: 64px; font-weight: 800; line-height: 1; color: #58a6ff;
+    font-variant-numeric: tabular-nums;
+  }
+  .zs-grade {
+    font-size: 28px; font-weight: 700; color: #3fb950;
+    padding: 6px 14px; background: rgba(63, 185, 80, 0.12);
+    border-radius: 8px;
+  }
+  .zs-grade.low { color: #f85149; background: rgba(248, 81, 73, 0.12); }
+  .zs-grade.mid { color: #d29922; background: rgba(210, 153, 34, 0.12); }
+  .zs-host { color: #8b949e; font-size: 14px; margin-top: 4px; }
+
+  .zs-breakdown {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px; margin: 16px 0;
+  }
+  .zs-b-card {
+    padding: 12px; background: #0d1117; border: 1px solid #30363d;
+    border-radius: 8px; text-align: center;
+  }
+  .zs-b-card .v { font-size: 20px; font-weight: 700; color: #e6edf3; }
+  .zs-b-card .l { font-size: 11px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+
+  .zs-thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin: 16px 0; }
+  .zs-thumb {
+    aspect-ratio: 1; background: #0d1117; border: 1px solid #30363d; border-radius: 6px;
+    overflow: hidden; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #8b949e; text-align: center; padding: 4px;
+  }
+  .zs-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .zs-cta {
+    margin-top: 24px; padding: 20px; background: rgba(88, 166, 255, 0.08);
+    border: 1px solid rgba(88, 166, 255, 0.3); border-radius: 8px;
+  }
+  .zs-cta h3 { margin: 0 0 8px; }
+  .zs-cta-buttons { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+  .zs-install {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; background: #58a6ff; color: #0d1117;
+    text-decoration: none; font-weight: 600; border-radius: 8px;
+  }
+  .zs-install:hover { background: #79b8ff; }
+  .zs-install.firefox { background: #f0883e; color: #fff; }
+  .zs-install.firefox:hover { background: #ff9f4a; }
+
+  .zs-share {
+    margin-top: 16px; font-size: 13px; color: #8b949e;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .zs-share input {
+    flex: 1 1 240px; padding: 6px 10px; font-size: 12px;
+    background: #0d1117; color: #c9d1d9; border: 1px solid #30363d;
+    border-radius: 4px; font-family: monospace;
+  }
+  .zs-share button {
+    padding: 6px 12px; font-size: 12px; cursor: pointer;
+    background: #21262d; color: #c9d1d9; border: 1px solid #30363d;
+    border-radius: 4px;
+  }
+
+  .zs-how { margin-top: 48px; }
+  .zs-how h2 { font-size: 22px; }
+  .zs-how ol { color: #c9d1d9; line-height: 1.7; }
+</style>
+
+<script is:inline>
+  (function () {
+    var API = 'https://api.ultrazoom.app';
+    var form = document.getElementById('zs-form');
+    var input = document.getElementById('zs-url');
+    var submit = form && form.querySelector('.zs-submit');
+    var status = document.getElementById('zs-status');
+    var result = document.getElementById('zs-result');
+
+    function setStatus(msg, kind) {
+      if (!status) return;
+      if (!msg) { status.hidden = true; status.textContent = ''; status.className = 'zs-status'; return; }
+      status.hidden = false;
+      status.textContent = msg;
+      status.className = 'zs-status ' + (kind || 'info');
+    }
+
+    function installCTA(host) {
+      var isFirefox = /firefox/i.test(navigator.userAgent);
+      var cws = 'https://chromewebstore.google.com/detail/ultra-zoom?src=zoom-score' +
+                 (host ? '&host=' + encodeURIComponent(host) : '');
+      var amo = 'https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/?src=zoom-score' +
+                 (host ? '&host=' + encodeURIComponent(host) : '');
+      return (
+        '<div class="zs-cta-buttons">' +
+          (isFirefox
+            ? '<a class="zs-install firefox" href="' + amo + '" target="_blank" rel="noopener">Install for Firefox</a>' +
+              '<a class="zs-install" href="' + cws + '" target="_blank" rel="noopener">Chrome</a>'
+            : '<a class="zs-install" href="' + cws + '" target="_blank" rel="noopener">Install for Chrome</a>' +
+              '<a class="zs-install firefox" href="' + amo + '" target="_blank" rel="noopener">Firefox</a>') +
+        '</div>'
+      );
+    }
+
+    function gradeClass(grade) {
+      if (!grade) return '';
+      if (grade === 'F' || grade === 'D') return 'low';
+      if (grade === 'C') return 'mid';
+      return '';
+    }
+
+    function renderResult(data) {
+      if (!result) return;
+      var shareUrl = location.origin + '/zoom-score?r=' + encodeURIComponent(data.id);
+      var b = data.breakdown || {};
+      var thumbs = (data.topImages || []).slice(0, 6).map(function (img) {
+        var label = (img.w && img.h) ? (img.w + '\u00d7' + img.h) : 'image';
+        return '<div class="zs-thumb" title="' + escape(img.src) + '">' +
+          '<img src="' + escape(img.src) + '" alt="" loading="lazy" referrerpolicy="no-referrer"' +
+          ' onerror="this.parentNode.textContent=\'' + label + '\';"/>' +
+          '</div>';
+      }).join('');
+
+      result.innerHTML =
+        '<h2>Zoom Score</h2>' +
+        '<div class="zs-headline">' +
+          '<div>' +
+            '<div class="zs-score-num">' + data.score + '</div>' +
+            '<div class="zs-host">' + escape(data.host) + '</div>' +
+          '</div>' +
+          '<div class="zs-grade ' + gradeClass(data.grade) + '">' + escape(data.grade) + '</div>' +
+        '</div>' +
+        '<div class="zs-breakdown">' +
+          card('Resolution', b.resolution, 40) +
+          card('Hi-res variants', b.hires, 20) +
+          card('Image count', b.count, 15) +
+          card('Pixel density', b.density, 15) +
+          card('Lazy-load hygiene', b.lazy, 10) +
+        '</div>' +
+        (thumbs ? '<h3>Top images found</h3><div class="zs-thumbs">' + thumbs + '</div>' : '') +
+        '<div class="zs-cta">' +
+          '<h3>Zoom this page yourself \u2014 free</h3>' +
+          '<p>Install Ultra Zoom and hover any image to see it at full native resolution.</p>' +
+          installCTA(data.host) +
+        '</div>' +
+        '<div class="zs-share">' +
+          '<span>Share:</span>' +
+          '<input id="zs-share-url" value="' + escape(shareUrl) + '" readonly />' +
+          '<button type="button" id="zs-copy-btn">Copy</button>' +
+        '</div>';
+
+      result.hidden = false;
+      result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      var copy = document.getElementById('zs-copy-btn');
+      if (copy) {
+        copy.addEventListener('click', function () {
+          var el = document.getElementById('zs-share-url');
+          if (!el) return;
+          el.select();
+          try { navigator.clipboard.writeText(el.value); copy.textContent = 'Copied!'; } catch (e) { /* ignore */ }
+          setTimeout(function () { copy.textContent = 'Copy'; }, 1500);
+        });
+      }
+    }
+
+    function card(label, value, max) {
+      return '<div class="zs-b-card">' +
+        '<div class="v">' + (value ?? 0) + '<span style="color:#8b949e;font-size:12px;font-weight:400;">/' + max + '</span></div>' +
+        '<div class="l">' + label + '</div>' +
+        '</div>';
+    }
+
+    function escape(s) {
+      return String(s ?? '').replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    async function fetchResult(id) {
+      setStatus('Loading result\u2026', 'info');
+      try {
+        const res = await fetch(API + '/api/zoom-score/r/' + encodeURIComponent(id));
+        if (!res.ok) throw new Error('Result not found or expired');
+        const data = await res.json();
+        setStatus('');
+        renderResult(data);
+      } catch (err) {
+        setStatus((err && err.message) || 'Could not load that result.', 'err');
+      }
+    }
+
+    async function submitUrl(urlStr) {
+      setStatus('Analyzing\u2026 this usually takes 5\u201315 seconds.', 'info');
+      if (submit) submit.disabled = true;
+      try {
+        const res = await fetch(API + '/api/zoom-score', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: urlStr }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || 'Request failed');
+        setStatus('');
+        // Update URL so the result is shareable / back-navigable.
+        var shareUrl = new URL(location.href);
+        shareUrl.searchParams.set('r', data.id);
+        history.replaceState(null, '', shareUrl.toString());
+        renderResult(data);
+      } catch (err) {
+        setStatus((err && err.message) || 'Could not score that URL.', 'err');
+      } finally {
+        if (submit) submit.disabled = false;
+      }
+    }
+
+    if (form && input) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var v = (input.value || '').trim();
+        if (!v) return;
+        submitUrl(v);
+      });
+    }
+
+    // Initial load: resolve ?r=<id> if present
+    var params = new URLSearchParams(location.search);
+    var id = params.get('r');
+    if (id && /^[a-z0-9]{8,32}$/.test(id)) {
+      fetchResult(id);
+    }
+  })();
+</script>
