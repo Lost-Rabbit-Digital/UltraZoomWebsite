@@ -19,6 +19,7 @@ const { Content } = await render(post);
   description={post.data.description}
   date={post.data.date}
   category={post.data.category}
+  slug={post.id}
 >
     <Content />
 </ArticleLayout>

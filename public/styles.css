@@ -1271,7 +1271,7 @@ kbd {
 .article {
     max-width: 720px;
     margin: 0 auto;
-    padding: 2rem 1.5rem 3rem;
+    padding: 2rem 1.5rem 7rem;
 }
 
 .article-header {
@@ -1358,6 +1358,166 @@ kbd {
 
 .article-footer a:hover {
     color: var(--link-hover);
+}
+
+/* ── Related Posts ───────────────────────────────── */
+
+.related-posts {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+}
+
+.related-posts-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.25rem;
+}
+
+.related-posts-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+}
+
+.related-post {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.related-post:hover {
+    border-color: var(--brand);
+    background: var(--bg-card);
+}
+
+.related-post-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0.25rem 0 0.5rem;
+    line-height: 1.35;
+}
+
+.related-post-title a {
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.related-post-title a:hover {
+    color: var(--brand);
+}
+
+.related-post-desc {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ── Sticky Install CTA ──────────────────────────── */
+
+.install-cta-bar {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    z-index: 100;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    padding: 0.75rem 1rem;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.install-cta-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.install-cta-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    min-width: 0;
+}
+
+.install-cta-text strong {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.install-cta-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.install-cta-btn {
+    display: inline-block;
+    background: var(--brand-dark);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0.5rem 1.1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.install-cta-btn:hover {
+    background: var(--brand-hover);
+    color: var(--white);
+}
+
+.install-cta-dismiss {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+}
+
+.install-cta-dismiss:hover {
+    color: var(--text-primary);
+    background: var(--bg-primary);
+}
+
+@media (max-width: 540px) {
+    .install-cta-bar {
+        bottom: 0.5rem;
+        left: 0.5rem;
+        right: 0.5rem;
+        padding: 0.6rem 0.75rem;
+    }
+
+    .install-cta-text {
+        font-size: 0.85rem;
+    }
+
+    .install-cta-text span {
+        display: none;
+    }
+
+    .install-cta-btn {
+        padding: 0.45rem 0.9rem;
+        font-size: 0.9rem;
+    }
 }
 
 /* ── Success Page ─────────────────────────────────── */
