@@ -1,0 +1,226 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Shared zoom | Ultra Zoom"
+  description="Someone shared a zoom with you. Install Ultra Zoom to see it at full resolution."
+  noindex={true}
+  og={{
+    url: 'https://ultrazoom.app/z/',
+    title: 'Someone sent you a zoom',
+    description: 'A friend shared a close-up on Ultra Zoom. Install to see it.',
+    image: 'https://ultrazoom.app/images/icon-128.png',
+  }}
+>
+  <main class="main z-page" id="main-content">
+    <section id="z-loading" class="z-card">
+      <p>Loading shared zoom\u2026</p>
+    </section>
+
+    <section id="z-content" class="z-card" hidden>
+      <h1 id="z-title">Someone shared a zoom with you</h1>
+      <p class="z-meta">
+        From <strong id="z-host">\u2014</strong>
+      </p>
+      <blockquote id="z-caption" class="z-caption" hidden></blockquote>
+
+      <div id="z-installed-cta" class="z-cta" hidden>
+        <h2>Open the source page</h2>
+        <p>Ultra Zoom is installed \u2014 click below and we\u2019ll take you to the original page so you can zoom in.</p>
+        <button type="button" id="z-open-btn" class="z-btn primary">Open and apply zoom</button>
+      </div>
+
+      <div id="z-install-cta" class="z-cta" hidden>
+        <h2>Install Ultra Zoom to see what they found</h2>
+        <p>Ultra Zoom is a free browser extension that enlarges images on hover. The recipient needs it to jump straight to the zoomed region.</p>
+        <div class="z-buttons" id="z-install-buttons"></div>
+        <p class="z-fallback">
+          <a href="#" id="z-source-fallback" rel="noopener noreferrer" target="_blank">Or open the source page anyway &rarr;</a>
+        </p>
+      </div>
+
+      <p class="z-report">
+        <a href="#" id="z-report-link">Report this link</a>
+      </p>
+    </section>
+
+    <section id="z-error" class="z-card" hidden>
+      <h1>Link not available</h1>
+      <p id="z-error-msg">This share link has expired, been removed, or does not exist.</p>
+      <p><a href="/" class="z-btn secondary">Back to Ultra Zoom</a></p>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .z-page { max-width: 640px; margin: 0 auto; padding: 48px 24px; }
+  .z-card {
+    background: #161b22; border: 1px solid #30363d;
+    border-radius: 12px; padding: 28px;
+  }
+  .z-card h1 { margin: 0 0 8px; font-size: 24px; }
+  .z-meta { color: #8b949e; font-size: 14px; margin: 0 0 18px; }
+  .z-caption {
+    margin: 16px 0; padding: 14px 16px;
+    background: #0d1117; border-left: 3px solid #58a6ff;
+    border-radius: 4px; color: #c9d1d9; font-size: 16px;
+  }
+  .z-cta { margin-top: 20px; padding-top: 20px; border-top: 1px solid #30363d; }
+  .z-cta h2 { font-size: 18px; margin: 0 0 8px; }
+  .z-cta p { color: #c9d1d9; margin: 0 0 14px; }
+  .z-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+  .z-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: 8px;
+    font-weight: 600; font-size: 14px; text-decoration: none;
+    border: 0; cursor: pointer;
+  }
+  .z-btn.primary { background: #58a6ff; color: #0d1117; }
+  .z-btn.primary:hover { background: #79b8ff; }
+  .z-btn.firefox { background: #f0883e; color: #fff; }
+  .z-btn.firefox:hover { background: #ff9f4a; }
+  .z-btn.secondary {
+    background: transparent; color: #c9d1d9; border: 1px solid #30363d;
+  }
+  .z-fallback { margin-top: 12px; font-size: 13px; color: #8b949e; }
+  .z-fallback a { color: #58a6ff; }
+  .z-report { margin-top: 24px; font-size: 12px; color: #6e7681; text-align: right; }
+  .z-report a { color: #6e7681; text-decoration: underline; }
+</style>
+
+<script is:inline>
+  (function () {
+    var API = 'https://api.ultrazoom.app';
+
+    var loadingEl = document.getElementById('z-loading');
+    var contentEl = document.getElementById('z-content');
+    var errorEl = document.getElementById('z-error');
+    var errorMsgEl = document.getElementById('z-error-msg');
+    var hostEl = document.getElementById('z-host');
+    var captionEl = document.getElementById('z-caption');
+    var installedCtaEl = document.getElementById('z-installed-cta');
+    var installCtaEl = document.getElementById('z-install-cta');
+    var installButtonsEl = document.getElementById('z-install-buttons');
+    var sourceFallbackEl = document.getElementById('z-source-fallback');
+    var openBtnEl = document.getElementById('z-open-btn');
+    var reportLinkEl = document.getElementById('z-report-link');
+
+    function escape(s) {
+      return String(s ?? '').replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    function getShareId() {
+      // Support both /z/abc123 and /z/?id=abc123 (depending on how Cloudflare
+      // routes the URL — the rewrite rule in _redirects maps the pretty path
+      // to this page with ?id=<id> preserved).
+      var params = new URLSearchParams(location.search);
+      var fromQuery = params.get('id');
+      if (fromQuery && /^[0-9a-hjkmnp-tv-z]{8}$/.test(fromQuery)) return fromQuery;
+      var m = location.pathname.match(/\/z\/([0-9a-hjkmnp-tv-z]{8})/i);
+      return m ? m[1] : null;
+    }
+
+    function installButtonsHtml(host) {
+      var q = '?src=share' + (host ? '&host=' + encodeURIComponent(host) : '');
+      var cws = 'https://chromewebstore.google.com/detail/ultra-zoom' + q;
+      var amo = 'https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/' + q;
+      var isFirefox = /firefox/i.test(navigator.userAgent);
+      var chrome = '<a class="z-btn primary" href="' + cws + '" target="_blank" rel="noopener">Install for Chrome</a>';
+      var firefox = '<a class="z-btn firefox" href="' + amo + '" target="_blank" rel="noopener">Install for Firefox</a>';
+      return isFirefox ? firefox + chrome : chrome + firefox;
+    }
+
+    function detectExtension() {
+      return new Promise(function (resolve) {
+        var done = false;
+        function finish(v) {
+          if (done) return;
+          done = true;
+          resolve(v);
+        }
+        window.addEventListener('message', function onMsg(e) {
+          if (e.origin !== window.location.origin) return;
+          var d = e.data || {};
+          if (d.type === 'UZ_DETECT_RESPONSE' && d.v === 1) {
+            window.removeEventListener('message', onMsg);
+            finish(true);
+          }
+        });
+        window.postMessage({ type: 'UZ_DETECT_REQUEST', v: 1 }, window.location.origin);
+        setTimeout(function () { finish(false); }, 700);
+      });
+    }
+
+    function showError(msg) {
+      if (loadingEl) loadingEl.hidden = true;
+      if (errorEl) errorEl.hidden = false;
+      if (errorMsgEl && msg) errorMsgEl.textContent = msg;
+    }
+
+    function applyViaExtension(payload) {
+      window.postMessage({ type: 'UZ_APPLY_REQUEST', v: 1, payload: payload }, window.location.origin);
+    }
+
+    async function init() {
+      var id = getShareId();
+      if (!id) {
+        showError('No share ID in the URL.');
+        return;
+      }
+
+      var record;
+      try {
+        var res = await fetch(API + '/api/z/' + encodeURIComponent(id));
+        if (!res.ok) {
+          var body = await res.json().catch(function () { return {}; });
+          return showError(body.error || 'Link not found or expired.');
+        }
+        record = await res.json();
+      } catch (err) {
+        return showError('Could not load the share right now.');
+      }
+
+      if (loadingEl) loadingEl.hidden = true;
+      if (contentEl) contentEl.hidden = false;
+      if (hostEl) hostEl.textContent = record.host || '\u2014';
+      if (record.caption && captionEl) {
+        captionEl.textContent = record.caption;
+        captionEl.hidden = false;
+      }
+      if (sourceFallbackEl && record.sourceUrl) {
+        sourceFallbackEl.setAttribute('href', record.sourceUrl);
+      }
+
+      var installed = await detectExtension();
+      if (installed && installedCtaEl && openBtnEl) {
+        installedCtaEl.hidden = false;
+        openBtnEl.addEventListener('click', function () {
+          applyViaExtension({ sourceUrl: record.sourceUrl });
+        });
+      } else if (installCtaEl && installButtonsEl) {
+        installCtaEl.hidden = false;
+        installButtonsEl.innerHTML = installButtonsHtml(record.host);
+      }
+
+      if (reportLinkEl) {
+        reportLinkEl.addEventListener('click', async function (e) {
+          e.preventDefault();
+          if (!confirm('Report this link as abusive or malicious?')) return;
+          try {
+            await fetch(API + '/api/z/' + encodeURIComponent(id) + '/report', { method: 'POST' });
+            reportLinkEl.textContent = 'Reported. Thanks.';
+            reportLinkEl.setAttribute('aria-disabled', 'true');
+            reportLinkEl.style.pointerEvents = 'none';
+          } catch (_) {
+            reportLinkEl.textContent = 'Report failed.';
+          }
+        });
+      }
+    }
+
+    init();
+  })();
+</script>

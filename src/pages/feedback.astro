@@ -1,0 +1,346 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Feedback-for-Pro | Ultra Zoom"
+  description="Share thoughtful feedback and earn free Ultra Zoom Pro. Five quick questions for 1 month; a video walkthrough for 3 months; a 30-minute call with the founder for 6 months."
+  currentPage="feedback"
+  og={{
+    url: 'https://ultrazoom.app/feedback',
+    title: 'Feedback-for-Pro \u2014 help shape Ultra Zoom, get Pro free',
+    description: 'Answer five short questions to get 1 month of Pro. Record a video for 3 months. Or book a 30-minute founder call for 6.',
+    image: 'https://ultrazoom.app/images/icon-128.png',
+  }}
+>
+  <main class="main fb-page" id="main-content">
+    <section class="fb-hero">
+      <h1>Help shape Ultra Zoom</h1>
+      <p class="fb-sub">
+        We\u2019re a two-person team iterating on Ultra Zoom in public. Your feedback literally makes the roadmap \u2014 in exchange, we\u2019re happy to give you Pro on the house.
+      </p>
+    </section>
+
+    <nav class="fb-tabs" role="tablist">
+      <button type="button" class="fb-tab active" role="tab" aria-selected="true" data-target="t1">
+        5 questions \u2192 <strong>1 month Pro</strong>
+      </button>
+      <button type="button" class="fb-tab" role="tab" aria-selected="false" data-target="t2">
+        Video \u2192 <strong>3 months Pro</strong>
+      </button>
+      <button type="button" class="fb-tab" role="tab" aria-selected="false" data-target="t3">
+        30-min call \u2192 <strong>6 months Pro</strong>
+      </button>
+    </nav>
+
+    <section id="fb-panel-t1" class="fb-panel active" role="tabpanel">
+      <p class="fb-intro">
+        Takes about 5 minutes. As soon as you submit, we\u2019ll mark the email you enter as Pro for 30 days \u2014 open the extension and it will pick up the change within a few hours.
+      </p>
+
+      <form id="fb-t1-form" class="fb-form" novalidate>
+        <label class="fb-field">
+          <span class="fb-label">Email</span>
+          <input name="email" type="email" required autocomplete="email" placeholder="you@example.com" />
+        </label>
+
+        <label class="fb-field">
+          <span class="fb-label">Which browser?</span>
+          <div class="fb-radio-row">
+            <label><input type="radio" name="browser" value="chrome" /> Chrome</label>
+            <label><input type="radio" name="browser" value="firefox" /> Firefox</label>
+          </div>
+        </label>
+
+        <label class="fb-field">
+          <span class="fb-label">1. What made you try Ultra Zoom?</span>
+          <textarea name="q1" rows="3" placeholder="Reddit post, review, friend, curiosity\u2026"></textarea>
+        </label>
+
+        <label class="fb-field">
+          <span class="fb-label">2. Walk us through the moment it first felt useful (or didn\u2019t).</span>
+          <textarea name="q2" rows="4" required minlength="40" placeholder="The specific image or site where something clicked \u2014 or where it let you down."></textarea>
+          <span class="fb-hint">At least 40 characters. Specifics matter.</span>
+        </label>
+
+        <label class="fb-field">
+          <span class="fb-label">3. What\u2019s the #1 thing that would make you pay for Pro?</span>
+          <textarea name="q3" rows="4" required minlength="40" placeholder="A specific feature, a site, a workflow\u2026 be honest."></textarea>
+          <span class="fb-hint">At least 40 characters.</span>
+        </label>
+
+        <label class="fb-field">
+          <span class="fb-label">4. Other zoom / product-photo tools you\u2019ve used?</span>
+          <textarea name="q4" rows="3" placeholder="Imagus, Hover Zoom+, built-in browser zoom\u2026 what did they do better / worse?"></textarea>
+        </label>
+
+        <label class="fb-field">
+          <span class="fb-label">5. Anything else we should know?</span>
+          <textarea name="q5" rows="3" placeholder="Open-ended."></textarea>
+        </label>
+
+        <label class="fb-consent">
+          <input type="checkbox" name="consentMarketing" />
+          <span>OK to quote a line from my feedback anonymously in marketing (e.g. \u201cit first felt useful when\u2026\u201d).</span>
+        </label>
+
+        <label class="fb-honeypot" aria-hidden="true">
+          Leave blank: <input name="honeypot" type="text" tabindex="-1" autocomplete="off" />
+        </label>
+
+        <div class="fb-submit-row">
+          <button type="submit" class="fb-submit">Submit & get 1 month Pro</button>
+        </div>
+        <div id="fb-t1-status" class="fb-status" hidden></div>
+      </form>
+    </section>
+
+    <section id="fb-panel-t2" class="fb-panel" role="tabpanel" hidden>
+      <p class="fb-intro">
+        Record a short screen walkthrough (Loom, YouTube unlisted, anything) showing how you actually use Ultra Zoom. We\u2019ll review within 48 hours and email you a 3-month Pro grant if it\u2019s substantive.
+      </p>
+
+      <form id="fb-t2-form" class="fb-form" novalidate>
+        <label class="fb-field">
+          <span class="fb-label">Email</span>
+          <input name="email" type="email" required autocomplete="email" placeholder="you@example.com" />
+        </label>
+
+        <label class="fb-field">
+          <span class="fb-label">Video URL (Loom / YouTube unlisted / Vimeo)</span>
+          <input name="videoUrl" type="url" required placeholder="https://www.loom.com/share/\u2026" />
+        </label>
+
+        <label class="fb-consent">
+          <input type="checkbox" name="consentMarketing" />
+          <span>OK to share short clips of this video in marketing (e.g. a landing-page testimonial reel).</span>
+        </label>
+
+        <label class="fb-honeypot" aria-hidden="true">
+          Leave blank: <input name="honeypot" type="text" tabindex="-1" autocomplete="off" />
+        </label>
+
+        <div class="fb-submit-row">
+          <button type="submit" class="fb-submit">Submit for review</button>
+        </div>
+        <div id="fb-t2-status" class="fb-status" hidden></div>
+      </form>
+    </section>
+
+    <section id="fb-panel-t3" class="fb-panel" role="tabpanel" hidden>
+      <p class="fb-intro">
+        A 30-minute call with the founder. No slide decks, no agenda beyond \u201chow do you actually use this, what would you change, what\u2019s missing.\u201d 6 months of Pro granted after the call.
+      </p>
+      <p>
+        Slots are limited. Email <a href="mailto:hello@ultrazoom.app?subject=Founder%20interview">hello@ultrazoom.app</a> with a couple of time windows that work for you, and mention that you\u2019re interested in the founder-interview slot.
+      </p>
+      <p class="fb-meta">
+        (Once we have more volume we\u2019ll wire up a Cal.com-style booker here directly.)
+      </p>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .fb-page { max-width: 760px; margin: 0 auto; padding: 48px 24px; }
+  .fb-hero h1 { font-size: 36px; margin: 0 0 12px; }
+  .fb-sub { color: #8b949e; font-size: 16px; line-height: 1.55; margin: 0 0 28px; max-width: 620px; }
+
+  .fb-tabs {
+    display: flex; gap: 4px; margin: 0 0 24px; border-bottom: 1px solid #30363d;
+    overflow-x: auto;
+  }
+  .fb-tab {
+    background: transparent; color: #8b949e; border: 0;
+    padding: 12px 16px; font-size: 14px; cursor: pointer;
+    border-bottom: 2px solid transparent; white-space: nowrap;
+  }
+  .fb-tab strong { color: #c9d1d9; }
+  .fb-tab.active { color: #58a6ff; border-bottom-color: #58a6ff; }
+  .fb-tab.active strong { color: #58a6ff; }
+  .fb-tab:hover { color: #c9d1d9; }
+
+  .fb-panel { display: none; }
+  .fb-panel.active { display: block; }
+  .fb-panel[hidden] { display: none !important; }
+
+  .fb-intro {
+    background: #161b22; border: 1px solid #30363d;
+    padding: 16px 18px; border-radius: 8px; color: #c9d1d9; font-size: 14px;
+    margin: 0 0 24px;
+  }
+
+  .fb-field { display: block; margin-bottom: 20px; }
+  .fb-label {
+    display: block; font-weight: 600; font-size: 13px;
+    color: #c9d1d9; margin-bottom: 6px;
+  }
+  .fb-field input[type="email"],
+  .fb-field input[type="url"],
+  .fb-field textarea {
+    display: block; width: 100%; padding: 10px 12px;
+    background: #0d1117; color: #e6edf3; border: 1px solid #30363d;
+    border-radius: 6px; font-size: 14px; font-family: inherit;
+    resize: vertical;
+  }
+  .fb-field input:focus, .fb-field textarea:focus {
+    outline: none; border-color: #58a6ff;
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+  }
+  .fb-hint { font-size: 12px; color: #6e7681; margin-top: 4px; display: block; }
+  .fb-radio-row { display: flex; gap: 16px; color: #c9d1d9; font-size: 14px; }
+  .fb-radio-row label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+
+  .fb-consent {
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 13px; color: #8b949e; line-height: 1.5;
+    margin: 0 0 16px;
+  }
+  .fb-consent input { margin-top: 3px; }
+
+  .fb-honeypot {
+    position: absolute; left: -10000px; opacity: 0; pointer-events: none;
+  }
+
+  .fb-submit-row { display: flex; justify-content: flex-start; }
+  .fb-submit {
+    padding: 12px 22px; font-size: 15px; font-weight: 600;
+    background: #58a6ff; color: #0d1117;
+    border: 0; border-radius: 8px; cursor: pointer;
+  }
+  .fb-submit:hover { background: #79b8ff; }
+  .fb-submit[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+  .fb-status {
+    margin-top: 14px; padding: 12px 14px; border-radius: 6px; font-size: 14px;
+  }
+  .fb-status.ok { background: rgba(63, 185, 80, 0.12); color: #3fb950; border: 1px solid rgba(63, 185, 80, 0.3); }
+  .fb-status.err { background: rgba(248, 81, 73, 0.12); color: #f85149; border: 1px solid rgba(248, 81, 73, 0.4); }
+
+  .fb-meta { color: #6e7681; font-size: 13px; }
+</style>
+
+<script is:inline>
+  (function () {
+    var API = 'https://api.ultrazoom.app';
+
+    var tabs = document.querySelectorAll('.fb-tab');
+    var panels = {
+      t1: document.getElementById('fb-panel-t1'),
+      t2: document.getElementById('fb-panel-t2'),
+      t3: document.getElementById('fb-panel-t3'),
+    };
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var target = tab.getAttribute('data-target');
+        tabs.forEach(function (t) {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        Object.keys(panels).forEach(function (k) {
+          var p = panels[k];
+          if (!p) return;
+          var show = k === target;
+          p.classList.toggle('active', show);
+          p.hidden = !show;
+        });
+      });
+    });
+
+    function statusEl(id) { return document.getElementById(id); }
+    function setStatus(el, msg, kind) {
+      if (!el) return;
+      if (!msg) { el.hidden = true; el.textContent = ''; el.className = 'fb-status'; return; }
+      el.hidden = false;
+      el.textContent = msg;
+      el.className = 'fb-status ' + (kind || 'ok');
+    }
+
+    function serialize(form) {
+      var data = {};
+      new FormData(form).forEach(function (v, k) {
+        if (k === 'consentMarketing') {
+          data[k] = !!v;
+        } else {
+          data[k] = typeof v === 'string' ? v : String(v);
+        }
+      });
+      return data;
+    }
+
+    async function submitT1(form) {
+      var status = statusEl('fb-t1-status');
+      var btn = form.querySelector('.fb-submit');
+      var data = serialize(form);
+      var payload = {
+        tier: 'T1',
+        email: data.email,
+        browser: data.browser || undefined,
+        consentMarketing: data.consentMarketing === true,
+        honeypot: data.honeypot,
+        answers: {
+          q1: data.q1 || '',
+          q2: data.q2 || '',
+          q3: data.q3 || '',
+          q4: data.q4 || '',
+          q5: data.q5 || '',
+        },
+      };
+      setStatus(status, 'Submitting\u2026', 'ok');
+      if (btn) btn.disabled = true;
+      try {
+        var res = await fetch(API + '/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        var body = await res.json();
+        if (!res.ok) throw new Error(body.error || 'Submission failed');
+        setStatus(status, body.message || 'Thanks! Pro has been activated.', 'ok');
+        form.reset();
+      } catch (err) {
+        setStatus(status, (err && err.message) || 'Something went wrong.', 'err');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    async function submitT2(form) {
+      var status = statusEl('fb-t2-status');
+      var btn = form.querySelector('.fb-submit');
+      var data = serialize(form);
+      var payload = {
+        tier: 'T2',
+        email: data.email,
+        videoUrl: data.videoUrl,
+        consentMarketing: data.consentMarketing === true,
+        honeypot: data.honeypot,
+      };
+      setStatus(status, 'Submitting\u2026', 'ok');
+      if (btn) btn.disabled = true;
+      try {
+        var res = await fetch(API + '/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        var body = await res.json();
+        if (!res.ok) throw new Error(body.error || 'Submission failed');
+        setStatus(status, body.message || 'Thanks! We\u2019ll review within 48 hours.', 'ok');
+        form.reset();
+      } catch (err) {
+        setStatus(status, (err && err.message) || 'Something went wrong.', 'err');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    var t1 = document.getElementById('fb-t1-form');
+    if (t1) t1.addEventListener('submit', function (e) { e.preventDefault(); submitT1(t1); });
+
+    var t2 = document.getElementById('fb-t2-form');
+    if (t2) t2.addEventListener('submit', function (e) { e.preventDefault(); submitT2(t2); });
+  })();
+</script>

@@ -1,0 +1,8 @@
+# Shareable-zoom links: rewrite /z/<id> to the /z page with ?id=<id>.
+# Status 200 = rewrite (URL stays as /z/<id> for the user; content is served
+# from /z — the inline script reads location.pathname to pick up the id).
+/z/:id    /z?id=:id    200
+
+# Referral links: same pattern — /r/<code> serves the /r page which
+# reads the code from location.pathname.
+/r/:code  /r?code=:code    200
