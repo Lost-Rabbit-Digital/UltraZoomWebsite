@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout
-  title="Your Account — Ultra Zoom"
+  title="Your Account | Ultra Zoom"
   description="Manage your Ultra Zoom Pro subscription. Billing is handled securely by Stripe."
   noindex={true}
 >
@@ -29,7 +29,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 <button type="submit" class="submit-btn" id="portal-submit">Open billing portal</button>
                 <p class="form-privacy-note">
                     You'll be redirected to Stripe's secure customer portal. Cancel,
-                    update your card, or change plans &mdash; it's all handled through Stripe.
+                    update your card, or change plans. It's all handled through Stripe.
                 </p>
             </div>
 
@@ -79,13 +79,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     if (result.status === 404) {
                         showStatus('error', "We couldn't find a Pro subscription for that email. If this looks wrong, email boden@lostrabbitdigital.com.");
                     } else {
-                        showStatus('error', 'Something went wrong — try again.');
+                        showStatus('error', 'Something went wrong. Try again.');
                     }
                     btn.disabled = false;
                     btn.textContent = 'Open billing portal';
                 })
                 .catch(function () {
-                    showStatus('error', 'Something went wrong — try again.');
+                    showStatus('error', 'Something went wrong. Try again.');
                     btn.disabled = false;
                     btn.textContent = 'Open billing portal';
                 });

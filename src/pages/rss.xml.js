@@ -9,7 +9,7 @@ export async function GET(context) {
   return rss({
     title: 'Ultra Zoom Blog',
     description:
-      'Release notes, tips, and use-case guides for Ultra Zoom — the hover-to-zoom browser extension.',
+      'Release notes, tips, and use-case guides for Ultra Zoom, the hover-to-zoom browser extension.',
     site: context.site,
     trailingSlash: false,
     items: posts.map(post => ({

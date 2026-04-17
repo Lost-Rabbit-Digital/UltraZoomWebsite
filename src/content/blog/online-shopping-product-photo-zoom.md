@@ -1,11 +1,11 @@
 ---
 title: "The online shopper's guide to inspecting product photos"
-description: "How to spot stitching, resolution tricks, and condition details on Amazon, Etsy, and eBay using hover-to-zoom — no more squinting or opening every listing in a new tab."
+description: "How to spot stitching, resolution tricks, and condition details on Amazon, Etsy, and eBay using hover-to-zoom. No more squinting or opening every listing in a new tab."
 date: 2026-04-15
 category: "Use cases"
 ---
 
-Online shopping lives and dies by product photos. You can't feel the fabric, flip the jewelry, or tilt the frame toward the light — all you have is what the seller uploaded. That means inspecting those photos well is the single biggest thing you can do to avoid bad purchases.
+Online shopping lives and dies by product photos. You can't feel the fabric, flip the jewelry, or tilt the frame toward the light. All you have is what the seller uploaded. That means inspecting those photos well is the single biggest thing you can do to avoid bad purchases.
 
 Here's how to get more out of every listing without drowning in open tabs.
 
@@ -16,7 +16,7 @@ Here's how to get more out of every listing without drowning in open tabs.
 
 ## The problem with thumbnails
 
-Most marketplaces compress thumbnails aggressively. A grid of forty Etsy listings is forty tiny JPEGs, each scaled to 200 pixels wide. At that size you can tell the color and the general shape — and almost nothing else.
+Most marketplaces compress thumbnails aggressively. A grid of forty Etsy listings is forty tiny JPEGs, each scaled to 200 pixels wide. At that size you can tell the color and the general shape, and almost nothing else.
 
 The full-resolution photo is usually hiding just one click away, but clicking means:
 
@@ -25,7 +25,7 @@ The full-resolution photo is usually hiding just one click away, but clicking me
 - Clicking the main photo to open the lightbox
 - Closing everything and going back to the grid
 
-For anyone doing serious shopping — comparing twenty similar rugs, scanning two hundred vintage listings, or double-checking stitching on a suit — that workflow is a tax on your afternoon.
+For anyone doing serious shopping (comparing twenty similar rugs, scanning two hundred vintage listings, or double-checking stitching on a suit), that workflow is a tax on your afternoon.
 
 ## What hover-to-zoom changes
 
@@ -45,7 +45,7 @@ Once you can actually *see* a product photo at full resolution, here's what usua
 
 **Color accuracy clues.** Look at the background and neutral elements in the photo. If the white paper under the product has a pink or yellow cast, the product color is probably off too.
 
-**Authenticity markers.** Logos, stamps, serial numbers, brand tags — anything tiny that a counterfeit often gets wrong. Zoom lets you read them without opening the full listing.
+**Authenticity markers.** Logos, stamps, serial numbers, brand tags, anything tiny that a counterfeit often gets wrong. Zoom lets you read them without opening the full listing.
 
 <figure>
   <img src="/images/blog/shopping-watch-dial.jpg" alt="Macro photograph of a wristwatch or pocket-watch dial showing the hour markers, hands, printed brand text, and fine lume or enamel texture at high magnification." loading="lazy" decoding="async" width="1600" height="1067">
@@ -56,15 +56,19 @@ Once you can actually *see* a product photo at full resolution, here's what usua
 
 ## Platform notes
 
-**Amazon** — The grid thumbnails are small, but Amazon hosts high-resolution versions of almost every product photo. Hover-zoom pulls those up directly. Particularly useful for fashion and home goods where the thumbnail hides texture.
+**Amazon.** The grid thumbnails are small, but Amazon hosts high-resolution versions of almost every product photo. Hover-zoom pulls those up directly. Particularly useful for fashion and home goods where the thumbnail hides texture.
 
-**Etsy** — Handmade and vintage listings reward close inspection. Hover-zoom across search results lets you triage forty listings in the time it used to take to open five.
+**Etsy.** Handmade and vintage listings reward close inspection. Hover-zoom across search results lets you triage forty listings in the time it used to take to open five.
 
-**eBay** — Condition is everything on eBay, especially for collectibles and used electronics. The full-resolution photos usually tell a more complete story than the seller's description.
+**eBay.** Condition is everything on eBay, especially for collectibles and used electronics. The full-resolution photos usually tell a more complete story than the seller's description.
 
-**Pinterest** — Not a shopping site per se, but a lot of shopping research starts here. Hover-zoom lets you see what you're actually pinning.
+**Pinterest.** Not a shopping site per se, but a lot of shopping research starts here. Hover-zoom lets you see what you're actually pinning.
 
-**Fashion retailers (ASOS, Zara, Revolve, etc.)** — Product grids become much more informative. You can check drape, fit, and pattern without loading every product page.
+**Fashion retailers (ASOS, Zara, Revolve, etc.).** Product grids become much more informative. You can check drape, fit, and pattern without loading every product page.
+
+<aside class="mid-article-cta" aria-label="Try Ultra Zoom">
+  <p><strong>Try it on your next Amazon or Etsy search.</strong> Ultra Zoom is a one-click install for Chrome and Firefox. Free, no account, no tracking. <a href="/">Get the extension</a>.</p>
+</aside>
 
 ## A faster shopping workflow
 
@@ -75,6 +79,6 @@ Put it all together and a typical shopping session looks like this:
 3. Only open the listings that actually survive the visual check.
 4. On the listing page, hover the thumbnail strip to compare photos without clicking through each one.
 
-You end up looking at more products and opening fewer tabs. For people who shop seriously — resellers, interior designers, buyers sourcing for small shops, anyone hunting vintage — the time saved adds up fast.
+You end up looking at more products and opening fewer tabs. For people who shop seriously (resellers, interior designers, buyers sourcing for small shops, anyone hunting vintage), the time saved adds up fast.
 
-[Install Ultra Zoom](/) for Chrome or Firefox and try it on your next shopping session. No tracking, no account required, and the first click counts.
+Grab [Ultra Zoom for Chrome or Firefox](/) and try it on your next shopping session. Want more features? [Pro](/pricing) adds batch download, EXIF viewer, and gallery navigation for power shoppers.

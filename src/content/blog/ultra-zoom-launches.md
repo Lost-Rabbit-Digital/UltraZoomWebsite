@@ -9,4 +9,4 @@ After months of development, Ultra Zoom is now available on the Chrome Web Store
 
 Our goal was simple: bring back the fast, frictionless image browsing that used to be standard before sites started locking thumbnails behind clicks and modals. Hover any image, see it full size. No click. No redirect. No tracking.
 
-Installation is one click — head to the [homepage](/) and grab the extension for your browser. If you hit any snags, our [Help page](/help) covers setup, per-site controls, and troubleshooting.
+Installation is one click. Head to the [homepage](/) and grab the extension for your browser. If you hit any snags, our [Help page](/help) covers setup, per-site controls, and troubleshooting.
