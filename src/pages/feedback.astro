@@ -44,13 +44,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <input name="email" type="email" required autocomplete="email" placeholder="you@example.com" />
         </label>
 
-        <label class="fb-field">
+        <div class="fb-field">
           <span class="fb-label">Which browser?</span>
           <div class="fb-radio-row">
             <label><input type="radio" name="browser" value="chrome" /> Chrome</label>
             <label><input type="radio" name="browser" value="firefox" /> Firefox</label>
           </div>
-        </label>
+        </div>
 
         <label class="fb-field">
           <span class="fb-label">1. What made you try Ultra Zoom?</span>
@@ -89,7 +89,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </label>
 
         <div class="fb-submit-row">
-          <button type="submit" class="fb-submit">Submit & get 1 month Pro</button>
+          <button type="submit" class="fb-submit">Submit &amp; get 1 month Pro</button>
         </div>
         <div id="fb-t1-status" class="fb-status" hidden></div>
       </form>
