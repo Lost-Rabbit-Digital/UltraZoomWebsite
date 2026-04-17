@@ -127,6 +127,8 @@ jobs:
           LIGHTHOUSE_LINKS: ${{ steps.lighthouse.outputs.links }}
         with:
           script: |
+            const fs = require('fs');
+
             const manifestRaw = (process.env.LIGHTHOUSE_MANIFEST || '').trim();
             const linksRaw   = (process.env.LIGHTHOUSE_LINKS   || '').trim();
 
@@ -138,23 +140,83 @@ jobs:
             const results = JSON.parse(manifestRaw);
             const links   = linksRaw ? JSON.parse(linksRaw) : {};
 
+            const CATEGORIES = [
+              { id: 'performance',    label: 'Perf' },
+              { id: 'accessibility',  label: 'A11y' },
+              { id: 'best-practices', label: 'BP'   },
+              { id: 'seo',            label: 'SEO'  },
+            ];
+            const SKIP_DISPLAY_MODES = new Set(['informative', 'notApplicable', 'manual']);
+
             const score = (v) => Math.round(v * 100);
             const emoji = (v) => v >= 0.9 ? '🟢' : v >= 0.5 ? '🟠' : '🔴';
+            const pathOf = (urlStr) => {
+              const p = new URL(urlStr).pathname.replace(/\.html$/, '');
+              return p === '/index' ? '/' : (p || '/');
+            };
 
             let body = '### ⚡ Lighthouse Report\n\n';
-            body += '| Category | Score |\n|----------|-------|\n';
+            body += '| Page | ' + CATEGORIES.map(c => c.label).join(' | ') + ' |\n';
+            body += '|------|' + CATEGORIES.map(() => ':----:').join('|') + '|\n';
+
+            const perPageIssues = [];
 
             for (const result of results) {
-              const { summary } = result;
-              for (const [key, value] of Object.entries(summary)) {
-                const label = key.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                body += `| ${emoji(value)} ${label} | ${score(value)} |\n`;
+              const p = pathOf(result.url);
+              const row = [`\`${p}\``];
+              for (const { id } of CATEGORIES) {
+                const s = result.summary[id];
+                row.push(s == null ? '—' : `${emoji(s)} ${score(s)}`);
               }
+              body += '| ' + row.join(' | ') + ' |\n';
+
+              try {
+                const report = JSON.parse(fs.readFileSync(result.jsonPath, 'utf-8'));
+                const issues = [];
+                for (const { id: catId, label } of CATEGORIES) {
+                  const category = report.categories[catId];
+                  if (!category) continue;
+                  for (const ref of category.auditRefs) {
+                    const audit = report.audits[ref.id];
+                    if (!audit) continue;
+                    if (SKIP_DISPLAY_MODES.has(audit.scoreDisplayMode)) continue;
+                    if (audit.score === null || audit.score >= 1) continue;
+                    issues.push({
+                      category: label,
+                      title: audit.title,
+                      score: audit.score,
+                      weight: ref.weight || 0,
+                    });
+                  }
+                }
+                if (issues.length) {
+                  issues.sort((a, b) => a.score - b.score || b.weight - a.weight);
+                  const worst = Math.min(...issues.map(i => i.score));
+                  perPageIssues.push({ path: p, issues, worst });
+                }
+              } catch (e) {
+                core.warning(`Could not read report ${result.jsonPath}: ${e.message}`);
+              }
+            }
+
+            if (perPageIssues.length) {
+              perPageIssues.sort((a, b) => a.worst - b.worst);
+              body += '\n<details open>\n<summary><strong>Top issues per page</strong></summary>\n\n';
+              for (const { path: p, issues } of perPageIssues) {
+                body += `**\`${p}\`**\n`;
+                for (const iss of issues.slice(0, 5)) {
+                  body += `- ${iss.category}: ${iss.title} (${score(iss.score)})\n`;
+                }
+                body += '\n';
+              }
+              body += '</details>\n';
+            } else {
+              body += '\n_No failing audits across any audited page._ 🎉\n';
             }
 
             if (Object.keys(links).length) {
               body += '\n**Full reports:** ';
-              body += Object.entries(links).map(([url, link]) => `[${new URL(url).pathname || '/'}](${link})`).join(' · ');
+              body += Object.entries(links).map(([url, link]) => `[${pathOf(url)}](${link})`).join(' · ');
               body += '\n';
             }
 

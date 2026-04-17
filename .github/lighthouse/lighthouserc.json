@@ -2,10 +2,33 @@
   "ci": {
     "collect": {
       "staticDistDir": "./dist",
-      "numberOfRuns": 1
-    },
-    "assert": {
-      "assertions": {}
+      "numberOfRuns": 1,
+      "url": [
+        "http://localhost/index.html",
+        "http://localhost/help.html",
+        "http://localhost/blog.html",
+        "http://localhost/contact.html",
+        "http://localhost/pricing.html",
+        "http://localhost/privacy.html",
+        "http://localhost/terms.html",
+        "http://localhost/zoom-score.html",
+        "http://localhost/feedback.html",
+        "http://localhost/account.html",
+        "http://localhost/success.html",
+        "http://localhost/blog/bundle-budget.html",
+        "http://localhost/blog/collector-auction-photo-zoom.html",
+        "http://localhost/blog/designer-moodboard-hover-zoom.html",
+        "http://localhost/blog/genealogy-archive-photo-zoom.html",
+        "http://localhost/blog/hover-zoom-power-tips.html",
+        "http://localhost/blog/hover-zoom-privacy-scandal.html",
+        "http://localhost/blog/manifest-v3-trap.html",
+        "http://localhost/blog/native-browser-image-zoom.html",
+        "http://localhost/blog/online-shopping-product-photo-zoom.html",
+        "http://localhost/blog/preact-over-react.html",
+        "http://localhost/blog/real-estate-listing-photo-zoom.html",
+        "http://localhost/blog/ultra-zoom-launches.html",
+        "http://localhost/blog/zero-knowledge-architecture.html"
+      ]
     },
     "upload": {
       "target": "temporary-public-storage"
