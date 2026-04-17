@@ -42,7 +42,7 @@ We rebuilt Ultra Zoom against MV3 as a deliberate constraint, not a compliance c
 
 **No background network interception.** Ultra Zoom doesn't use `webRequest` or `declarativeNetRequest` to inspect your traffic. Image fetches are initiated by content scripts, using the same CORS behavior any other page would see. If a site blocks hotlinking, Ultra Zoom respects that — we don't route around it with a proxy.
 
-**Service worker holds no state worth stealing.** Our service worker handles two things: license validation at activation, and routing keyboard shortcut events. It doesn't cache URLs, doesn't maintain a history buffer, doesn't ping home. If the browser kills it after 30 seconds, nothing is lost.
+**Service worker holds no state worth stealing.** Our service worker handles two things: license validation at activation, and routing keyboard shortcut events. It doesn't cache URLs, doesn't maintain a history buffer, doesn't ping home. If the browser kills it after 30 seconds, nothing is lost. It's also small — about 2.6 KB gzipped — because it does small things. We [break down the rest of the bundle](/blog/bundle-budget) in a separate post.
 
 **Permissions scoped to supported sites.** Ultra Zoom requests host access only for the sites listed on the [Help page](/help). It does not ask for "all websites." If we want to add a new site, we ship an update — and you see the new permission in your browser's update prompt before it takes effect.
 

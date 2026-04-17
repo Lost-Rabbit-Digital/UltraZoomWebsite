@@ -63,7 +63,7 @@ Preact is the right call for Ultra Zoom. It would not automatically be the right
 
 **If the team was reaching for React-specific tooling** — React DevTools works with Preact via a bridge, but it's not as smooth. A team that lives in React DevTools every day would feel the difference.
 
-None of these apply to us. Ultra Zoom's popup is a few dozen components, our state is `chrome.storage.local`, and our team is four people who read MDN more than they read React docs.
+None of these apply to us. Ultra Zoom's popup is a few dozen components, our state is `chrome.storage.local`, and our team is two people who read MDN more than they read React docs.
 
 ## The meta-point
 
