@@ -1,7 +1,7 @@
 ---
 title: "The designer's hover-zoom workflow: faster moodboards on Pinterest, Behance, and Dribbble"
 description: "How illustrators, graphic designers, and art directors use hover-to-zoom to scan inspiration galleries, inspect texture and type detail, and build moodboards without losing their place."
-date: 2026-04-17
+date: 2026-04-15
 category: "Use cases"
 ---
 

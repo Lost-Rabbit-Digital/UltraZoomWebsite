@@ -1,7 +1,7 @@
 ---
 title: "Your browser already supports image zoom. It's just intentionally bad."
 description: "Every major browser has had the building blocks for native image zoom for two decades. Here's why they never stitched them together, and why extensions had to."
-date: 2026-04-16
+date: 2026-04-10
 category: "Engineering"
 ---
 

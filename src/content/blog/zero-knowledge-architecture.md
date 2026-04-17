@@ -1,7 +1,7 @@
 ---
 title: "Zero-knowledge by design: how Ultra Zoom handles your data"
 description: "A detailed look at Ultra Zoom's data architecture: what stays on your machine, what crosses the network, and what is never collected or sent."
-date: 2026-04-12
+date: 2026-04-03
 category: "Privacy & security"
 ---
 

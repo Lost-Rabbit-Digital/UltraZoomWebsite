@@ -1,7 +1,7 @@
 ---
 title: "Zooming into real estate listings: what to look for in every photo"
 description: "A house-hunter's checklist for inspecting Zillow, Redfin, and Realtor.com photos with hover-to-zoom. Catch red flags before you book the tour."
-date: 2026-04-16
+date: 2026-04-09
 category: "Use cases"
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: "Ultra Zoom launches on Chrome and Firefox"
 description: "Ultra Zoom is now available on the Chrome Web Store and Firefox Add-ons, shipping with hover-to-zoom support for 60+ websites."
-date: 2026-04-10
+date: 2026-04-02
 category: "Release notes"
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: "The online shopper's guide to inspecting product photos"
 description: "How to spot stitching, resolution tricks, and condition details on Amazon, Etsy, and eBay using hover-to-zoom. No more squinting or opening every listing in a new tab."
-date: 2026-04-15
+date: 2026-04-07
 category: "Use cases"
 ---
 

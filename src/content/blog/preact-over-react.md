@@ -1,7 +1,7 @@
 ---
 title: "Why we picked Preact over React for a browser extension"
 description: "React is a fine default for web apps. For a browser extension where every kilobyte ships to every user, Preact is a better fit — and the migration cost is close to zero."
-date: 2026-04-17
+date: 2026-04-14
 category: "Engineering"
 ---
 
