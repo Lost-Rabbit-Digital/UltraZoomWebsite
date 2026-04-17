@@ -9,6 +9,15 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "astro": "^5.9.0"
+    "@astrojs/rss": "^4.0.18",
+    "@astrojs/sitemap": "^3.7.2",
+    "@resvg/resvg-js": "^2.6.2",
+    "astro": "^5.9.0",
+    "satori": "^0.26.0"
+  },
+  "devDependencies": {
+    "@capsizecss/metrics": "^3.7.0",
+    "@fontsource/inter": "^5.2.8",
+    "inter-ui": "^4.1.1"
   }
 }

@@ -1,14 +1,16 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import { getCollection } from 'astro:content';
 
 interface Props {
   title: string;
   description: string;
   date: Date;
   category: string;
+  slug: string;
 }
 
-const { title, description, date, category } = Astro.props;
+const { title, description, date, category, slug } = Astro.props;
 
 const formattedDate = date.toLocaleDateString('en-US', {
   year: 'numeric',
@@ -16,6 +18,19 @@ const formattedDate = date.toLocaleDateString('en-US', {
   day: 'numeric',
 });
 const isoDate = date.toISOString().slice(0, 10);
+
+const ogImage = new URL(`/og/${slug}.png`, Astro.site).toString();
+
+const allPosts = await getCollection('blog');
+const relatedPosts = allPosts
+  .filter(p => p.id !== slug)
+  .sort((a, b) => {
+    const aSameCat = a.data.category === category ? 0 : 1;
+    const bSameCat = b.data.category === category ? 0 : 1;
+    if (aSameCat !== bSameCat) return aSameCat - bSameCat;
+    return b.data.date.getTime() - a.data.date.getTime();
+  })
+  .slice(0, 3);
 ---
 
 <BaseLayout
@@ -25,6 +40,7 @@ const isoDate = date.toISOString().slice(0, 10);
     url: Astro.url.href,
     title,
     description,
+    image: ogImage,
   }}
   currentPage="blog"
 >
@@ -41,9 +57,72 @@ const isoDate = date.toISOString().slice(0, 10);
             <div class="article-body">
                 <slot />
             </div>
+
+            {relatedPosts.length > 0 && (
+                <aside class="related-posts" aria-label="Related posts">
+                    <h2 class="related-posts-title">Keep reading</h2>
+                    <ul class="related-posts-list">
+                        {relatedPosts.map(post => {
+                            const rIso = post.data.date.toISOString().slice(0, 10);
+                            const rDate = post.data.date.toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                            });
+                            return (
+                                <li class="related-post">
+                                    <p class="blog-meta">
+                                        <time datetime={rIso}>{rDate}</time>
+                                        <span class="blog-dot" aria-hidden="true">&bull;</span>
+                                        <span>{post.data.category}</span>
+                                    </p>
+                                    <h3 class="related-post-title">
+                                        <a href={`/blog/${post.id}`}>{post.data.title}</a>
+                                    </h3>
+                                    <p class="related-post-desc">{post.data.description}</p>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </aside>
+            )}
+
             <footer class="article-footer">
                 <a href="/blog">&larr; Back to all posts</a>
             </footer>
         </article>
     </main>
+
+    <aside class="install-cta-bar" id="install-cta-bar" aria-label="Install Ultra Zoom">
+        <div class="install-cta-inner">
+            <div class="install-cta-text">
+                <strong>Try Ultra Zoom free.</strong>
+                <span>Hover-to-zoom for Chrome and Firefox. No tracking.</span>
+            </div>
+            <div class="install-cta-actions">
+                <a href="/" class="install-cta-btn">Install</a>
+                <button type="button" class="install-cta-dismiss" aria-label="Dismiss">&times;</button>
+            </div>
+        </div>
+    </aside>
+
+    <script is:inline>
+        (function () {
+            var bar = document.getElementById('install-cta-bar');
+            if (!bar) return;
+            try {
+                if (sessionStorage.getItem('uz-cta-dismissed') === '1') {
+                    bar.hidden = true;
+                    return;
+                }
+            } catch (_) {}
+            var btn = bar.querySelector('.install-cta-dismiss');
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    bar.hidden = true;
+                    try { sessionStorage.setItem('uz-cta-dismissed', '1'); } catch (_) {}
+                });
+            }
+        })();
+    </script>
 </BaseLayout>

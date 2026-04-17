@@ -1271,7 +1271,7 @@ kbd {
 .article {
     max-width: 720px;
     margin: 0 auto;
-    padding: 2rem 1.5rem 3rem;
+    padding: 2rem 1.5rem 7rem;
 }
 
 .article-header {
@@ -1358,6 +1358,166 @@ kbd {
 
 .article-footer a:hover {
     color: var(--link-hover);
+}
+
+/* ── Related Posts ───────────────────────────────── */
+
+.related-posts {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+}
+
+.related-posts-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.25rem;
+}
+
+.related-posts-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+}
+
+.related-post {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.related-post:hover {
+    border-color: var(--brand);
+    background: var(--bg-card);
+}
+
+.related-post-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0.25rem 0 0.5rem;
+    line-height: 1.35;
+}
+
+.related-post-title a {
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.related-post-title a:hover {
+    color: var(--brand);
+}
+
+.related-post-desc {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ── Sticky Install CTA ──────────────────────────── */
+
+.install-cta-bar {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    z-index: 100;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    padding: 0.75rem 1rem;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.install-cta-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.install-cta-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    min-width: 0;
+}
+
+.install-cta-text strong {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.install-cta-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.install-cta-btn {
+    display: inline-block;
+    background: var(--brand-dark);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0.5rem 1.1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.install-cta-btn:hover {
+    background: var(--brand-hover);
+    color: var(--white);
+}
+
+.install-cta-dismiss {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+}
+
+.install-cta-dismiss:hover {
+    color: var(--text-primary);
+    background: var(--bg-primary);
+}
+
+@media (max-width: 540px) {
+    .install-cta-bar {
+        bottom: 0.5rem;
+        left: 0.5rem;
+        right: 0.5rem;
+        padding: 0.6rem 0.75rem;
+    }
+
+    .install-cta-text {
+        font-size: 0.85rem;
+    }
+
+    .install-cta-text span {
+        display: none;
+    }
+
+    .install-cta-btn {
+        padding: 0.45rem 0.9rem;
+        font-size: 0.9rem;
+    }
 }
 
 /* ── Success Page ─────────────────────────────────── */
@@ -1563,3 +1723,159 @@ kbd {
         justify-content: center;
     }
 }
+
+/* ── Pricing Page ─────────────────────────────────── */
+
+.pricing-intro {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    max-width: 640px;
+    margin-bottom: 2rem;
+    line-height: 1.7;
+}
+
+.pricing-plans {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin: 1.5rem 0 1rem;
+}
+
+.pricing-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+.pricing-card:hover {
+    border-color: var(--brand);
+    transform: translateY(-2px);
+}
+
+.pricing-card--featured {
+    border-color: var(--brand);
+    box-shadow: 0 4px 20px rgba(31, 111, 235, 0.2);
+}
+
+.pricing-card-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--brand-light);
+    margin-bottom: 0.75rem;
+    margin-top: 0;
+}
+
+.pricing-card-price {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.pricing-card-price strong {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.pricing-card-per {
+    margin-left: 0.25rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.pricing-card-note {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+}
+
+.pricing-card-cta {
+    display: inline-block;
+    background: var(--brand-dark);
+    color: var(--white);
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.7rem 1.75rem;
+    border-radius: 8px;
+    width: 100%;
+    transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 3px 14px rgba(31, 111, 235, 0.3);
+}
+
+.pricing-card-cta:hover:not(:disabled) {
+    background: var(--brand-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 20px rgba(31, 111, 235, 0.45);
+}
+
+.pricing-compare-wrap {
+    overflow-x: auto;
+    margin-top: 0.75rem;
+}
+
+.pricing-compare {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.pricing-compare th,
+.pricing-compare td {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    text-align: left;
+    color: var(--text-secondary);
+}
+
+.pricing-compare thead th {
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.pricing-compare thead th:not(:first-child),
+.pricing-compare tbody td {
+    text-align: center;
+}
+
+.pricing-compare tbody th {
+    color: var(--text-primary);
+    font-weight: 500;
+    background: var(--bg-secondary);
+}
+
+.pricing-compare tbody tr:nth-child(even) th,
+.pricing-compare tbody tr:nth-child(even) td {
+    background: var(--bg-card);
+}
+
+.pricing-compare tbody td {
+    color: var(--success);
+    font-weight: 700;
+}
+
+/* ── Account Page ─────────────────────────────────── */
+
+.account-form {
+    margin-top: 2rem;
+}
+
+@media (max-width: 640px) {
+    .pricing-plans {
+        grid-template-columns: 1fr;
+    }
+}
+
