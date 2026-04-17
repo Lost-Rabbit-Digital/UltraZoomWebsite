@@ -1,0 +1,155 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Pricing — Ultra Zoom"
+  description="Ultra Zoom Pro pricing — monthly, annual, and lifetime plans. Free to use on every site; upgrade for premium plugins and power features."
+  currentPage="pricing"
+  og={{
+    url: 'https://ultrazoom.app/pricing',
+    title: 'Pricing — Ultra Zoom',
+    description: 'Ultra Zoom is free on every site. Upgrade to Pro for premium plugins and power features.',
+    image: 'https://ultrazoom.app/images/icon-128.png',
+  }}
+>
+    <main class="main page-content" id="main-content">
+        <h1>Pricing</h1>
+
+        <p class="pricing-intro">Ultra Zoom is free to use on every site. Upgrade to Pro for premium plugins and power features.</p>
+
+        <section class="pricing-plans" aria-label="Pricing plans">
+            <article class="pricing-card">
+                <h2 class="pricing-card-name">Monthly</h2>
+                <p class="pricing-card-price"><strong>$3.99</strong><span class="pricing-card-per">/mo</span></p>
+                <p class="pricing-card-note">7-day free trial</p>
+                <button type="button" class="pricing-card-cta" data-plan="monthly">Start free trial</button>
+            </article>
+
+            <article class="pricing-card pricing-card--featured">
+                <h2 class="pricing-card-name">Annual</h2>
+                <p class="pricing-card-price"><strong>$29.99</strong><span class="pricing-card-per">/yr</span></p>
+                <p class="pricing-card-note">Save ~37%</p>
+                <button type="button" class="pricing-card-cta" data-plan="annual">Subscribe annually</button>
+            </article>
+
+            <article class="pricing-card">
+                <h2 class="pricing-card-name">Lifetime</h2>
+                <p class="pricing-card-price"><strong>$59.99</strong><span class="pricing-card-per">one-time</span></p>
+                <p class="pricing-card-note">Pay once, keep forever</p>
+                <button type="button" class="pricing-card-cta" data-plan="lifetime">Buy lifetime</button>
+            </article>
+        </section>
+
+        <p id="checkout-error" class="checkout-error" hidden></p>
+
+        <h2>Free vs. Pro</h2>
+
+        <div class="pricing-compare-wrap">
+            <table class="pricing-compare">
+                <thead>
+                    <tr>
+                        <th scope="col">Feature</th>
+                        <th scope="col">Free</th>
+                        <th scope="col">Pro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">Hover-to-zoom on every site</th>
+                        <td aria-label="Included">&#10003;</td>
+                        <td aria-label="Included">&#10003;</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Universal CDN plugins (Imgur, CloudFront, etc.)</th>
+                        <td aria-label="Included">&#10003;</td>
+                        <td aria-label="Included">&#10003;</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Basic settings</th>
+                        <td aria-label="Included">&#10003;</td>
+                        <td aria-label="Included">&#10003;</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Premium site plugins (Instagram, Amazon, etc.)</th>
+                        <td aria-label="Not included">&mdash;</td>
+                        <td aria-label="Included">&#10003;</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Gallery navigation</th>
+                        <td aria-label="Not included">&mdash;</td>
+                        <td aria-label="Included">&#10003;</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Video preview</th>
+                        <td aria-label="Not included">&mdash;</td>
+                        <td aria-label="Included">&#10003;</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Stats, history, EXIF viewer</th>
+                        <td aria-label="Not included">&mdash;</td>
+                        <td aria-label="Included">&#10003;</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Batch download</th>
+                        <td aria-label="Not included">&mdash;</td>
+                        <td aria-label="Included">&#10003;</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Custom rules &amp; favorites</th>
+                        <td aria-label="Not included">&mdash;</td>
+                        <td aria-label="Included">&#10003;</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Settings sync</th>
+                        <td aria-label="Not included">&mdash;</td>
+                        <td aria-label="Included">&#10003;</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>Questions?</h2>
+        <p>Visit the <a href="/help">Help page</a> for setup and supported sites, or review our <a href="/privacy">Privacy policy</a>. Already Pro? Manage billing on your <a href="/account">Account</a> page.</p>
+    </main>
+
+    <script is:inline>
+        (function () {
+            var errEl = document.getElementById('checkout-error');
+
+            document.querySelectorAll('[data-plan]').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    var plan = btn.getAttribute('data-plan');
+                    if (errEl) { errEl.hidden = true; errEl.textContent = ''; }
+                    btn.style.opacity = '0.6';
+                    btn.style.pointerEvents = 'none';
+
+                    fetch('https://api.ultrazoom.app/api/checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ plan: plan })
+                    })
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        if (data.url) {
+                            window.location.href = data.url;
+                        } else {
+                            throw new Error(data.error || 'Unable to start checkout');
+                        }
+                    })
+                    .catch(function (err) {
+                        if (errEl) {
+                            errEl.textContent = err.message || 'Something went wrong. Please try again.';
+                            errEl.hidden = false;
+                        }
+                    })
+                    .finally(function () {
+                        btn.style.opacity = '';
+                        btn.style.pointerEvents = '';
+                    });
+                });
+            });
+        })();
+    </script>
+</BaseLayout>

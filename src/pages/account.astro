@@ -1,0 +1,108 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Your Account — Ultra Zoom"
+  description="Manage your Ultra Zoom Pro subscription. Billing is handled securely by Stripe."
+  noindex={true}
+>
+    <main class="main page-content" id="main-content">
+        <h1>Your Account</h1>
+
+        <p>Manage your Ultra Zoom Pro subscription. Billing is handled securely by Stripe.</p>
+
+        <form id="portal-form" class="contact-form account-form" novalidate>
+            <div class="form-group">
+                <label for="email">Email <span class="form-required" aria-hidden="true">*</span></label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    autocomplete="email"
+                    required
+                    placeholder="you@example.com"
+                >
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="submit-btn" id="portal-submit">Open billing portal</button>
+                <p class="form-privacy-note">
+                    You'll be redirected to Stripe's secure customer portal. Cancel,
+                    update your card, or change plans &mdash; it's all handled through Stripe.
+                </p>
+            </div>
+
+            <div class="form-status" id="portal-status" aria-live="polite" hidden></div>
+        </form>
+
+        <div class="contact-alt">
+            <h2>Not a Pro subscriber yet?</h2>
+            <p>See plans and features on the <a href="/pricing">Pricing page</a>.</p>
+        </div>
+    </main>
+
+    <script is:inline>
+        (function () {
+            var form = document.getElementById('portal-form');
+            var status = document.getElementById('portal-status');
+            var btn = document.getElementById('portal-submit');
+            var emailInput = document.getElementById('email');
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.textContent = 'Opening…';
+                hideStatus();
+
+                fetch('https://api.ultrazoom.app/api/customer-portal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: emailInput.value })
+                })
+                .then(function (res) {
+                    return res.json().then(function (data) {
+                        return { status: res.status, ok: res.ok, data: data };
+                    });
+                })
+                .then(function (result) {
+                    if (result.ok && result.data && result.data.url) {
+                        window.location.href = result.data.url;
+                        return;
+                    }
+                    if (result.status === 404) {
+                        showStatus('error', "We couldn't find a Pro subscription for that email. If this looks wrong, email boden@lostrabbitdigital.com.");
+                    } else {
+                        showStatus('error', 'Something went wrong — try again.');
+                    }
+                    btn.disabled = false;
+                    btn.textContent = 'Open billing portal';
+                })
+                .catch(function () {
+                    showStatus('error', 'Something went wrong — try again.');
+                    btn.disabled = false;
+                    btn.textContent = 'Open billing portal';
+                });
+            });
+
+            function showStatus(type, message) {
+                status.hidden = false;
+                status.className = 'form-status form-status--' + type;
+                status.textContent = message;
+                status.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            function hideStatus() {
+                status.hidden = true;
+                status.textContent = '';
+                status.className = 'form-status';
+            }
+        })();
+    </script>
+</BaseLayout>
