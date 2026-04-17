@@ -1345,6 +1345,37 @@ kbd {
     color: var(--text-primary);
 }
 
+.article-body figure {
+    margin: 2rem 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.article-body figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.article-body figure figcaption {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border);
+    line-height: 1.5;
+}
+
+.article-body figure figcaption a {
+    color: var(--text-secondary);
+    text-decoration: underline;
+}
+
+.article-body figure figcaption a:hover {
+    color: var(--text-primary);
+}
+
 .article-footer {
     margin-top: 2.5rem;
     padding-top: 1.5rem;

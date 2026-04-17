@@ -9,6 +9,11 @@ Every real estate listing photo is trying to sell you something. That's not a ba
 
 Hover-to-zoom is a surprisingly powerful tool for that. Here's the checklist we've developed after watching real estate agents use Ultra Zoom on Zillow, Redfin, and Realtor.com.
 
+<figure>
+  <img src="/images/blog/realestate-habs-house.jpg" alt="Large-format black-and-white photograph of a Victorian or Craftsman-era house exterior, showing roofline, siding, windows, trim, and front porch in sharp architectural detail." loading="lazy" decoding="async" width="1600" height="1067">
+  <figcaption>A Historic American Buildings Survey exterior. HABS photographers shoot at large format specifically to preserve the roofline, trim, and foundation detail a buyer needs to evaluate. Image: public domain (Library of Congress HABS).</figcaption>
+</figure>
+
 ## Why listing photos deserve a closer look
 
 A typical home search might involve looking at one or two hundred listings before narrowing to a shortlist. If every listing takes ten minutes to evaluate, that's fifteen-plus hours of browsing. Hover-to-zoom cuts the per-listing time dramatically by letting you inspect every photo without opening the full listing page.
@@ -28,6 +33,11 @@ It also catches things you'd otherwise miss. Listing thumbnails on every major s
 **Neighboring properties.** Listing photos often frame around the neighbors for a reason. Zoom into the edges of exterior shots — you'll sometimes see the corner of a commercial building, a power substation, or a junkyard that doesn't appear in the listing description.
 
 ### Interior photos
+
+<figure>
+  <img src="/images/blog/realestate-habs-detail.jpg" alt="Large-format architectural photograph of a historic interior or porch detail, showing wood trim, wainscoting, door casing, and floor transitions at high resolution." loading="lazy" decoding="async" width="1600" height="1067">
+  <figcaption>HABS interior detail. Trim separation, floor transitions, and wall patches show up at full zoom long before they show up on a walk-through. Image: public domain (Library of Congress HABS).</figcaption>
+</figure>
 
 **Ceilings.** Stains, sagging drywall, and tape lines are classic water-damage tells. They're usually small in the frame and blend with the lighting — zoom makes them obvious.
 

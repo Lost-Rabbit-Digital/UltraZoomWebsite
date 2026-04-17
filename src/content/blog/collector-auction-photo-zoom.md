@@ -9,6 +9,11 @@ If you collect anything — coins, stamps, trading cards, rare books, art, watch
 
 The problem is that most auction and marketplace sites show those photos in compressed gallery thumbnails that hide exactly the details you're trying to see. Hover-to-zoom is the fastest fix.
 
+<figure>
+  <img src="/images/blog/collector-coin-obverse.jpg" alt="High-resolution macro photograph of the obverse of a Morgan silver dollar, showing fine luster breaks, die wear, and bag marks on Liberty's cheek and hair." loading="lazy" decoding="async" width="1600" height="1067">
+  <figcaption>A Morgan dollar at macro resolution. The condition tells — luster on the cheek, hairline scratches, strike softness — only exist at this zoom level. Image: public domain (US Mint / Wikimedia Commons).</figcaption>
+</figure>
+
 ## Why condition inspection needs real resolution
 
 A coin graded "AU-55" can look identical to one graded "MS-62" until you see the luster on the high points. A trading card described as "near mint" can have a soft corner the seller didn't mention. A vintage print can have foxing in the margins that's completely invisible at thumbnail size.
@@ -30,6 +35,11 @@ Hover-to-zoom pulls that full-resolution image into an overlay the moment you ho
 **Toning patterns.** Natural toning has a characteristic look that's different from artificial re-toning. Zoom doesn't make you an expert, but it lets you see what you're evaluating.
 
 ### Stamps
+
+<figure>
+  <img src="/images/blog/collector-stamp-detail.jpg" alt="High-resolution scan of a 19th-century postage stamp showing engraved line detail, perforation edges, and cancellation ink." loading="lazy" decoding="async" width="1600" height="1067">
+  <figcaption>Zoomed stamp detail reveals perforation condition, centering, and cancellation clarity — all three drive valuation. Image: public domain (Wikimedia Commons).</figcaption>
+</figure>
 
 **Perforations.** Missing or torn perfs are a condition hit. Counting and checking them at full zoom takes a second.
 
