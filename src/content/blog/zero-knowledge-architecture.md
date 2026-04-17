@@ -30,7 +30,7 @@ Only two types of network requests ever leave your browser:
 - **Image requests — direct to the origin server.** When you hover a thumbnail, Ultra Zoom fetches the full-resolution image from the same server that hosts the website. This is the same request your browser would make if you clicked the image and opened it in a new tab. Ultra Zoom doesn't proxy these through our servers or any third party.
 - **License check — once at activation.** When you first activate a paid license, Ultra Zoom validates the key against our licensing server. After that, the result is cached locally. This is a single HTTPS request containing only the license key — no browsing data, no device fingerprints, no usage telemetry.
 
-That's it. Two categories. You can verify this yourself by opening your browser's developer tools (F12 > Network tab) and watching the traffic while you use Ultra Zoom.
+That's it. Two categories. You can verify this yourself by opening your browser's developer tools (F12 → Network tab) and watching the traffic while you use Ultra Zoom.
 
 ### 3. Never sent anywhere
 

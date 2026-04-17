@@ -42,7 +42,7 @@ Whether you use Ultra Zoom or not, here's what to check before installing any ex
 
 1. **Read the permissions.** If an image-zoom tool asks for access to "all websites" and "all browsing data," ask why it needs that.
 2. **Check the privacy policy.** Vague language like "we may share anonymized usage data with partners" is a red flag.
-3. **Look at the network traffic.** Developer tools (F12 > Network tab) will show you exactly what an extension is sending and where.
+3. **Look at the network traffic.** Developer tools (F12 → Network tab) will show you exactly what an extension is sending and where.
 4. **Watch for ownership changes.** Extensions get sold. The developer who built it isn't always the one running it today.
 
 Ultra Zoom's approach is simple: your browser talks to the image server, and that's the end of the story. No middlemen, no trackers, no surprises.
