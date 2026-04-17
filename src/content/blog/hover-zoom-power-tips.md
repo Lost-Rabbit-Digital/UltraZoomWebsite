@@ -1,7 +1,7 @@
 ---
 title: "Power tips: making the most of hover-to-zoom"
 description: "Three keyboard and mouse shortcuts that make hover-to-zoom even faster: scroll zoom, arrow-key galleries, and per-site toggles."
-date: 2026-04-02
+date: 2026-04-01
 category: "Tips & tricks"
 ---
 

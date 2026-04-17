@@ -1,7 +1,7 @@
 ---
 title: "The Manifest V3 trap: why most hover-zoom extensions had to choose between breaking and spying"
 description: "Manifest V3 reshaped what browser extensions can do. For hover-zoom tools, the migration created a fork in the road — and a lot of extensions took the wrong path."
-date: 2026-04-15
+date: 2026-04-08
 category: "Engineering"
 ---
 

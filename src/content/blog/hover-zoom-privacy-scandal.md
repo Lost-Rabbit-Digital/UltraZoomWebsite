@@ -1,7 +1,7 @@
 ---
 title: "What happened to Hover Zoom, and why we built Ultra Zoom differently"
 description: "Hover Zoom was the most popular image-zoom extension until it was caught injecting tracking scripts and selling browsing data. Here's the full story, and how Ultra Zoom avoids the same mistakes."
-date: 2026-04-14
+date: 2026-04-06
 category: "Privacy & security"
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: "Genealogy research: zooming into old photos and scanned documents"
 description: "How family history researchers use hover-to-zoom on Ancestry, FamilySearch, and digitized newspaper archives to read faded handwriting and spot clues in old photographs."
-date: 2026-04-16
+date: 2026-04-13
 category: "Use cases"
 ---
 

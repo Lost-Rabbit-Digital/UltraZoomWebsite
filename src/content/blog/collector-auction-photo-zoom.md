@@ -1,7 +1,7 @@
 ---
 title: "Collectors and auction watchers: inspecting lot photos before you bid"
 description: "How coin, stamp, book, card, and art collectors use hover-to-zoom on eBay, Heritage Auctions, Catawiki, and Worthpoint to inspect condition before placing a bid."
-date: 2026-04-17
+date: 2026-04-16
 category: "Use cases"
 ---
 
