@@ -5,20 +5,20 @@ date: 2026-04-17
 category: "Use cases"
 ---
 
-If you collect anything — coins, stamps, trading cards, rare books, art, watches, militaria, vintage posters — you already know that photos make or break a purchase. Descriptions are subjective. Grades are sometimes generous. The photo, at full resolution, is usually the most honest thing in the listing.
+If you collect anything (coins, stamps, trading cards, rare books, art, watches, militaria, vintage posters), you already know that photos make or break a purchase. Descriptions are subjective. Grades are sometimes generous. The photo, at full resolution, is usually the most honest thing in the listing.
 
 The problem is that most auction and marketplace sites show those photos in compressed gallery thumbnails that hide exactly the details you're trying to see. Hover-to-zoom is the fastest fix.
 
 <figure>
   <img src="/images/blog/collector-coin-obverse.jpg" alt="High-resolution macro photograph of the obverse of a Morgan silver dollar, showing fine luster breaks, die wear, and bag marks on Liberty's cheek and hair." loading="lazy" decoding="async" width="1600" height="1067">
-  <figcaption>A Morgan dollar at macro resolution. The condition tells — luster on the cheek, hairline scratches, strike softness — only exist at this zoom level. Image: public domain (US Mint / Wikimedia Commons).</figcaption>
+  <figcaption>A Morgan dollar at macro resolution. The condition tells (luster on the cheek, hairline scratches, strike softness) only exist at this zoom level. Image: public domain (US Mint / Wikimedia Commons).</figcaption>
 </figure>
 
 ## Why condition inspection needs real resolution
 
 A coin graded "AU-55" can look identical to one graded "MS-62" until you see the luster on the high points. A trading card described as "near mint" can have a soft corner the seller didn't mention. A vintage print can have foxing in the margins that's completely invisible at thumbnail size.
 
-At thumbnail resolution you're looking at a 200-pixel image of a 1-inch object. A significant edge defect might be two or three pixels wide. You can't make a condition judgment from that. You need to see the photo as the seller shot it — usually 2000 or more pixels — to spot what's actually there.
+At thumbnail resolution you're looking at a 200-pixel image of a 1-inch object. A significant edge defect might be two or three pixels wide. You can't make a condition judgment from that. You need to see the photo as the seller shot it (usually 2000 or more pixels) to spot what's actually there.
 
 Hover-to-zoom pulls that full-resolution image into an overlay the moment you hover. Scrolling the mouse wheel zooms in further. For a collector scanning a hundred lots, it changes the workflow entirely.
 
@@ -38,7 +38,7 @@ Hover-to-zoom pulls that full-resolution image into an overlay the moment you ho
 
 <figure>
   <img src="/images/blog/collector-stamp-detail.jpg" alt="High-resolution scan of a 19th-century postage stamp showing engraved line detail, perforation edges, and cancellation ink." loading="lazy" decoding="async" width="1600" height="1067">
-  <figcaption>Zoomed stamp detail reveals perforation condition, centering, and cancellation clarity — all three drive valuation. Image: public domain (Wikimedia Commons).</figcaption>
+  <figcaption>Zoomed stamp detail reveals perforation condition, centering, and cancellation clarity. All three drive valuation. Image: public domain (Wikimedia Commons).</figcaption>
 </figure>
 
 **Perforations.** Missing or torn perfs are a condition hit. Counting and checking them at full zoom takes a second.
@@ -87,28 +87,28 @@ Hover-to-zoom pulls that full-resolution image into an overlay the moment you ho
 
 ## Platform-by-platform
 
-**eBay** — The biggest collectibles marketplace on the web. Sellers upload photos at varying quality, but the full-resolution version is usually there. Hover-zoom pulls it up over the search grid, which turns eBay from tab-chaos into a scannable inventory.
+**eBay.** The biggest collectibles marketplace on the web. Sellers upload photos at varying quality, but the full-resolution version is usually there. Hover-zoom pulls it up over the search grid, which turns eBay from tab-chaos into a scannable inventory.
 
-**Heritage Auctions** — Large, high-quality photography. Auctions are browseable by session, and hover-zoom works on the lot gallery thumbnails to let you triage sessions quickly.
+**Heritage Auctions.** Large, high-quality photography. Auctions are browseable by session, and hover-zoom works on the lot gallery thumbnails to let you triage sessions quickly.
 
-**Catawiki** — European multi-category auction site. Lot thumbnails are small enough that zoom is essential for any real inspection.
+**Catawiki.** European multi-category auction site. Lot thumbnails are small enough that zoom is essential for any real inspection.
 
-**Worthpoint** — Useful for comp research. Hover-zoom on past-sale galleries lets you check whether the comp is actually comparable to the lot you're considering.
+**Worthpoint.** Useful for comp research. Hover-zoom on past-sale galleries lets you check whether the comp is actually comparable to the lot you're considering.
 
-**Sotheby's, Christie's, Bonhams** — Major auction houses increasingly offer good gallery browsing. Hover-zoom helps when scanning large multi-lot sales.
+**Sotheby's, Christie's, Bonhams.** Major auction houses increasingly offer good gallery browsing. Hover-zoom helps when scanning large multi-lot sales.
 
-**LiveAuctioneers and Invaluable** — Aggregators for smaller auction houses, where photo quality varies enormously. Hover-zoom is doubly useful here because it lets you quickly filter out lots with unusable photography.
+**LiveAuctioneers and Invaluable.** Aggregators for smaller auction houses, where photo quality varies enormously. Hover-zoom is doubly useful here because it lets you quickly filter out lots with unusable photography.
 
 ## A practical bidding workflow
 
-1. **Filter the auction first.** Don't hover everything — filter by category, date, and price first.
+1. **Filter the auction first.** Don't hover everything. Filter by category, date, and price first.
 2. **First-pass scan with hover-zoom.** Go through the filtered list. Hover each lot's thumbnail. Shortlist the ones where the photo shows what you want to see.
 3. **Deeper inspection on each shortlist lot.** Open the lot page. Use hover-zoom across the full photo set. Decide on a maximum bid.
 4. **Keep notes per lot.** At the volume most collectors bid, you'll forget which issues each lot had. Even a one-line note beats going back and re-zooming everything on auction day.
 
 ## Why bidders care about extension privacy
 
-If you're bidding seriously — especially on higher-value lots — your research activity is competitive information. An extension quietly logging which lots you've inspected could leak signal about your bidding intentions if that data ever got sold, breached, or subpoenaed.
+If you're bidding seriously (especially on higher-value lots) your research activity is competitive information. An extension quietly logging which lots you've inspected could leak signal about your bidding intentions if that data ever got sold, breached, or subpoenaed.
 
 Ultra Zoom is built so that data doesn't exist. No analytics, no telemetry, no server receiving your browsing history. [The full privacy architecture is here](/blog/zero-knowledge-architecture) if you want the technical details.
 

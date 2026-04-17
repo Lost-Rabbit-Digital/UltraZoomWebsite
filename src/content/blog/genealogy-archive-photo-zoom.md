@@ -11,18 +11,18 @@ Hover-to-zoom doesn't solve every archival problem, but it does remove a huge am
 
 <figure>
   <img src="/images/blog/genealogy-census-page.jpg" alt="Scanned page of a nineteenth-century US census showing handwritten cursive entries for household members, ages, occupations, and birthplaces in columned rows." loading="lazy" decoding="async" width="1600" height="1067">
-  <figcaption>A nineteenth-century census page. Reading the clerk's hand — distinguishing capital T from F, long-s from f — is exactly the job hover-zoom makes tolerable. Image: public domain (US National Archives via Wikimedia Commons).</figcaption>
+  <figcaption>A nineteenth-century census page. Reading the clerk's hand (distinguishing capital T from F, long-s from f) is exactly the job hover-zoom makes tolerable. Image: public domain (US National Archives via Wikimedia Commons).</figcaption>
 </figure>
 
 ## The archive viewer problem
 
-Most big genealogy platforms — Ancestry, FamilySearch, MyHeritage, Findmypast, Newspapers.com — have built their own image viewers. Those viewers usually *work*, but they're built for one record at a time. You open the viewer, you pan and zoom, you close it, you move to the next result. For a researcher working through a forty-record search result, that's a lot of clicks.
+Most big genealogy platforms (Ancestry, FamilySearch, MyHeritage, Findmypast, Newspapers.com) have built their own image viewers. Those viewers usually *work*, but they're built for one record at a time. You open the viewer, you pan and zoom, you close it, you move to the next result. For a researcher working through a forty-record search result, that's a lot of clicks.
 
 Hover-to-zoom works differently. You hover the result thumbnail and see the full image immediately, right over the search list. Scroll to zoom further. Move away, it disappears. It's especially useful for:
 
-- **Triage** — deciding which of forty search hits is actually the record you want, without opening each viewer
-- **Cross-referencing** — bouncing between a census page and a map or photograph without losing your place
-- **Fast scans of thumbnail galleries** — newspaper front pages, cemetery photo sets, passenger manifest indexes
+- **Triage:** deciding which of forty search hits is actually the record you want, without opening each viewer
+- **Cross-referencing:** bouncing between a census page and a map or photograph without losing your place
+- **Fast scans of thumbnail galleries:** newspaper front pages, cemetery photo sets, passenger manifest indexes
 
 ## Reading old handwriting
 
@@ -42,7 +42,7 @@ What hover-zoom helps with:
 
 <figure>
   <img src="/images/blog/genealogy-cabinet-card.jpg" alt="Late nineteenth-century studio cabinet card photograph of a family, showing clothing detail, jewelry, and the studio's embossed photographer mark on the card mount." loading="lazy" decoding="async" width="1600" height="1067">
-  <figcaption>A period cabinet card. The photographer's mount text, a brooch engraving, or a background calendar can date a photo within a year — all invisible without zoom. Image: public domain (Wikimedia Commons).</figcaption>
+  <figcaption>A period cabinet card. The photographer's mount text, a brooch engraving, or a background calendar can date a photo within a year. All invisible without zoom. Image: public domain (Wikimedia Commons).</figcaption>
 </figure>
 
 Photographs are where zoom earns its keep. A typical old family portrait carries more information than you'd think:
@@ -59,15 +59,15 @@ Photographs are where zoom earns its keep. A typical old family portrait carries
 
 ## Platform-by-platform notes
 
-**Ancestry.com** — Hover-zoom works on search result thumbnails, record hints, and photo gallery previews. Particularly useful when you're working through a long hint queue.
+**Ancestry.com.** Hover-zoom works on search result thumbnails, record hints, and photo gallery previews. Particularly useful when you're working through a long hint queue.
 
-**FamilySearch** — The catalog browse pages show small image previews of scanned books and microfilm. Hover-zoom lets you check the page you're looking for without opening the full film viewer.
+**FamilySearch.** The catalog browse pages show small image previews of scanned books and microfilm. Hover-zoom lets you check the page you're looking for without opening the full film viewer.
 
-**Newspapers.com and Chronicling America** — Newspaper search results show a thumbnail of the clipping with the match highlighted. Zoom lets you read the surrounding article at a glance to decide whether it's your John Miller.
+**Newspapers.com and Chronicling America.** Newspaper search results show a thumbnail of the clipping with the match highlighted. Zoom lets you read the surrounding article at a glance to decide whether it's your John Miller.
 
-**FindAGrave and BillionGraves** — Cemetery photo pages have grid galleries of headstone photos. Zooming inscriptions is dramatically faster than opening each photo in its own page.
+**FindAGrave and BillionGraves.** Cemetery photo pages have grid galleries of headstone photos. Zooming inscriptions is dramatically faster than opening each photo in its own page.
 
-**MyHeritage** — DNA match result pages, photos of ancestors, and source documents all work with hover-zoom.
+**MyHeritage.** DNA match result pages, photos of ancestors, and source documents all work with hover-zoom.
 
 ## A few workflow tips
 
@@ -79,10 +79,10 @@ Photographs are where zoom earns its keep. A typical old family portrait carries
 
 ## Why this matters for privacy-minded researchers
 
-Family history research touches sensitive information — living relatives, health conditions, adoptions, military service records. The last thing a researcher wants is a browser extension logging which records they're viewing.
+Family history research touches sensitive information: living relatives, health conditions, adoptions, military service records. The last thing a researcher wants is a browser extension logging which records they're viewing.
 
 Ultra Zoom is built so that it can't. The extension doesn't collect or transmit which images you hover. It doesn't have an analytics endpoint. The network traffic is limited to the image fetches themselves, direct to the archive's own server, which is exactly what your browser would do without the extension installed.
 
-If that part matters to you — and for genealogy work, it really should — [our zero-knowledge architecture post](/blog/zero-knowledge-architecture) walks through the technical details.
+If that part matters to you (and for genealogy work, it really should), [our zero-knowledge architecture post](/blog/zero-knowledge-architecture) walks through the technical details.
 
 [Install Ultra Zoom](/) for Chrome or Firefox and bring it to your next research session.
