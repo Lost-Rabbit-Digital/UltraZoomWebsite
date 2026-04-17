@@ -1,12 +1,15 @@
-# Validate, build, and deploy the Ultra Zoom static site to Cloudflare Pages.
+# Validate, build, and deploy the Ultra Zoom static site to Cloudflare Workers.
 #
 # Pipeline:
-#   validate   → catch HTML errors and broken links early
-#   build      → minify HTML/CSS, optimize images, produce clean _site/ output
-#   lighthouse → run Lighthouse audit and post a performance summary
-#   deploy     → deploy _site/ to Cloudflare Pages (main branch only)
+#   build      → install deps, run `astro build`, upload dist/ artifact
+#   validate   → html-validate + lychee against the built dist/
+#   lighthouse → Lighthouse audit over the built dist/
+#   deploy     → `wrangler versions upload` on main (serves dist/ per wrangler.jsonc)
+#
+# Third-party actions are pinned to commit SHAs for supply-chain safety.
+# actions/* are trusted at major-version tags.
 
-name: Deploy static content to Pages
+name: Deploy static content to Workers
 
 on:
   push:
@@ -19,120 +22,103 @@ permissions:
   contents: read
 
 concurrency:
-  group: "pages-${{ github.ref }}"
-  cancel-in-progress: false
+  group: "workers-${{ github.ref }}"
+  # Cancel superseded PR runs; never cancel an in-flight main-branch deploy.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  NODE_VERSION: "24"
 
 jobs:
-  # ── Validate ────────────────────────────────────────────
-  validate:
-    name: Validate
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-
-      - name: Validate HTML
-        run: npx --yes html-validate *.html
-
-      - name: Check links
-        uses: lycheeverse/lychee-action@v2
-        with:
-          args: --offline --no-progress --root-dir . '*.html'
-          fail: true
-
-  # ── Build & Optimize ────────────────────────────────────
+  # ── Build ───────────────────────────────────────────────
   build:
     name: Build
-    needs: validate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: "24"
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
 
-      - name: Install build tools
-        run: npm install --no-save clean-css-cli html-minifier-terser
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Create output directory
-        run: mkdir -p _site/images
+      - name: Build site
+        run: npm run build
 
-      - name: Minify CSS
-        run: npx cleancss -o _site/styles.css styles.css
-
-      - name: Minify HTML
-        run: |
-          for file in *.html; do
-            npx html-minifier-terser \
-              --collapse-whitespace \
-              --remove-comments \
-              --remove-redundant-attributes \
-              --remove-script-type-attributes \
-              --remove-style-link-type-attributes \
-              --minify-css true \
-              --minify-urls true \
-              --output "_site/$file" \
-              "$file"
-          done
-
-      - name: Optimize images
-        run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq optipng > /dev/null 2>&1
-          cp images/* _site/images/
-          optipng -quiet -o2 _site/images/*.png
-
-      - name: Report build sizes
+      - name: Report build size
         run: |
           echo "### Build output" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "| File | Size |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|------|------|" >> "$GITHUB_STEP_SUMMARY"
-          for f in _site/*.html _site/*.css _site/images/*; do
-            size=$(du -h "$f" | cut -f1)
-            name=${f#_site/}
-            echo "| \`$name\` | $size |" >> "$GITHUB_STEP_SUMMARY"
-          done
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Total:** $(du -sh _site | cut -f1)" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Metric | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|--------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Total size | $(du -sh dist | cut -f1) |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| HTML pages | $(find dist -name '*.html' | wc -l) |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Assets     | $(find dist -type f ! -name '*.html' | wc -l) |" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: site-build
-          path: _site
+          path: dist
+          retention-days: ${{ github.event_name == 'pull_request' && 7 || 14 }}
 
-  # ── Lighthouse ───────────────────────────────────────────
+  # ── Validate ────────────────────────────────────────────
+  validate:
+    name: Validate
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: site-build
+          path: dist
+
+      - name: Validate HTML
+        run: npx --yes html-validate 'dist/**/*.html'
+
+      - name: Restore lychee cache
+        uses: actions/cache@v5
+        with:
+          path: .lycheecache
+          key: lychee-${{ github.sha }}
+          restore-keys: lychee-
+
+      - name: Check links
+        uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2.8.0
+        with:
+          args: --cache --max-cache-age 1d --offline --no-progress --root-dir "$GITHUB_WORKSPACE/dist" 'dist/**/*.html'
+          fail: true
+
+  # ── Lighthouse ──────────────────────────────────────────
   lighthouse:
     name: Lighthouse
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: site-build
-          path: _site
+          path: dist
 
       - name: Lighthouse audit
         id: lighthouse
-        uses: treosh/lighthouse-ci-action@v12
+        uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12
         with:
           uploadArtifacts: true
           configPath: .github/lighthouse/lighthouserc.json
 
       - name: Format Lighthouse summary
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           LIGHTHOUSE_MANIFEST: ${{ steps.lighthouse.outputs.manifest }}
           LIGHTHOUSE_LINKS: ${{ steps.lighthouse.outputs.links }}
@@ -171,25 +157,28 @@ jobs:
 
             core.summary.addRaw(body).write();
 
-  # ── Deploy to Cloudflare Pages ───────────────────────────
+  # ── Deploy to Cloudflare Workers ────────────────────────
   deploy:
     name: Deploy
-    needs: build
+    needs: [validate, lighthouse]
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: production
       url: https://ultrazoom.app
     steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: site-build
-          path: _site
+          path: dist
 
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3.15.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy _site --project-name=ultrazoom-website
+          command: versions upload
