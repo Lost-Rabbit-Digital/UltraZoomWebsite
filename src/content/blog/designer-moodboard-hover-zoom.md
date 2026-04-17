@@ -53,6 +53,10 @@ Hover-to-zoom keeps you in the gallery. You scan. Something catches your eye. Yo
 
 **Tumblr and Cara.** Art-focused social feeds that compress aggressively for feed display. Hover-zoom pulls the full-resolution upload for any image your eye lands on.
 
+<aside class="mid-article-cta" aria-label="Try Ultra Zoom">
+  <p><strong>Pull up Pinterest or Behance and try it.</strong> Ultra Zoom is a one-click install for Chrome and Firefox. Nothing to configure. <a href="/">Install it now</a>.</p>
+</aside>
+
 ## A board-building workflow
 
 Here's the workflow a few art directors we know have converged on:
@@ -70,4 +74,4 @@ A designer working on an unannounced rebrand or a confidential campaign probably
 
 Ultra Zoom doesn't collect it. The extension has no analytics, no telemetry, and no server that could receive your browsing history. [Our zero-knowledge architecture post](/blog/zero-knowledge-architecture) walks through exactly what goes over the network and what doesn't.
 
-[Install Ultra Zoom](/) for Chrome or Firefox. One click, no account, works on every major design-inspiration site out of the box.
+Grab [Ultra Zoom for Chrome or Firefox](/) and load up a Pinterest board. For gallery navigation and caption overlays while you scan, upgrade to [Pro](/pricing).

@@ -69,6 +69,10 @@ Photographs are where zoom earns its keep. A typical old family portrait carries
 
 **MyHeritage.** DNA match result pages, photos of ancestors, and source documents all work with hover-zoom.
 
+<aside class="mid-article-cta" aria-label="Try Ultra Zoom">
+  <p><strong>Bring it to your next research session.</strong> Ultra Zoom is free for Chrome and Firefox. No account required, and the extension has no server that sees which records you&rsquo;re viewing. <a href="/">Install Ultra Zoom</a>.</p>
+</aside>
+
 ## A few workflow tips
 
 **Combine hover-zoom with the platform's own tools.** Hover-zoom is for triage and quick reading. For detailed examination, annotation, or side-by-side comparison, keep using the platform's built-in viewer. The two complement each other.
@@ -85,4 +89,4 @@ Ultra Zoom is built so that it can't. The extension doesn't collect or transmit 
 
 If that part matters to you (and for genealogy work, it really should), [our zero-knowledge architecture post](/blog/zero-knowledge-architecture) walks through the technical details.
 
-[Install Ultra Zoom](/) for Chrome or Firefox and bring it to your next research session.
+Grab [Ultra Zoom for Chrome or Firefox](/) and give your next research session a try. Deep in a multi-generation project? [Pro](/pricing) unlocks EXIF viewer and batch download for archive work.

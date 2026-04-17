@@ -82,8 +82,12 @@ Real estate agents we've talked to end up with a workflow like this:
 
 The result: far fewer wasted tours, and a much better sense of each home before you walk in.
 
+<aside class="mid-article-cta" aria-label="Try Ultra Zoom">
+  <p><strong>Pull up your favorite Zillow search and try it.</strong> Ultra Zoom is a free, one-click install for Chrome and Firefox. <a href="/">Install Ultra Zoom</a>.</p>
+</aside>
+
 ## For agents showing the home
 
 If you're on the listing side, the same workflow is useful in reverse. Hover-zoom through your own photos the way a buyer would. Anything that jumps out at you negatively will jump out at them too, and you can ask the photographer to reshoot or re-edit before the listing goes live.
 
-[Install Ultra Zoom](/) for Chrome or Firefox. It's a one-click install, there's no account to create, and it works on every major real estate site out of the box.
+Grab [Ultra Zoom for Chrome or Firefox](/). One click, no account, works on every major real estate site out of the box. If you're house-hunting at volume, [Pro](/pricing) adds gallery navigation and batch download for faster comp reviews.

@@ -66,6 +66,10 @@ Once you can actually *see* a product photo at full resolution, here's what usua
 
 **Fashion retailers (ASOS, Zara, Revolve, etc.).** Product grids become much more informative. You can check drape, fit, and pattern without loading every product page.
 
+<aside class="mid-article-cta" aria-label="Try Ultra Zoom">
+  <p><strong>Try it on your next Amazon or Etsy search.</strong> Ultra Zoom is a one-click install for Chrome and Firefox. Free, no account, no tracking. <a href="/">Get the extension</a>.</p>
+</aside>
+
 ## A faster shopping workflow
 
 Put it all together and a typical shopping session looks like this:
@@ -77,4 +81,4 @@ Put it all together and a typical shopping session looks like this:
 
 You end up looking at more products and opening fewer tabs. For people who shop seriously (resellers, interior designers, buyers sourcing for small shops, anyone hunting vintage), the time saved adds up fast.
 
-[Install Ultra Zoom](/) for Chrome or Firefox and try it on your next shopping session. No tracking, no account required, and the first click counts.
+Grab [Ultra Zoom for Chrome or Firefox](/) and try it on your next shopping session. Want more features? [Pro](/pricing) adds batch download, EXIF viewer, and gallery navigation for power shoppers.

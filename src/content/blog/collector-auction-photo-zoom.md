@@ -99,6 +99,10 @@ Hover-to-zoom pulls that full-resolution image into an overlay the moment you ho
 
 **LiveAuctioneers and Invaluable.** Aggregators for smaller auction houses, where photo quality varies enormously. Hover-zoom is doubly useful here because it lets you quickly filter out lots with unusable photography.
 
+<aside class="mid-article-cta" aria-label="Try Ultra Zoom">
+  <p><strong>Use Ultra Zoom on your next auction preview.</strong> Free on Chrome and Firefox. No account, no tracking, and no server that ever sees which lots you inspected. <a href="/">Install Ultra Zoom</a>.</p>
+</aside>
+
 ## A practical bidding workflow
 
 1. **Filter the auction first.** Don't hover everything. Filter by category, date, and price first.
@@ -112,4 +116,4 @@ If you're bidding seriously (especially on higher-value lots) your research acti
 
 Ultra Zoom is built so that data doesn't exist. No analytics, no telemetry, no server receiving your browsing history. [The full privacy architecture is here](/blog/zero-knowledge-architecture) if you want the technical details.
 
-[Install Ultra Zoom](/) for Chrome or Firefox and bring it to your next auction preview.
+Grab [Ultra Zoom for Chrome or Firefox](/) before your next preview session. Bidding seriously? [Pro](/pricing) adds EXIF viewer, batch download, and gallery navigation that pay for themselves on a single lot.

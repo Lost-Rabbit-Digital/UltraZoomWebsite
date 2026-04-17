@@ -38,14 +38,30 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </ul>
 
             <p class="landing-blurb">
-                Hover any image. The full-size version appears instantly. Works on Google Images, Reddit,
-                Twitter/X, Instagram, Amazon, Pinterest, and dozens more. Free and open to use, with optional
-                Pro features for power users.
+                Hover any image. The full-size version appears instantly. The hover-to-zoom
+                extension that doesn&rsquo;t sell your browsing history.
             </p>
 
             <p class="landing-help-link">
                 Need setup help? Visit the <a href="/help">Help page</a> or read the <a href="/blog">blog</a>.
             </p>
+        </section>
+
+        <section class="trust-band" aria-label="Why Ultra Zoom">
+            <ul class="trust-band-list">
+                <li class="trust-band-item">
+                    <strong>No tracking.</strong>
+                    <span>Zero telemetry, zero analytics, no server that sees your browsing. <a href="/blog/zero-knowledge-architecture">See the architecture</a>.</span>
+                </li>
+                <li class="trust-band-item">
+                    <strong>Works on 60+ sites.</strong>
+                    <span>Google Images, Reddit, Twitter/X, Instagram, Amazon, Pinterest, eBay, and dozens more out of the box.</span>
+                </li>
+                <li class="trust-band-item">
+                    <strong>Free forever.</strong>
+                    <span>The core extension is free. Pro unlocks power features for people who live in their browser.</span>
+                </li>
+            </ul>
         </section>
 
         <section class="screenshot-gallery" aria-label="Ultra Zoom in action">
@@ -70,15 +86,31 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
         </section>
 
-        <section class="support-strip" aria-label="Support Ultra Zoom">
+        <section class="different-callout" aria-label="Why Ultra Zoom is different">
+            <div class="different-callout-inner">
+                <h2 class="different-callout-title">Built different, on purpose</h2>
+                <p class="different-callout-body">
+                    The most popular hover-zoom extension once shipped an update that quietly
+                    logged every URL its users visited. Ultra Zoom&rsquo;s architecture makes that
+                    scenario structurally impossible. No remote code. No analytics endpoint.
+                    No server that could collect the data.
+                </p>
+                <p class="different-callout-cta">
+                    <a href="/blog/hover-zoom-privacy-scandal">Read the story &rarr;</a>
+                </p>
+            </div>
+        </section>
+
+        <section class="support-strip" aria-label="Ultra Zoom Pro">
             <div class="support-strip-inner">
                 <p class="support-strip-text">
-                    <strong>Support Ultra Zoom.</strong>
-                    Today is <strong class="payment-date"></strong>. Help keep hover-zoom alive with a one-time payment.
+                    <strong>Go Pro for power browsing.</strong>
+                    Video preview, gallery navigation, batch download, EXIF viewer, and more.
+                    <a href="/pricing">See Pro features &rarr;</a>
                 </p>
                 <div class="support-strip-actions">
-                    <a href="#" class="payment-btn-hero support-strip-btn" data-plan="lifetime">Pay $59.99</a>
-                    <span class="support-strip-or">or <a href="#" data-plan="annual">$29.99/yr</a> &middot; <a href="#" data-plan="monthly">$3.99/mo</a> with 7-day free trial</span>
+                    <a href="#" class="payment-btn-hero support-strip-btn" data-plan="monthly">Start 7-day free trial</a>
+                    <span class="support-strip-or"><a href="#" data-plan="annual">$29.99/yr</a> &middot; <a href="#" data-plan="lifetime">$59.99 lifetime</a></span>
                 </div>
             </div>
             <p id="checkout-error" class="checkout-error" hidden></p>
@@ -86,13 +118,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </main>
 
     <script is:inline>
-        document.querySelectorAll('.payment-date').forEach(function(el) {
-            var d = new Date();
-            var months = ['January','February','March','April','May','June',
-                          'July','August','September','October','November','December'];
-            el.textContent = months[d.getMonth()] + ' ' + d.getDate();
-        });
-
         document.querySelectorAll('[data-plan]').forEach(function(btn) {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();

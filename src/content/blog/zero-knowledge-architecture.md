@@ -61,4 +61,4 @@ We encourage you to audit Ultra Zoom's behavior:
 
 Privacy shouldn't require faith. It should be verifiable. That's what zero-knowledge by design means to us.
 
-[Install Ultra Zoom](/) and see for yourself.
+[Install Ultra Zoom](/) for Chrome or Firefox and see for yourself. Curious what went wrong with the old Hover Zoom extension? [Here's the backstory](/blog/hover-zoom-privacy-scandal).

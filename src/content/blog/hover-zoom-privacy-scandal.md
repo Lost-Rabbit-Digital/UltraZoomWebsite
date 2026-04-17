@@ -47,4 +47,4 @@ Whether you use Ultra Zoom or not, here's what to check before installing any ex
 
 Ultra Zoom's approach is simple: your browser talks to the image server, and that's the end of the story. No middlemen, no trackers, no surprises.
 
-Ready to try it? [Install Ultra Zoom](/) for Chrome or Firefox.
+Want the full technical breakdown? [Read how our zero-knowledge architecture works](/blog/zero-knowledge-architecture), or go ahead and [install Ultra Zoom](/) for Chrome or Firefox.
