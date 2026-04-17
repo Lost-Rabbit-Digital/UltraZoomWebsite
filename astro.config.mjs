@@ -9,7 +9,7 @@ export default defineConfig({
   trailingSlash: 'never',
   integrations: [
     sitemap({
-      filter: page => !page.includes('/success'),
+      filter: page => !page.includes('/success') && !page.includes('/account'),
     }),
   ],
 });
