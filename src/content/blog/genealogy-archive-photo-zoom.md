@@ -9,6 +9,11 @@ Family history research is a profession of squinting. Between 1850 census pages 
 
 Hover-to-zoom doesn't solve every archival problem, but it does remove a huge amount of friction from the day-to-day work. Here's how researchers use it on the sites that matter most.
 
+<figure>
+  <img src="/images/blog/genealogy-census-page.jpg" alt="Scanned page of a nineteenth-century US census showing handwritten cursive entries for household members, ages, occupations, and birthplaces in columned rows." loading="lazy" decoding="async" width="1600" height="1067">
+  <figcaption>A nineteenth-century census page. Reading the clerk's hand — distinguishing capital T from F, long-s from f — is exactly the job hover-zoom makes tolerable. Image: public domain (US National Archives via Wikimedia Commons).</figcaption>
+</figure>
+
 ## The archive viewer problem
 
 Most big genealogy platforms — Ancestry, FamilySearch, MyHeritage, Findmypast, Newspapers.com — have built their own image viewers. Those viewers usually *work*, but they're built for one record at a time. You open the viewer, you pan and zoom, you close it, you move to the next result. For a researcher working through a forty-record search result, that's a lot of clicks.
@@ -34,6 +39,11 @@ What hover-zoom helps with:
 **Page damage and bleed-through.** Ink from the back of the page shows up under zoom. Recognizing bleed-through vs. a real mark on the front keeps you from mis-transcribing entries.
 
 ## Clues in old photographs
+
+<figure>
+  <img src="/images/blog/genealogy-cabinet-card.jpg" alt="Late nineteenth-century studio cabinet card photograph of a family, showing clothing detail, jewelry, and the studio's embossed photographer mark on the card mount." loading="lazy" decoding="async" width="1600" height="1067">
+  <figcaption>A period cabinet card. The photographer's mount text, a brooch engraving, or a background calendar can date a photo within a year — all invisible without zoom. Image: public domain (Wikimedia Commons).</figcaption>
+</figure>
 
 Photographs are where zoom earns its keep. A typical old family portrait carries more information than you'd think:
 

@@ -9,6 +9,11 @@ Online shopping lives and dies by product photos. You can't feel the fabric, fli
 
 Here's how to get more out of every listing without drowning in open tabs.
 
+<figure>
+  <img src="/images/blog/shopping-textile-detail.jpg" alt="Macro photograph of embroidered or woven textile showing individual threads, stitching pattern, and weave structure in sharp detail." loading="lazy" decoding="async" width="1600" height="1067">
+  <figcaption>Textile detail at macro resolution. This is what hover-zoom shows you that a 200-pixel Etsy thumbnail hides: stitch regularity, thread count, and finish quality. Image: CC0 (The Metropolitan Museum of Art Open Access).</figcaption>
+</figure>
+
 ## The problem with thumbnails
 
 Most marketplaces compress thumbnails aggressively. A grid of forty Etsy listings is forty tiny JPEGs, each scaled to 200 pixels wide. At that size you can tell the color and the general shape — and almost nothing else.
@@ -41,6 +46,11 @@ Once you can actually *see* a product photo at full resolution, here's what usua
 **Color accuracy clues.** Look at the background and neutral elements in the photo. If the white paper under the product has a pink or yellow cast, the product color is probably off too.
 
 **Authenticity markers.** Logos, stamps, serial numbers, brand tags — anything tiny that a counterfeit often gets wrong. Zoom lets you read them without opening the full listing.
+
+<figure>
+  <img src="/images/blog/shopping-watch-dial.jpg" alt="Macro photograph of a wristwatch or pocket-watch dial showing the hour markers, hands, printed brand text, and fine lume or enamel texture at high magnification." loading="lazy" decoding="async" width="1600" height="1067">
+  <figcaption>A watch dial under macro. Printing quality, lume aging, and hand alignment are where genuine and counterfeit diverge. Image: public domain (Wikimedia Commons).</figcaption>
+</figure>
 
 **Scale cues.** Rulers, coins, hands, and standard objects often appear in dimensional photos. Zooming lets you actually read the ruler markings instead of guessing.
 

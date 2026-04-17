@@ -9,6 +9,11 @@ Designers look at a lot of images. A week of moodboarding for one project can me
 
 Hover-to-zoom solves the bottleneck directly. Here's how working designers use it.
 
+<figure>
+  <img src="/images/blog/designer-type-specimen.jpg" alt="Scan of a nineteenth-century type specimen page showing multiple display typefaces, ornaments, and decorative borders at high resolution." loading="lazy" decoding="async" width="1600" height="1067">
+  <figcaption>A period type specimen. Kerning, stroke contrast, and serif detail only read at specimen-grade resolution — exactly what hover-zoom surfaces from a thumbnail. Image: public domain (Wikimedia Commons).</figcaption>
+</figure>
+
 ## Why thumbnails fail for design work
 
 Design judgment happens at detail level. Kerning, hinting, texture, color gradient smoothness, edge quality, halftone pattern, stroke weight consistency — none of these are visible in a 300-pixel gallery thumbnail. You need to see the work at something close to its actual resolution to decide whether it belongs on the board.
@@ -28,6 +33,11 @@ Hover-to-zoom keeps you in the gallery. You scan. Something catches your eye. Yo
 **Design system coherence.** On Behance case studies and portfolio sites, zoom lets you see whether a designer kept the type, color, and grid consistent across screens. A sloppy system is obvious at full size and invisible at thumbnail size.
 
 **Print finishes and materials.** Foil, emboss, deckled edges, paper texture — none of this reads on a compressed JPEG thumbnail. On a 2400-pixel portfolio image, hover-zoom often shows you the grain of uncoated stock.
+
+<figure>
+  <img src="/images/blog/designer-moodboard-poster.jpg" alt="High-resolution reproduction of an Art Nouveau or early twentieth-century lithograph poster showing ornamental line work, flat color fields, and hand-drawn type." loading="lazy" decoding="async" width="1600" height="1067">
+  <figcaption>Lithograph detail from a period poster. Thumbnails flatten the texture; zoom shows the hand. Image: public domain (Wikimedia Commons).</figcaption>
+</figure>
 
 ## Platform-by-platform workflow
 
