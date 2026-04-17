@@ -21,8 +21,8 @@ The content script is the only thing that loads on every page where Ultra Zoom i
 
 | File | Raw | Gzipped |
 |---|---|---|
-| `hoverzoom.ts` (content script) | 58.1 KB | 18.4 KB |
-| `hoverzoom.css` | 7.8 KB | 2.2 KB |
+| `ultrazoom.ts` (content script) | 58.1 KB | 18.4 KB |
+| `ultrazoom.css` | 7.8 KB | 2.2 KB |
 
 **20.6 KB gzipped, per page.** That's the cost of opening a tab with Ultra Zoom enabled. The browser parses and executes it before any hover interaction is possible.
 
