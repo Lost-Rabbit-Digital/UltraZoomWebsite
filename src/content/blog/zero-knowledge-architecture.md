@@ -56,7 +56,7 @@ Ultra Zoom's architecture is our answer to that problem. Instead of asking you t
 We encourage you to audit Ultra Zoom's behavior:
 
 1. **Network tab.** Open developer tools (F12), switch to the Network tab, and browse normally with Ultra Zoom enabled. You'll see image fetches going directly to origin servers and nothing else.
-2. **Extension source.** Both Chrome and Firefox allow you to inspect installed extension source code. Look for any `fetch`, `XMLHttpRequest`, or `sendMessage` calls that point to unexpected domains.
+2. **Extension source.** Both Chrome and Firefox allow you to inspect installed extension source code. Look for any `fetch`, `XMLHttpRequest`, or `sendMessage` calls that point to unexpected domains. There isn't much code to read — we [publish the full bundle breakdown](/blog/bundle-budget).
 3. **Permissions.** Check what permissions Ultra Zoom requests in your browser's extension management page. Compare them against what's needed to display images.
 
 Privacy shouldn't require faith. It should be verifiable. That's what zero-knowledge by design means to us.

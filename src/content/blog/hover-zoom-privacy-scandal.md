@@ -28,7 +28,7 @@ Here's the difference in network behavior:
 
 We designed Ultra Zoom from day one to make the Hover Zoom scenario structurally impossible:
 
-**No remote code execution.** Ultra Zoom doesn't fetch or execute scripts from external servers. Every line of code that runs is included in the extension package you install, which means it's auditable and it's exactly what was reviewed by the Chrome Web Store and Firefox Add-ons teams.
+**No remote code execution.** Ultra Zoom doesn't fetch or execute scripts from external servers. Every line of code that runs is included in the extension package you install, which means it's auditable and it's exactly what was reviewed by the Chrome Web Store and Firefox Add-ons teams. Keeping that reviewable surface small is part of [why we picked Preact over React](/blog/preact-over-react) for our UI.
 
 **No data collection infrastructure.** There are no analytics endpoints, no telemetry servers, no tracking pixels. We don't operate any server that receives browsing data because we don't want it and we didn't build one.
 
