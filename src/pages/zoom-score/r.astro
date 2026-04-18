@@ -1,10 +1,11 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-// Per-id OG card (stretch goal) is deferred. Option A (server-rendered
-// /zoom-score/r/[id]/card.svg) and Option B (@vercel/og handler) both
-// need an SSR adapter, which this Worker static-assets build does not
-// ship. Falls back to the generic icon until an adapter lands.
+// Per-result OG image + meta is served by the worker at
+// api.ultrazoom.app/og/r/:id (SVG card) and /og/r/:id (meta-only HTML shell
+// that refreshes to this page). The <meta property="og:image"> below is a
+// static fallback for direct visits and crawlers that hit this URL without
+// the scraper-friendly path.
 ---
 
 <BaseLayout
@@ -42,7 +43,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         </div>
         <div class="zsr-actions">
           <button type="button" id="zsr-reanalyze" class="zsr-btn ghost">Re-analyze</button>
-          <button type="button" id="zsr-copy" class="zsr-btn ghost">Copy permalink</button>
+          <button type="button" id="zsr-copy" class="zsr-btn ghost">Copy share link</button>
         </div>
         <p id="zsr-verdict" class="zsr-verdict"></p>
       </header>
@@ -60,190 +61,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     </article>
   </main>
 </BaseLayout>
-
-<style>
-  .zsr-page { max-width: 880px; margin: 0 auto; padding: 32px 20px 64px; }
-
-  .zsr-crumbs { margin: 0 0 20px; font-size: 14px; }
-  .zsr-crumbs a { color: #8b949e; text-decoration: none; }
-  .zsr-crumbs a:hover { color: #c9d1d9; }
-
-  .zsr-state {
-    background: #161b22; border: 1px solid #30363d; border-radius: 12px;
-    padding: 40px 24px; text-align: center; color: #8b949e;
-  }
-  .zsr-state.err { color: #e6edf3; }
-  .zsr-state h1 { margin: 0 0 8px; font-size: 22px; }
-
-  /* Hero */
-  .zsr-hero {
-    background: #161b22; border: 1px solid #30363d; border-radius: 14px;
-    padding: 32px 24px; text-align: center; margin-bottom: 20px;
-  }
-  .zsr-dial {
-    width: 160px; height: 160px; margin: 0 auto 16px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .zsr-dial svg { display: block; width: 100%; height: 100%; }
-  .zsr-meta {
-    display: flex; gap: 8px; justify-content: center; align-items: center;
-    color: #8b949e; font-size: 14px; flex-wrap: wrap;
-  }
-  .zsr-host { color: #c9d1d9; text-decoration: none; font-weight: 600; }
-  .zsr-host:hover { color: #58a6ff; text-decoration: underline; }
-  .zsr-dot { color: #484f58; }
-  .zsr-actions {
-    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
-    margin: 18px 0 0;
-  }
-  .zsr-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 16px; font-size: 13px; font-weight: 600;
-    border-radius: 6px; border: 1px solid transparent;
-    cursor: pointer; text-decoration: none;
-    font-family: inherit;
-  }
-  .zsr-btn.ghost {
-    background: transparent; color: #c9d1d9;
-    border-color: #30363d;
-  }
-  .zsr-btn.ghost:hover { background: #21262d; border-color: #484f58; }
-  .zsr-btn.primary { background: #58a6ff; color: #0d1117; }
-  .zsr-btn.primary:hover { background: #79b8ff; }
-  .zsr-btn.firefox { background: #f0883e; color: #fff; }
-  .zsr-btn.firefox:hover { background: #ff9f4a; }
-
-  .zsr-verdict {
-    margin: 20px 0 0; font-size: 16px; line-height: 1.5;
-    color: #e6edf3;
-  }
-
-  /* Audits */
-  .zsr-audits {
-    display: grid; gap: 12px; margin: 0 0 20px;
-  }
-  .zsr-audit {
-    background: #161b22; border: 1px solid #30363d; border-radius: 10px;
-    padding: 16px 18px;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    grid-template-areas:
-      'icon name  points'
-      'icon bar   bar'
-      'body body  body'
-      'foot foot  foot';
-    column-gap: 14px; row-gap: 8px;
-    align-items: center;
-  }
-  .zsr-audit-icon {
-    grid-area: icon;
-    width: 36px; height: 36px; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    background: #0d1117; border: 1px solid #30363d;
-    font-size: 18px;
-  }
-  .zsr-audit-name {
-    grid-area: name; font-weight: 600; color: #e6edf3;
-    font-size: 15px; text-align: left;
-  }
-  .zsr-audit-points {
-    grid-area: points;
-    font-variant-numeric: tabular-nums;
-    font-size: 13px; font-weight: 700;
-    padding: 4px 10px; border-radius: 999px;
-    background: #0d1117; border: 1px solid #30363d;
-    color: #c9d1d9; white-space: nowrap;
-  }
-  .zsr-audit-bar {
-    grid-area: bar;
-    height: 6px; background: #0d1117;
-    border: 1px solid #30363d; border-radius: 999px;
-    overflow: hidden; position: relative;
-  }
-  .zsr-audit-bar-fill {
-    height: 100%; border-radius: 999px;
-    transition: width 400ms ease;
-  }
-  .zsr-audit-finding {
-    grid-area: body;
-    margin: 0; color: #e6edf3; font-size: 14px; line-height: 1.5;
-  }
-  .zsr-audit-target {
-    grid-area: foot;
-    margin: 0; color: #8b949e; font-size: 13px; line-height: 1.5;
-    padding-top: 8px; border-top: 1px dashed #30363d;
-  }
-  .zsr-audit-target.hidden { display: none; }
-  .zsr-audit-target::before { content: '\2192  '; color: #58a6ff; }
-
-  /* Evidence */
-  .zsr-evidence { margin: 0 0 20px; }
-  .zsr-evidence h2 {
-    margin: 0 0 12px; font-size: 16px; color: #c9d1d9;
-    text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
-  }
-  .zsr-thumbs {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 12px;
-  }
-  .zsr-thumb {
-    display: block; background: #0d1117;
-    border: 1px solid #30363d; border-radius: 8px;
-    overflow: hidden; text-decoration: none;
-    transition: border-color 120ms ease;
-  }
-  .zsr-thumb:hover { border-color: #58a6ff; }
-  .zsr-thumb-img {
-    aspect-ratio: 1; width: 100%; display: block;
-    object-fit: cover; background: #0d1117;
-  }
-  .zsr-thumb-cap {
-    padding: 8px 10px; font-size: 11px; color: #8b949e;
-    display: flex; justify-content: space-between; gap: 8px;
-    font-variant-numeric: tabular-nums;
-  }
-  .zsr-thumb-cap .dim { color: #c9d1d9; font-weight: 600; }
-
-  /* Stats strip */
-  .zsr-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 8px; margin: 0 0 20px;
-    background: #161b22; border: 1px solid #30363d; border-radius: 10px;
-    padding: 16px;
-  }
-  .zsr-stat { text-align: center; padding: 4px; }
-  .zsr-stat-v {
-    font-size: 22px; font-weight: 700; color: #e6edf3;
-    font-variant-numeric: tabular-nums;
-  }
-  .zsr-stat-l {
-    font-size: 11px; color: #8b949e; text-transform: uppercase;
-    letter-spacing: 0.05em; margin-top: 4px;
-  }
-
-  /* CTA */
-  .zsr-cta {
-    background: rgba(88, 166, 255, 0.08);
-    border: 1px solid rgba(88, 166, 255, 0.3);
-    border-radius: 12px; padding: 24px;
-  }
-  .zsr-cta h2 { margin: 0 0 8px; font-size: 20px; color: #e6edf3; }
-  .zsr-cta p { margin: 0 0 16px; color: #c9d1d9; line-height: 1.5; }
-  .zsr-cta-links {
-    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
-  }
-  .zsr-cta-links .sep {
-    color: #484f58; font-weight: 700;
-  }
-  /* Mobile: stack install links on separate lines, hide the "·" divider. */
-  @media (max-width: 480px) {
-    .zsr-cta-links { flex-direction: column; align-items: stretch; }
-    .zsr-cta-links .zsr-btn { justify-content: center; }
-    .zsr-cta-links .sep { display: none; }
-  }
-</style>
 
 <script is:inline>
   (function () {
@@ -309,6 +126,43 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       );
     }
 
+    // Inline SVGs keyed by finding.key. Stroke uses currentColor so the
+    // parent .zsr-audit-icon colors them.
+    var ICONS = {
+      resolution:
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<rect x="3" y="5" width="18" height="14" rx="2"/>' +
+          '<path d="M7 15l3-3 3 3 4-5"/>' +
+        '</svg>',
+      hires:
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<path d="M4 7l8-4 8 4-8 4-8-4z"/>' +
+          '<path d="M4 12l8 4 8-4"/>' +
+          '<path d="M4 17l8 4 8-4"/>' +
+        '</svg>',
+      count:
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<rect x="3" y="3" width="7" height="7" rx="1"/>' +
+          '<rect x="14" y="3" width="7" height="7" rx="1"/>' +
+          '<rect x="3" y="14" width="7" height="7" rx="1"/>' +
+          '<rect x="14" y="14" width="7" height="7" rx="1"/>' +
+        '</svg>',
+      density:
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<circle cx="12" cy="12" r="9"/>' +
+          '<path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/>' +
+        '</svg>',
+      lazy:
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/>' +
+          '<circle cx="12" cy="12" r="3"/>' +
+        '</svg>',
+    };
+
+    function iconFor(key) {
+      return ICONS[key] || '<span aria-hidden="true">&bull;</span>';
+    }
+
     function formatBytes(n) {
       if (!n && n !== 0) return '';
       if (n < 1024) return n + ' B';
@@ -316,10 +170,25 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       return (n / (1024 * 1024)).toFixed(n < 10 * 1024 * 1024 ? 2 : 1) + ' MB';
     }
 
-    function formatDate(iso) {
-      if (!iso) return '';
-      var d = new Date(iso);
-      if (isNaN(d.getTime())) return '';
+    // Accept Unix seconds (the worker's actual payload shape) or an ISO
+    // string (legacy cached results). Values < 1e12 are treated as seconds.
+    function toDate(v) {
+      if (v == null || v === '') return null;
+      var d;
+      if (typeof v === 'number') {
+        d = new Date(v < 1e12 ? v * 1000 : v);
+      } else {
+        var n = Number(v);
+        d = isFinite(n) && String(v).match(/^\d+$/)
+          ? new Date(n < 1e12 ? n * 1000 : n)
+          : new Date(v);
+      }
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    function formatDate(v) {
+      var d = toDate(v);
+      if (!d) return '';
       return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
     }
 
@@ -331,18 +200,19 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         var pts = f.points || 0;
         var pct = max ? Math.max(0, Math.min(1, pts / max)) : 0;
         var color = rampColor(pct);
+        var name = f.name || f.category || 'Audit';
         var targetHtml = '';
         if (f.target) {
           targetHtml = '<p class="zsr-audit-target">' + escape(f.target) + '</p>';
         }
         return (
           '<article class="zsr-audit">' +
-            '<div class="zsr-audit-icon" aria-hidden="true">' + escape(f.icon || '\u2022') + '</div>' +
-            '<h3 class="zsr-audit-name">' + escape(f.category || 'Audit') + '</h3>' +
+            '<div class="zsr-audit-icon" aria-hidden="true">' + iconFor(f.key) + '</div>' +
+            '<h3 class="zsr-audit-name">' + escape(name) + '</h3>' +
             '<span class="zsr-audit-points">' + pts + ' / ' + max + '</span>' +
             '<div class="zsr-audit-bar" role="progressbar" aria-valuenow="' + pts + '"' +
               ' aria-valuemin="0" aria-valuemax="' + max + '"' +
-              ' aria-label="' + escape(f.category || 'Audit') + ' score">' +
+              ' aria-label="' + escape(name) + ' score">' +
               '<div class="zsr-audit-bar-fill" style="width:' + (pct * 100).toFixed(1) + '%;' +
                 'background:' + color + ';"></div>' +
             '</div>' +
@@ -421,7 +291,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       var headline, body;
       if (score >= 70) {
         headline = 'This page is already zoom-friendly \u2014 Ultra Zoom makes it one-hover easy.';
-        body = 'Install Ultra Zoom and hover any image to trigger native-resolution zoom without opening a new tab.';
+        body = 'Hover any image to pop it at native resolution without opening a new tab.';
       } else {
         headline = 'Install Ultra Zoom to see every image at native resolution regardless of the site.';
         body = 'Ultra Zoom fetches the largest available source for you \u2014 even when the page itself hasn\u2019t wired up hi-res variants.';
@@ -433,7 +303,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     }
 
     function render(data) {
-      // Hero
       var dialHost = document.getElementById('zsr-dial');
       if (dialHost) dialHost.innerHTML = renderDial(data.score, data.grade);
 
@@ -446,8 +315,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
       var created = document.getElementById('zsr-created');
       if (created) {
-        created.textContent = formatDate(data.createdAt) || 'just now';
-        if (data.createdAt) created.setAttribute('datetime', data.createdAt);
+        var d = toDate(data.createdAt);
+        created.textContent = d ? formatDate(data.createdAt) : 'just now';
+        if (d) created.setAttribute('datetime', d.toISOString());
       }
 
       var verdict = document.getElementById('zsr-verdict');
@@ -474,20 +344,22 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       var copy = document.getElementById('zsr-copy');
       if (copy) {
         copy.addEventListener('click', function () {
-          var permalink = 'https://ultrazoom.app/zoom-score/r/' + encodeURIComponent(id);
+          // Scraper-friendly URL — redirects humans to the real page but
+          // serves per-result OG meta for Bluesky/Slack/etc. previews.
+          var share = API + '/og/r/' + encodeURIComponent(id);
           try {
-            navigator.clipboard.writeText(permalink);
+            navigator.clipboard.writeText(share);
             copy.textContent = 'Copied!';
           } catch (_) {
             var tmp = document.createElement('input');
-            tmp.value = permalink;
+            tmp.value = share;
             document.body.appendChild(tmp);
             tmp.select();
             try { document.execCommand('copy'); copy.textContent = 'Copied!'; }
             catch (__) { copy.textContent = 'Copy failed'; }
             document.body.removeChild(tmp);
           }
-          setTimeout(function () { copy.textContent = 'Copy permalink'; }, 1500);
+          setTimeout(function () { copy.textContent = 'Copy share link'; }, 1500);
         });
       }
     }
