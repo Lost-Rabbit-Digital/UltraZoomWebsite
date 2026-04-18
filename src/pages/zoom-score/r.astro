@@ -1,0 +1,516 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Per-id OG card (stretch goal) is deferred. Option A (server-rendered
+// /zoom-score/r/[id]/card.svg) and Option B (@vercel/og handler) both
+// need an SSR adapter, which this Worker static-assets build does not
+// ship. Falls back to the generic icon until an adapter lands.
+---
+
+<BaseLayout
+  title="Zoom Score report | Ultra Zoom"
+  description="Detailed zoom-quality breakdown for a web page — source resolution, hi-res variants, image count, pixel density, and lazy-load hygiene."
+  noindex={true}
+  mainClass="main zsr-page"
+  og={{
+    url: 'https://ultrazoom.app/zoom-score/r/',
+    title: 'Zoom Score report',
+    description: 'How zoom-friendly is this page? See the full breakdown.',
+    image: 'https://ultrazoom.app/images/icon-128.png',
+  }}
+>
+  <main class="main zsr-page" id="main-content">
+    <nav class="zsr-crumbs">
+      <a href="/zoom-score">&larr; Score another page</a>
+    </nav>
+
+    <section id="zsr-loading" class="zsr-state">Loading report&hellip;</section>
+
+    <section id="zsr-error" class="zsr-state err" hidden>
+      <h1>Couldn&rsquo;t load that report</h1>
+      <p id="zsr-error-msg">This result link may have expired or never existed.</p>
+      <p><a class="zsr-btn primary" href="/zoom-score">Score a fresh URL</a></p>
+    </section>
+
+    <article id="zsr-report" hidden>
+      <header class="zsr-hero">
+        <div class="zsr-dial" id="zsr-dial"></div>
+        <div class="zsr-meta">
+          <a id="zsr-host-link" class="zsr-host" href="#" target="_blank" rel="noopener"></a>
+          <span class="zsr-dot" aria-hidden="true">&middot;</span>
+          <span>analyzed <time id="zsr-created"></time></span>
+        </div>
+        <div class="zsr-actions">
+          <button type="button" id="zsr-reanalyze" class="zsr-btn ghost">Re-analyze</button>
+          <button type="button" id="zsr-copy" class="zsr-btn ghost">Copy permalink</button>
+        </div>
+        <p id="zsr-verdict" class="zsr-verdict"></p>
+      </header>
+
+      <section id="zsr-audits" class="zsr-audits" aria-label="Audit categories"></section>
+
+      <section class="zsr-evidence" id="zsr-evidence-wrap" hidden>
+        <h2>Evidence &mdash; top images found</h2>
+        <div id="zsr-thumbs" class="zsr-thumbs"></div>
+      </section>
+
+      <aside id="zsr-stats" class="zsr-stats" hidden></aside>
+
+      <section id="zsr-cta" class="zsr-cta"></section>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .zsr-page { max-width: 880px; margin: 0 auto; padding: 32px 20px 64px; }
+
+  .zsr-crumbs { margin: 0 0 20px; font-size: 14px; }
+  .zsr-crumbs a { color: #8b949e; text-decoration: none; }
+  .zsr-crumbs a:hover { color: #c9d1d9; }
+
+  .zsr-state {
+    background: #161b22; border: 1px solid #30363d; border-radius: 12px;
+    padding: 40px 24px; text-align: center; color: #8b949e;
+  }
+  .zsr-state.err { color: #e6edf3; }
+  .zsr-state h1 { margin: 0 0 8px; font-size: 22px; }
+
+  /* Hero */
+  .zsr-hero {
+    background: #161b22; border: 1px solid #30363d; border-radius: 14px;
+    padding: 32px 24px; text-align: center; margin-bottom: 20px;
+  }
+  .zsr-dial {
+    width: 160px; height: 160px; margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .zsr-dial svg { display: block; width: 100%; height: 100%; }
+  .zsr-meta {
+    display: flex; gap: 8px; justify-content: center; align-items: center;
+    color: #8b949e; font-size: 14px; flex-wrap: wrap;
+  }
+  .zsr-host { color: #c9d1d9; text-decoration: none; font-weight: 600; }
+  .zsr-host:hover { color: #58a6ff; text-decoration: underline; }
+  .zsr-dot { color: #484f58; }
+  .zsr-actions {
+    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+    margin: 18px 0 0;
+  }
+  .zsr-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; font-size: 13px; font-weight: 600;
+    border-radius: 6px; border: 1px solid transparent;
+    cursor: pointer; text-decoration: none;
+    font-family: inherit;
+  }
+  .zsr-btn.ghost {
+    background: transparent; color: #c9d1d9;
+    border-color: #30363d;
+  }
+  .zsr-btn.ghost:hover { background: #21262d; border-color: #484f58; }
+  .zsr-btn.primary { background: #58a6ff; color: #0d1117; }
+  .zsr-btn.primary:hover { background: #79b8ff; }
+  .zsr-btn.firefox { background: #f0883e; color: #fff; }
+  .zsr-btn.firefox:hover { background: #ff9f4a; }
+
+  .zsr-verdict {
+    margin: 20px 0 0; font-size: 16px; line-height: 1.5;
+    color: #e6edf3;
+  }
+
+  /* Audits */
+  .zsr-audits {
+    display: grid; gap: 12px; margin: 0 0 20px;
+  }
+  .zsr-audit {
+    background: #161b22; border: 1px solid #30363d; border-radius: 10px;
+    padding: 16px 18px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      'icon name  points'
+      'icon bar   bar'
+      'body body  body'
+      'foot foot  foot';
+    column-gap: 14px; row-gap: 8px;
+    align-items: center;
+  }
+  .zsr-audit-icon {
+    grid-area: icon;
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: #0d1117; border: 1px solid #30363d;
+    font-size: 18px;
+  }
+  .zsr-audit-name {
+    grid-area: name; font-weight: 600; color: #e6edf3;
+    font-size: 15px; text-align: left;
+  }
+  .zsr-audit-points {
+    grid-area: points;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px; font-weight: 700;
+    padding: 4px 10px; border-radius: 999px;
+    background: #0d1117; border: 1px solid #30363d;
+    color: #c9d1d9; white-space: nowrap;
+  }
+  .zsr-audit-bar {
+    grid-area: bar;
+    height: 6px; background: #0d1117;
+    border: 1px solid #30363d; border-radius: 999px;
+    overflow: hidden; position: relative;
+  }
+  .zsr-audit-bar-fill {
+    height: 100%; border-radius: 999px;
+    transition: width 400ms ease;
+  }
+  .zsr-audit-finding {
+    grid-area: body;
+    margin: 0; color: #e6edf3; font-size: 14px; line-height: 1.5;
+  }
+  .zsr-audit-target {
+    grid-area: foot;
+    margin: 0; color: #8b949e; font-size: 13px; line-height: 1.5;
+    padding-top: 8px; border-top: 1px dashed #30363d;
+  }
+  .zsr-audit-target.hidden { display: none; }
+  .zsr-audit-target::before { content: '\2192  '; color: #58a6ff; }
+
+  /* Evidence */
+  .zsr-evidence { margin: 0 0 20px; }
+  .zsr-evidence h2 {
+    margin: 0 0 12px; font-size: 16px; color: #c9d1d9;
+    text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
+  }
+  .zsr-thumbs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  .zsr-thumb {
+    display: block; background: #0d1117;
+    border: 1px solid #30363d; border-radius: 8px;
+    overflow: hidden; text-decoration: none;
+    transition: border-color 120ms ease;
+  }
+  .zsr-thumb:hover { border-color: #58a6ff; }
+  .zsr-thumb-img {
+    aspect-ratio: 1; width: 100%; display: block;
+    object-fit: cover; background: #0d1117;
+  }
+  .zsr-thumb-cap {
+    padding: 8px 10px; font-size: 11px; color: #8b949e;
+    display: flex; justify-content: space-between; gap: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .zsr-thumb-cap .dim { color: #c9d1d9; font-weight: 600; }
+
+  /* Stats strip */
+  .zsr-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px; margin: 0 0 20px;
+    background: #161b22; border: 1px solid #30363d; border-radius: 10px;
+    padding: 16px;
+  }
+  .zsr-stat { text-align: center; padding: 4px; }
+  .zsr-stat-v {
+    font-size: 22px; font-weight: 700; color: #e6edf3;
+    font-variant-numeric: tabular-nums;
+  }
+  .zsr-stat-l {
+    font-size: 11px; color: #8b949e; text-transform: uppercase;
+    letter-spacing: 0.05em; margin-top: 4px;
+  }
+
+  /* CTA */
+  .zsr-cta {
+    background: rgba(88, 166, 255, 0.08);
+    border: 1px solid rgba(88, 166, 255, 0.3);
+    border-radius: 12px; padding: 24px;
+  }
+  .zsr-cta h2 { margin: 0 0 8px; font-size: 20px; color: #e6edf3; }
+  .zsr-cta p { margin: 0 0 16px; color: #c9d1d9; line-height: 1.5; }
+  .zsr-cta-links {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  }
+  .zsr-cta-links .sep {
+    color: #484f58; font-weight: 700;
+  }
+  /* Mobile: stack install links on separate lines, hide the "·" divider. */
+  @media (max-width: 480px) {
+    .zsr-cta-links { flex-direction: column; align-items: stretch; }
+    .zsr-cta-links .zsr-btn { justify-content: center; }
+    .zsr-cta-links .sep { display: none; }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    var API = 'https://api.ultrazoom.app';
+    var ID_RE = /^[a-z0-9]{8,32}$/;
+
+    var loadingEl = document.getElementById('zsr-loading');
+    var errorEl = document.getElementById('zsr-error');
+    var errorMsgEl = document.getElementById('zsr-error-msg');
+    var reportEl = document.getElementById('zsr-report');
+
+    function escape(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    function getId() {
+      var params = new URLSearchParams(location.search);
+      var q = params.get('id');
+      if (q && ID_RE.test(q)) return q;
+      var m = location.pathname.match(/\/zoom-score\/r\/([a-z0-9]{8,32})/i);
+      return m ? m[1].toLowerCase() : null;
+    }
+
+    function showError(msg) {
+      if (loadingEl) loadingEl.hidden = true;
+      if (errorEl) errorEl.hidden = false;
+      if (errorMsgEl && msg) errorMsgEl.textContent = msg;
+    }
+
+    // Color ramp: red → amber → green, indexed by percent (0..1).
+    function rampColor(pct) {
+      if (pct >= 0.75) return '#3fb950';
+      if (pct >= 0.50) return '#d29922';
+      return '#f85149';
+    }
+
+    // Inline SVG dial (160px). Circumference of r=52 stroke.
+    function renderDial(score, grade) {
+      var pct = Math.max(0, Math.min(1, (score || 0) / 100));
+      var color = rampColor(pct);
+      var C = 2 * Math.PI * 52;
+      var offset = C * (1 - pct);
+      return (
+        '<svg viewBox="0 0 120 120" role="img" aria-label="Zoom score ' +
+          score + ' out of 100, grade ' + grade + '">' +
+          '<circle cx="60" cy="60" r="52" fill="none" stroke="#21262d" stroke-width="10"/>' +
+          '<circle cx="60" cy="60" r="52" fill="none" stroke="' + color + '"' +
+            ' stroke-width="10" stroke-linecap="round"' +
+            ' stroke-dasharray="' + C.toFixed(2) + '"' +
+            ' stroke-dashoffset="' + offset.toFixed(2) + '"' +
+            ' transform="rotate(-90 60 60)"/>' +
+          '<text x="60" y="60" text-anchor="middle" dominant-baseline="central"' +
+            ' fill="#e6edf3" font-size="34" font-weight="800"' +
+            ' font-family="system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif">' +
+            escape(score) + '</text>' +
+          '<text x="60" y="94" text-anchor="middle"' +
+            ' fill="' + color + '" font-size="16" font-weight="700" letter-spacing="0.04em"' +
+            ' font-family="system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif">' +
+            escape(grade) + '</text>' +
+        '</svg>'
+      );
+    }
+
+    function formatBytes(n) {
+      if (!n && n !== 0) return '';
+      if (n < 1024) return n + ' B';
+      if (n < 1024 * 1024) return (n / 1024).toFixed(n < 10 * 1024 ? 1 : 0) + ' KB';
+      return (n / (1024 * 1024)).toFixed(n < 10 * 1024 * 1024 ? 2 : 1) + ' MB';
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '';
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    function renderAudits(findings) {
+      var host = document.getElementById('zsr-audits');
+      if (!host || !Array.isArray(findings)) return;
+      host.innerHTML = findings.map(function (f) {
+        var max = f.max || 0;
+        var pts = f.points || 0;
+        var pct = max ? Math.max(0, Math.min(1, pts / max)) : 0;
+        var color = rampColor(pct);
+        var targetHtml = '';
+        if (f.target) {
+          targetHtml = '<p class="zsr-audit-target">' + escape(f.target) + '</p>';
+        }
+        return (
+          '<article class="zsr-audit">' +
+            '<div class="zsr-audit-icon" aria-hidden="true">' + escape(f.icon || '\u2022') + '</div>' +
+            '<h3 class="zsr-audit-name">' + escape(f.category || 'Audit') + '</h3>' +
+            '<span class="zsr-audit-points">' + pts + ' / ' + max + '</span>' +
+            '<div class="zsr-audit-bar" role="progressbar" aria-valuenow="' + pts + '"' +
+              ' aria-valuemin="0" aria-valuemax="' + max + '"' +
+              ' aria-label="' + escape(f.category || 'Audit') + ' score">' +
+              '<div class="zsr-audit-bar-fill" style="width:' + (pct * 100).toFixed(1) + '%;' +
+                'background:' + color + ';"></div>' +
+            '</div>' +
+            '<p class="zsr-audit-finding">' + escape(f.finding || '') + '</p>' +
+            targetHtml +
+          '</article>'
+        );
+      }).join('');
+    }
+
+    function renderThumbs(topImages) {
+      var wrap = document.getElementById('zsr-evidence-wrap');
+      var host = document.getElementById('zsr-thumbs');
+      if (!wrap || !host) return;
+      var list = Array.isArray(topImages) ? topImages.slice(0, 8) : [];
+      if (!list.length) { wrap.hidden = true; return; }
+      wrap.hidden = false;
+      host.innerHTML = list.map(function (img) {
+        var dim = (img.w && img.h) ? (img.w + '\u00d7' + img.h) : '';
+        var fmt = img.format ? String(img.format).toUpperCase() : '';
+        var size = formatBytes(img.bytes);
+        var metaRight = [fmt, size].filter(Boolean).join(' \u00b7 ');
+        return (
+          '<a class="zsr-thumb" href="' + escape(img.src) + '"' +
+            ' target="_blank" rel="noopener noreferrer"' +
+            ' title="Open full image in a new tab">' +
+            '<img class="zsr-thumb-img" src="' + escape(img.src) + '" alt=""' +
+              ' loading="lazy" decoding="async" referrerpolicy="no-referrer"' +
+              ' onerror="this.style.display=\'none\';"/>' +
+            '<div class="zsr-thumb-cap">' +
+              '<span class="dim">' + escape(dim || 'image') + '</span>' +
+              '<span>' + escape(metaRight) + '</span>' +
+            '</div>' +
+          '</a>'
+        );
+      }).join('');
+    }
+
+    function renderStats(stats) {
+      var host = document.getElementById('zsr-stats');
+      if (!host) return;
+      if (!stats || typeof stats !== 'object') { host.hidden = true; return; }
+      var items = [
+        { l: 'Total images', v: stats.total },
+        { l: 'With srcset', v: stats.withSrcset },
+        { l: 'WebP / AVIF', v: stats.modernFormats },
+        { l: 'Lazy-loaded', v: stats.lazyLoaded },
+      ].filter(function (x) { return typeof x.v === 'number'; });
+      if (!items.length) { host.hidden = true; return; }
+      host.hidden = false;
+      host.innerHTML = items.map(function (it) {
+        return '<div class="zsr-stat">' +
+          '<div class="zsr-stat-v">' + it.v + '</div>' +
+          '<div class="zsr-stat-l">' + escape(it.l) + '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function renderCta(data) {
+      var host = document.getElementById('zsr-cta');
+      if (!host) return;
+      var score = data.score || 0;
+      var hostname = data.host || '';
+      var q = '?src=zoom-score' + (hostname ? '&host=' + encodeURIComponent(hostname) : '');
+      var cws = 'https://chromewebstore.google.com/detail/ultra-zoom' + q;
+      var amo = 'https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/' + q;
+      var isFirefox = /firefox/i.test(navigator.userAgent);
+      var chromeLink = '<a class="zsr-btn primary" href="' + cws +
+        '" target="_blank" rel="noopener">Install for Chrome</a>';
+      var firefoxLink = '<a class="zsr-btn firefox" href="' + amo +
+        '" target="_blank" rel="noopener">Install for Firefox</a>';
+      var sep = '<span class="sep" aria-hidden="true">\u00b7</span>';
+      var links = isFirefox
+        ? firefoxLink + sep + chromeLink
+        : chromeLink + sep + firefoxLink;
+      var headline, body;
+      if (score >= 70) {
+        headline = 'This page is already zoom-friendly \u2014 Ultra Zoom makes it one-hover easy.';
+        body = 'Install Ultra Zoom and hover any image to trigger native-resolution zoom without opening a new tab.';
+      } else {
+        headline = 'Install Ultra Zoom to see every image at native resolution regardless of the site.';
+        body = 'Ultra Zoom fetches the largest available source for you \u2014 even when the page itself hasn\u2019t wired up hi-res variants.';
+      }
+      host.innerHTML =
+        '<h2>' + escape(headline) + '</h2>' +
+        '<p>' + escape(body) + '</p>' +
+        '<div class="zsr-cta-links">' + links + '</div>';
+    }
+
+    function render(data) {
+      // Hero
+      var dialHost = document.getElementById('zsr-dial');
+      if (dialHost) dialHost.innerHTML = renderDial(data.score, data.grade);
+
+      var hostLink = document.getElementById('zsr-host-link');
+      if (hostLink) {
+        hostLink.textContent = data.host || '\u2014';
+        if (data.url) hostLink.setAttribute('href', data.url);
+        else if (data.host) hostLink.setAttribute('href', 'https://' + data.host);
+      }
+
+      var created = document.getElementById('zsr-created');
+      if (created) {
+        created.textContent = formatDate(data.createdAt) || 'just now';
+        if (data.createdAt) created.setAttribute('datetime', data.createdAt);
+      }
+
+      var verdict = document.getElementById('zsr-verdict');
+      if (verdict) verdict.textContent = data.verdict || '';
+
+      renderAudits(data.findings || []);
+      renderThumbs(data.topImages || []);
+      renderStats(data.imageStats);
+      renderCta(data);
+
+      if (loadingEl) loadingEl.hidden = true;
+      if (reportEl) reportEl.hidden = false;
+    }
+
+    function wireActions(id, data) {
+      var reanalyze = document.getElementById('zsr-reanalyze');
+      if (reanalyze) {
+        reanalyze.addEventListener('click', function () {
+          var url = data && data.url ? data.url : '';
+          var next = '/zoom-score' + (url ? '?url=' + encodeURIComponent(url) + '&rescore=1' : '');
+          location.href = next;
+        });
+      }
+      var copy = document.getElementById('zsr-copy');
+      if (copy) {
+        copy.addEventListener('click', function () {
+          var permalink = 'https://ultrazoom.app/zoom-score/r/' + encodeURIComponent(id);
+          try {
+            navigator.clipboard.writeText(permalink);
+            copy.textContent = 'Copied!';
+          } catch (_) {
+            var tmp = document.createElement('input');
+            tmp.value = permalink;
+            document.body.appendChild(tmp);
+            tmp.select();
+            try { document.execCommand('copy'); copy.textContent = 'Copied!'; }
+            catch (__) { copy.textContent = 'Copy failed'; }
+            document.body.removeChild(tmp);
+          }
+          setTimeout(function () { copy.textContent = 'Copy permalink'; }, 1500);
+        });
+      }
+    }
+
+    async function init() {
+      var id = getId();
+      if (!id) { showError('No report id in the URL.'); return; }
+      try {
+        var res = await fetch(API + '/api/zoom-score/r/' + encodeURIComponent(id));
+        if (!res.ok) {
+          var body = {};
+          try { body = await res.json(); } catch (_) { /* ignore */ }
+          showError(body && body.error ? body.error : 'Report not found or expired.');
+          return;
+        }
+        var data = await res.json();
+        render(data);
+        wireActions(id, data);
+      } catch (err) {
+        showError('Could not load this report right now.');
+      }
+    }
+
+    init();
+  })();
+</script>
