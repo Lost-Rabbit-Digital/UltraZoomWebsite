@@ -21,7 +21,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   }}
 >
   <main class="main zsr-page" id="main-content">
-    <nav class="zsr-crumbs">
+    <nav class="zsr-crumbs" aria-label="Breadcrumb">
       <a href="/zoom-score">&larr; Score another page</a>
     </nav>
 
@@ -37,7 +37,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       <header class="zsr-hero">
         <div class="zsr-dial" id="zsr-dial"></div>
         <div class="zsr-meta">
-          <a id="zsr-host-link" class="zsr-host" href="#" target="_blank" rel="noopener"></a>
+          <a id="zsr-host-link" class="zsr-host" href="#" target="_blank" rel="noopener">&mdash;</a>
           <span class="zsr-dot" aria-hidden="true">&middot;</span>
           <span>analyzed <time id="zsr-created"></time></span>
         </div>
