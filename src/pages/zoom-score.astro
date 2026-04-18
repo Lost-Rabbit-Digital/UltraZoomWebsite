@@ -17,7 +17,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <section class="zs-hero">
       <h1>Zoom Score</h1>
       <p class="zs-sub">
-        How zoom-friendly is any webpage? Paste a URL \u2014 we check the source image resolution, hi-res variants, and detail density. In 10 seconds.
+        How zoom-friendly is any webpage? Paste a URL — we check the source image resolution, hi-res variants, and detail density. In 10 seconds.
       </p>
 
       <form id="zs-form" class="zs-form" novalidate>
@@ -35,7 +35,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           />
           <button type="submit" class="zs-submit">Get score</button>
         </div>
-        <p class="zs-note">We fetch the page once and score it. We don\u2019t store your identity. Cached results are anonymous and expire in 30 days.</p>
+        <p class="zs-note">We fetch the page once and score it. We don’t store your identity. Cached results are anonymous and expire in 30 days. Some marketplaces (Etsy, Amazon) may block our fetch — if so, try a direct image URL.</p>
       </form>
 
       <div id="zs-status" class="zs-status" hidden></div>
@@ -46,13 +46,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <section class="zs-how">
       <h2>How it works</h2>
       <ol>
-        <li><strong>Source resolution (40 pts)</strong> \u2014 biggest native image we can reach on the page.</li>
-        <li><strong>Hi-res variants (20 pts)</strong> \u2014 does the site expose larger crops via srcset or CDN params?</li>
-        <li><strong>Image count (15 pts)</strong> \u2014 how many distinct product-worthy images are discoverable.</li>
-        <li><strong>Pixel density (15 pts)</strong> \u2014 pixels per byte \u2014 a proxy for compression quality.</li>
-        <li><strong>Lazy-load hygiene (10 pts)</strong> \u2014 modern formats (WebP/AVIF) and proper loading hints.</li>
+        <li><strong>Source resolution (40 pts)</strong> — biggest native image we can reach on the page.</li>
+        <li><strong>Hi-res variants (20 pts)</strong> — does the site expose larger crops via srcset or CDN params?</li>
+        <li><strong>Image count (15 pts)</strong> — how many distinct product-worthy images are discoverable.</li>
+        <li><strong>Pixel density (15 pts)</strong> — pixels per byte — a proxy for compression quality.</li>
+        <li><strong>Lazy-load hygiene (10 pts)</strong> — modern formats (WebP/AVIF) and proper loading hints.</li>
       </ol>
-      <p>Total maxes at 100. A+ \u2265 95. Letter grade shown next to your score.</p>
+      <p>Total maxes at 100. A+ ≥ 95. Letter grade shown next to your score.</p>
     </section>
   </main>
 </BaseLayout>
@@ -290,15 +290,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       setStatus('Analyzing\u2026 this usually takes 5\u201315 seconds.', 'info');
       if (submit) submit.disabled = true;
       try {
-        const res = await fetch(API + '/api/zoom-score', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: urlStr }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.error || 'Request failed');
+        let res;
+        try {
+          res = await fetch(API + '/api/zoom-score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: urlStr }),
+          });
+        } catch (netErr) {
+          throw new Error('Network error \u2014 check your connection and try again.');
+        }
+        var data = null;
+        try { data = await res.json(); } catch (_) { /* non-JSON body, e.g. edge 502 */ }
+        if (!res.ok) {
+          if (res.status >= 500) {
+            throw new Error('Our analyzer is temporarily unavailable. Some marketplaces (Etsy, Amazon) block automated fetches \u2014 try a direct image URL, or retry in a minute.');
+          }
+          throw new Error((data && data.error) || 'That URL couldn\u2019t be analyzed. Make sure it\u2019s a public product or image page.');
+        }
         setStatus('');
-        // Update URL so the result is shareable / back-navigable.
         var shareUrl = new URL(location.href);
         shareUrl.searchParams.set('r', data.id);
         history.replaceState(null, '', shareUrl.toString());
