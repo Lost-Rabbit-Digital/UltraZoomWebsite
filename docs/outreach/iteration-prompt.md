@@ -16,7 +16,7 @@ I need you to find the NEXT batch of 10-15 active browser extension listicles fo
 - Goal: Get Ultra Zoom mentioned/listed in "best extensions" articles
 
 ### Already contacted (do NOT include these publications)
-Check outreach/leads.json for the full list of already-contacted leads. Skip any publication or URL that appears there.
+Check docs/outreach/leads.json for the full list of already-contacted leads. Skip any publication or URL that appears there.
 
 ### Search strategy
 Use a mix of these search queries (rotate angles each iteration):
@@ -46,8 +46,8 @@ Use a mix of these search queries (rotate angles each iteration):
 - Skip: huge SaaS company blogs (ClickUp, Monday, etc.) unless they have a named author with direct contact
 
 ### Output format:
-1. Add new leads to outreach/leads.json (append to the leads array, continuing the ID sequence)
-2. Create individual email drafts in outreach/drafts/ following the naming pattern: NN-publication-slug.md
+1. Add new leads to docs/outreach/leads.json (append to the leads array, continuing the ID sequence)
+2. Create individual email drafts in docs/outreach/drafts/ following the naming pattern: NN-publication-slug.md
 3. Each draft should include: To, Subject, Send window (Tue-Thu), and the personalized email body
 4. Keep emails to 3-4 short paragraphs: reference their specific article, explain Ultra Zoom, explain why it fits, offer to help
 
