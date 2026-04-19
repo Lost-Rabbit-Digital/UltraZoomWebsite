@@ -748,6 +748,7 @@ img {
     font-weight: 700;
     margin-bottom: 0.5rem;
     padding-top: 1rem;
+    color: var(--text-primary);
 }
 
 .page-content h2 {
@@ -755,13 +756,33 @@ img {
     font-weight: 600;
     margin-top: 2rem;
     margin-bottom: 0.5rem;
-    color: var(--brand-light);
+    color: var(--brand);
 }
 
 .page-content p {
-    color: var(--text-secondary);
+    color: var(--text-primary);
     margin-bottom: 1rem;
     line-height: 1.7;
+}
+
+.page-content ul,
+.page-content ol {
+    color: var(--text-primary);
+    margin: 0 0 1rem 1.25rem;
+    padding: 0;
+    line-height: 1.7;
+}
+
+.page-content li {
+    margin-bottom: 0.4rem;
+}
+
+.page-content a {
+    color: var(--link);
+}
+
+.page-content a:hover {
+    color: var(--link-hover);
 }
 
 .page-content code {
@@ -769,6 +790,7 @@ img {
     padding: 0.15rem 0.4rem;
     border-radius: 4px;
     font-size: 0.9em;
+    color: var(--text-primary);
 }
 
 /* ── Help Hero ────────────────────────────────────── */
