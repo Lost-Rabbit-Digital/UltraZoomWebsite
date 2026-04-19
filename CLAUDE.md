@@ -33,7 +33,10 @@ astro.config.mjs       Astro configuration
   lighthouse/
     lighthouserc.json  Lighthouse CI config
   scripts/             Automation scripts
-diagrams/              Mermaid diagram source files
+docs/
+  diagrams/            Mermaid diagram source files
+  growth/              Growth plan notes
+  outreach/            Outreach leads, drafts, prompts
 ```
 
 ## Technology Stack
