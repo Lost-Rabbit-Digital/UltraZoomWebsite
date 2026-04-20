@@ -1,9 +1,10 @@
 # Listicle Outreach — Iteration Prompt
 
-Prompts for running the next batch of outreach research. Two versions:
+Prompts for running the next batch of outreach research. Three versions:
 
 1. **Interactive** — paste into a new Claude Code session you're watching
 2. **Routines-compatible** — self-contained, non-interactive, runs as a Claude Routine and opens a PR
+3. **Cowork** (live-browser pair session) — see `cowork-prompt.md`. Best for high-quality seed leads with verified contacts.
 
 Goal: reach **300 verified prospects** in `docs/outreach/leads.json` so we can send 10 personalized emails per day for a full month. Primary lane: **Chrome / Firefox extension listicle articles.** Secondary lanes: niche / use-case publications (collectors, designers, genealogists, real estate agents, privacy, engineering).
 
