@@ -1,10 +1,24 @@
 {
-  "generated": "2026-04-16",
+  "generated": "2026-04-20",
   "product": "Ultra Zoom — Hover-to-Zoom browser extension for 60+ websites",
   "product_url": "https://ultrazoom.app",
   "chrome_store": "https://chromewebstore.google.com/detail/ultra-zoom",
   "firefox_addons": "https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/",
   "publisher": "Lost Rabbit Digital LLC",
+  "target_total": 300,
+  "notes": "Primary lane: Chrome/Firefox extension listicles. Secondary lanes: niche use-case publications paired with blog spears (see templates.md). Research loop: iteration-prompt.md. Draft scheduling via Gmail: gmail-drafts-prompt.md.",
+  "status_values": {
+    "research_pending": "Lead collected, contact not verified yet",
+    "draft_ready": "Draft written, ready for Gmail",
+    "draft_scheduled": "Gmail draft exists, awaiting human send",
+    "sent": "Human-sent the Gmail draft",
+    "replied_positive": "Interested / willing to list",
+    "replied_negative": "Declined or not a fit",
+    "no_reply": "14+ days, no response",
+    "followup_scheduled": "Follow-up draft in Gmail",
+    "linked": "Ultra Zoom mentioned / linked",
+    "dead": "Bounced, invalid, opted-out"
+  },
   "leads": [
     {
       "id": 1,
