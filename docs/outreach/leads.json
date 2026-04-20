@@ -470,6 +470,40 @@
       "pitch_angle": "Aesthetic browsing upgrade — hover-zoom adds a seamless, clean image preview experience that fits the visual-first audience",
       "status": "draft_ready",
       "draft_file": "drafts/30-gridfiti.md"
+    },
+    {
+      "id": 31,
+      "publication": "Muzli (Muzli - Design Inspiration)",
+      "article_title": "Best Chrome Extensions for Designers in 2026",
+      "article_url": "https://medium.muz.li/best-chrome-extensions-for-designers-in-2026-54e25d50c11f",
+      "author": "Muzli Editorial",
+      "role": "Design inspiration hub / newsletter team (MuzliX Ltd.)",
+      "contact_email": "info@muz.li",
+      "contact_method": "email",
+      "contact_confidence": "verified",
+      "contact_notes": "MuzliX Ltd., Tel-Aviv. info@muz.li listed on muz.li/contact. Article is published as a Medium newsletter under the 'Muzli' corporate byline — no individual author. Formerly acquired by InVision, now independent. Published Nov 3, 2025.",
+      "category": "designer",
+      "blog_spear": "designer-spear",
+      "pitch_angle": "Article is built around designer image workflows (SVG Export, Image Downloader, Google Font Previewer, WhatFont). Ultra Zoom slots in as the hover-preview companion for Pinterest/Dribbble/Behance reference work — inspect before you download.",
+      "status": "draft_ready",
+      "draft_file": "drafts/31-muzli.md"
+    },
+    {
+      "id": 32,
+      "publication": "Kripesh Adwani (kripeshadwani.com)",
+      "article_title": "13 Best Firefox Extensions & Add-Ons (2026) – Supercharge Your Productivity",
+      "article_url": "https://kripeshadwani.com/best-firefox-extensions/",
+      "author": "Kripesh Adwani",
+      "role": "Independent tech blogger / YouTuber (hosting, VPN, productivity tools)",
+      "contact_email": "hello@kripeshadwani.com",
+      "contact_method": "email",
+      "contact_confidence": "verified",
+      "contact_notes": "Listed on /contact-us page. Personal-domain tech blog with a companion YouTube channel. Article last modified Jan 3, 2026.",
+      "category": "firefox",
+      "blog_spear": "listicle-generic",
+      "pitch_angle": "Firefox roundup is productivity-first (Awesome Screenshot, Tranquility Reader, Dark Reader, Dictionary Anywhere). Ultra Zoom fits that mold — a one-shortcut hover-to-zoom tool that works on Firefox across Pinterest, Amazon, eBay, etc. No duplicate functionality with anything currently on the list.",
+      "status": "draft_ready",
+      "draft_file": "drafts/32-kripesh-adwani.md"
     }
   ]
 }
