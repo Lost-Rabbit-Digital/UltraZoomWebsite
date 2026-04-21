@@ -26,6 +26,8 @@ public/
   images/              Icons and assets
 wrangler.jsonc         Cloudflare Workers config (static assets from dist/)
 astro.config.mjs       Astro configuration
+scripts/
+  find-leads.mjs       Dork-driven lead discovery (Google CSE → CSV)
 .github/
   workflows/
     static.yml         CI pipeline
@@ -36,7 +38,7 @@ astro.config.mjs       Astro configuration
 docs/
   diagrams/            Mermaid diagram source files
   growth/              Growth plan notes
-  outreach/            Outreach leads, drafts, prompts
+  outreach/            Outreach leads, drafts, prompts, contact-form templates
 ```
 
 ## Technology Stack

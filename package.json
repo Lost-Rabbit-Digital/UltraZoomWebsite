@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "find-leads": "node scripts/find-leads.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.18",
