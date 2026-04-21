@@ -133,11 +133,28 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <script is:inline>
         (function () {
             var errEl = document.getElementById('checkout-error');
+            var PLAN_PRICES = { monthly: 3.99, annual: 29.99, lifetime: 59.99 };
 
             document.querySelectorAll('[data-plan]').forEach(function (btn) {
                 btn.addEventListener('click', function (e) {
                     e.preventDefault();
                     var plan = btn.getAttribute('data-plan');
+                    var value = PLAN_PRICES[plan];
+
+                    try {
+                        sessionStorage.setItem('uz_last_plan', plan);
+                        if (value) sessionStorage.setItem('uz_last_plan_value', String(value));
+                    } catch (_) {}
+
+                    if (window.rdt) {
+                        window.rdt('track', 'AddToCart', {
+                            currency: 'USD',
+                            itemCount: 1,
+                            value: value,
+                            products: [{ id: plan, name: 'Ultra Zoom Pro ' + plan, category: 'subscription' }]
+                        });
+                    }
+
                     if (errEl) { errEl.hidden = true; errEl.textContent = ''; }
                     btn.style.opacity = '0.6';
                     btn.style.pointerEvents = 'none';
