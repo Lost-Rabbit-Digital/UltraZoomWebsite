@@ -29,4 +29,27 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <a href="/" class="success-home-link">Back to Ultra Zoom</a>
         </div>
     </main>
+
+    <script is:inline>
+        (function () {
+            var plan = null;
+            var value = null;
+            try {
+                plan = sessionStorage.getItem('uz_last_plan');
+                var v = sessionStorage.getItem('uz_last_plan_value');
+                if (v) value = parseFloat(v);
+                sessionStorage.removeItem('uz_last_plan');
+                sessionStorage.removeItem('uz_last_plan_value');
+            } catch (_) {}
+
+            if (window.rdt) {
+                var payload = { currency: 'USD', itemCount: 1 };
+                if (value) payload.value = value;
+                if (plan) {
+                    payload.products = [{ id: plan, name: 'Ultra Zoom Pro ' + plan, category: 'subscription' }];
+                }
+                window.rdt('track', 'Purchase', payload);
+            }
+        })();
+    </script>
 </BaseLayout>
