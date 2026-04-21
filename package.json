@@ -19,6 +19,7 @@
   "devDependencies": {
     "@capsizecss/metrics": "^3.7.0",
     "@fontsource/inter": "^5.2.8",
+    "google-auth-library": "^10.6.2",
     "inter-ui": "^4.1.1"
   }
 }

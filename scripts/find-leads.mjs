@@ -1,107 +1,74 @@
 #!/usr/bin/env node
 /*
- * find-leads.mjs — dork-driven lead discovery for contact-form outreach.
+ * find-leads.mjs — Exa-powered lead discovery for the contact-form outreach lane.
  *
- * Reads a markdown file of Google dorks (fenced code blocks), runs each query
- * against the Google Custom Search JSON API, dedupes + filters results, and
- * writes a CSV ready to import into Google Sheets.
+ * Two modes:
+ *   search        Runs natural-language queries from docs/outreach/exa-queries.md
+ *                 against Exa's /search endpoint.
+ *   find-similar  Reads seed URLs from docs/outreach/leads.json (and optional
+ *                 --seeds <file>) and asks Exa's /findSimilar for more of the
+ *                 same shape. This is the force-multiplier — 30 curated leads
+ *                 can surface 300+ similar articles.
  *
- * Setup (one-time, ~10 min):
- *   1. Create / pick a Google Cloud project:  https://console.cloud.google.com
- *   2. Enable "Custom Search API" in that project.
- *   3. Create an API key under "APIs & Services → Credentials".
- *   4. Create a Programmable Search Engine:  https://programmablesearchengine.google.com
- *      Toggle "Search the entire web" ON. Copy the "Search engine ID" (cx).
- *   5. Export the env vars:
- *        export GOOGLE_CSE_KEY=...
- *        export GOOGLE_CSE_ID=...
+ * Results are appended to a Google Sheet (dedup by URL before append) so
+ * humans can edit status/template/assigned_to columns without the script
+ * stomping their edits on the next run.
+ *
+ * Required env vars:
+ *   EXA_API_KEY           — Exa API key
+ *   GOOGLE_SHEETS_SA_KEY  — service-account JSON (raw string, see sheets-setup.md)
+ *   LEADS_SHEET_ID        — target Google Sheet ID (from its URL)
+ *
+ * See docs/outreach/sheets-setup.md for a one-time service-account setup.
  *
  * Usage:
- *   node scripts/find-leads.mjs [options]
+ *   node scripts/find-leads.mjs --mode search --limit 20
+ *   node scripts/find-leads.mjs --mode find-similar --limit 30
+ *   node scripts/find-leads.mjs --mode both --limit 20
+ *   node scripts/find-leads.mjs --mode search --dry-run      (preview queries)
  *
  * Options:
- *   --dorks <file>      Path to a dorks markdown file. Parses fenced code
- *                       blocks; each non-empty line is one query.
- *                       Default: docs/outreach/dorks.md
- *   --out <file>        Output CSV path. Default: docs/outreach/leads-contact-form.csv
- *                       (appends if file exists, keeps URL dedupe)
- *   --limit <n>         Max queries to run this invocation. Default: 20.
- *   --per-query <n>     Results per query (CSE max is 10). Default: 10.
- *   --sections <re>     Regex to filter dork sections by heading text.
- *                       Example: --sections "listicle|photography"
- *   --dry-run           Print the queries that would run and exit.
- *
- * Notes:
- *   - Free CSE quota: 100 queries/day. Respect it; this script counts.
- *   - To swap in SerpAPI: replace `runQuery()` body with a SerpAPI call.
- *   - Known-bad domains (chrome store, addons.mozilla.org, etc.) are filtered
- *     so you don't have to scroll past them in the Sheet.
+ *   --mode <m>         search | find-similar | both   (default: both)
+ *   --limit <n>        max queries/seeds per mode     (default: 20)
+ *   --per-query <n>    results per Exa call           (default: 10, max 25)
+ *   --queries <file>   override for NL query file     (default: docs/outreach/exa-queries.md)
+ *   --seeds <file>     override for seed URL source   (default: docs/outreach/leads.json)
+ *   --sections <re>    regex filter on query sections
+ *   --since <iso>      filter to pages published after this date (YYYY-MM-DD)
+ *   --dry-run          print what would run, skip API + Sheet calls
  */
 
-import { readFileSync, appendFileSync, existsSync, writeFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { argv, env, exit } from "node:process";
 
-const DEFAULT_DORKS = "docs/outreach/dorks.md";
-const DEFAULT_OUT = "docs/outreach/leads-contact-form.csv";
+import { search as exaSearch, findSimilar as exaFindSimilar } from "./lib/exa.mjs";
+import { makeClient, rowFromResult } from "./lib/sheets.mjs";
 
-const CSV_COLUMNS = [
-  "found_at",
-  "category",
-  "query",
-  "rank",
-  "title",
-  "url",
-  "domain",
-  "snippet",
-  "status",
-  "template",
-  "contact_url",
-  "message_sent",
-  "reply",
-  "notes",
-];
-
-// Domains we never want in the output — first-party stores, search engines,
-// social aggregators with no contact surface, etc.
-const SKIP_DOMAINS = new Set([
-  "chromewebstore.google.com",
-  "chrome.google.com",
-  "addons.mozilla.org",
-  "microsoftedge.microsoft.com",
-  "apps.apple.com",
-  "play.google.com",
-  "youtube.com",
-  "twitter.com",
-  "x.com",
-  "facebook.com",
-  "instagram.com",
-  "linkedin.com",
-  "pinterest.com",
-  "github.com",
-  "stackoverflow.com",
-  "google.com",
-  "bing.com",
-  "duckduckgo.com",
-]);
+const DEFAULT_QUERIES = "docs/outreach/exa-queries.md";
+const DEFAULT_SEEDS = "docs/outreach/leads.json";
 
 function parseArgs(raw) {
   const out = {
-    dorks: DEFAULT_DORKS,
-    out: DEFAULT_OUT,
+    mode: "both",
     limit: 20,
     perQuery: 10,
+    queries: DEFAULT_QUERIES,
+    seeds: DEFAULT_SEEDS,
     sections: null,
+    since: null,
     dryRun: false,
   };
   for (let i = 2; i < raw.length; i++) {
     const a = raw[i];
     const next = () => raw[++i];
-    if (a === "--dorks") out.dorks = next();
-    else if (a === "--out") out.out = next();
+    if (a === "--mode") out.mode = next();
     else if (a === "--limit") out.limit = Number(next());
-    else if (a === "--per-query") out.perQuery = Math.min(10, Number(next()));
+    else if (a === "--per-query") out.perQuery = Math.min(25, Number(next()));
+    else if (a === "--queries") out.queries = next();
+    else if (a === "--seeds") out.seeds = next();
     else if (a === "--sections") out.sections = new RegExp(next(), "i");
+    else if (a === "--since") out.since = next();
     else if (a === "--dry-run") out.dryRun = true;
     else if (a === "-h" || a === "--help") {
       console.log(readFileSync(new URL(import.meta.url), "utf8").split("*/")[0]);
@@ -111,206 +78,197 @@ function parseArgs(raw) {
       exit(2);
     }
   }
+  if (!["search", "find-similar", "both"].includes(out.mode)) {
+    console.error(`--mode must be search, find-similar, or both`);
+    exit(2);
+  }
   return out;
 }
 
-// Extract queries grouped by section heading. A section is an H2 (## …) in
-// the dorks markdown; queries are the non-empty, non-comment lines inside
-// fenced ``` blocks under that heading.
-function parseDorks(path, sectionFilter) {
+// Parse docs/outreach/exa-queries.md. Format: H2 section headings, with
+// markdown bullet points (- or *) as individual queries. Lines that start
+// with `>` (blockquote) are treated as notes and skipped.
+function parseQueries(path, sectionFilter) {
   const text = readFileSync(path, "utf8");
   const lines = text.split("\n");
-  const results = [];
+  const out = [];
   let currentSection = "uncategorized";
-  let inFence = false;
   for (const line of lines) {
     if (line.startsWith("## ")) {
       currentSection = line.replace(/^##+\s*/, "").trim();
-      inFence = false;
       continue;
     }
-    if (line.startsWith("### ")) {
-      // treat H3 as a subsection appended to the parent
-      const sub = line.replace(/^#+\s*/, "").trim();
-      currentSection = currentSection.split(" — ")[0] + " — " + sub;
-      continue;
-    }
-    if (line.trim().startsWith("```")) {
-      inFence = !inFence;
-      continue;
-    }
-    if (!inFence) continue;
-    const q = line.trim();
-    if (!q || q.startsWith("#") || q.startsWith("//")) continue;
+    const m = line.match(/^\s*[-*]\s+"?(.+?)"?\s*$/);
+    if (!m) continue;
+    const q = m[1].replace(/\\"/g, '"').trim();
+    if (!q || q.startsWith("TODO") || q.startsWith("#")) continue;
     if (sectionFilter && !sectionFilter.test(currentSection)) continue;
-    results.push({ section: currentSection, query: q });
+    out.push({ section: currentSection, query: q });
   }
-  return results;
-}
-
-function csvEscape(v) {
-  if (v == null) return "";
-  const s = String(v);
-  if (s.includes('"') || s.includes(",") || s.includes("\n")) {
-    return `"${s.replace(/"/g, '""')}"`;
-  }
-  return s;
-}
-
-function loadExistingUrls(path) {
-  const urls = new Set();
-  if (!existsSync(path)) return urls;
-  const text = readFileSync(path, "utf8");
-  const lines = text.split("\n").slice(1); // skip header
-  for (const line of lines) {
-    // crude CSV parse — pull the url column (index 5)
-    const cols = splitCsvRow(line);
-    if (cols[5]) urls.add(cols[5]);
-  }
-  return urls;
-}
-
-function splitCsvRow(line) {
-  const out = [];
-  let cur = "";
-  let inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (inQ) {
-      if (c === '"' && line[i + 1] === '"') {
-        cur += '"';
-        i++;
-      } else if (c === '"') {
-        inQ = false;
-      } else cur += c;
-    } else {
-      if (c === ",") {
-        out.push(cur);
-        cur = "";
-      } else if (c === '"' && cur === "") {
-        inQ = true;
-      } else cur += c;
-    }
-  }
-  out.push(cur);
   return out;
 }
 
-async function runQuery({ query, perQuery, key, cx }) {
-  const url = new URL("https://www.googleapis.com/customsearch/v1");
-  url.searchParams.set("key", key);
-  url.searchParams.set("cx", cx);
-  url.searchParams.set("q", query);
-  url.searchParams.set("num", String(perQuery));
-  const res = await fetch(url);
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`CSE ${res.status}: ${body.slice(0, 200)}`);
+function loadSeedUrls(path) {
+  if (!existsSync(path)) return [];
+  const text = readFileSync(path, "utf8");
+  try {
+    const data = JSON.parse(text);
+    const leads = Array.isArray(data) ? data : data.leads || [];
+    return leads
+      .map((l) => l.article_url || l.url)
+      .filter((u) => typeof u === "string" && u.startsWith("http"));
+  } catch (e) {
+    console.error(`could not parse seeds file ${path}: ${e.message}`);
+    return [];
   }
-  const json = await res.json();
-  return json.items || [];
 }
 
-function hostOf(u) {
-  try {
-    return new URL(u).hostname.replace(/^www\./, "");
-  } catch {
-    return "";
+async function runSearchMode({ queries, perQuery, since, apiKey, sheet, seen, dryRun }) {
+  console.error(`\n== search mode (${queries.length} queries) ==`);
+  const rows = [];
+  for (const { section, query } of queries) {
+    if (dryRun) {
+      console.error(`  [dry] [${section}] ${query}`);
+      continue;
+    }
+    let items;
+    try {
+      items = await exaSearch({
+        apiKey,
+        query,
+        numResults: perQuery,
+        startPublishedDate: since || undefined,
+      });
+    } catch (e) {
+      console.error(`  ! ${query.slice(0, 60)} — ${e.message}`);
+      continue;
+    }
+    const kept = collect({
+      items,
+      source: "exa-search",
+      seed: query,
+      seen,
+      rows,
+    });
+    console.error(`  + [${kept}/${items.length}]  ${query.slice(0, 70)}`);
   }
+  if (!dryRun && rows.length) await sheet.appendRows(rows);
+  return rows.length;
+}
+
+async function runFindSimilarMode({ seeds, perQuery, apiKey, sheet, seen, dryRun }) {
+  console.error(`\n== find-similar mode (${seeds.length} seed URLs) ==`);
+  const rows = [];
+  for (const seedUrl of seeds) {
+    if (dryRun) {
+      console.error(`  [dry] similar-to: ${seedUrl}`);
+      continue;
+    }
+    let items;
+    try {
+      items = await exaFindSimilar({ apiKey, url: seedUrl, numResults: perQuery });
+    } catch (e) {
+      console.error(`  ! ${seedUrl.slice(0, 60)} — ${e.message}`);
+      continue;
+    }
+    const kept = collect({
+      items,
+      source: "exa-similar",
+      seed: seedUrl,
+      seen,
+      rows,
+    });
+    console.error(`  + [${kept}/${items.length}]  ${seedUrl.slice(0, 70)}`);
+  }
+  if (!dryRun && rows.length) await sheet.appendRows(rows);
+  return rows.length;
+}
+
+function collect({ items, source, seed, seen, rows }) {
+  const foundAt = new Date().toISOString().slice(0, 10);
+  let kept = 0;
+  for (const it of items) {
+    if (!it.url || seen.has(it.url)) continue;
+    seen.add(it.url);
+    rows.push(rowFromResult(it, { source, seed, foundAt }));
+    kept++;
+  }
+  return kept;
 }
 
 async function main() {
   const opts = parseArgs(argv);
-  const key = env.GOOGLE_CSE_KEY;
-  const cx = env.GOOGLE_CSE_ID;
+  const apiKey = env.EXA_API_KEY;
+  const saKeyJson = env.GOOGLE_SHEETS_SA_KEY;
+  const sheetId = env.LEADS_SHEET_ID;
 
-  if (!opts.dryRun && (!key || !cx)) {
-    console.error("error: set GOOGLE_CSE_KEY and GOOGLE_CSE_ID env vars");
-    console.error("       (or re-run with --dry-run to preview queries)");
-    exit(1);
+  if (!opts.dryRun) {
+    const missing = [];
+    if (!apiKey) missing.push("EXA_API_KEY");
+    if (!saKeyJson) missing.push("GOOGLE_SHEETS_SA_KEY");
+    if (!sheetId) missing.push("LEADS_SHEET_ID");
+    if (missing.length) {
+      console.error(`error: missing env vars: ${missing.join(", ")}`);
+      console.error(`       (or re-run with --dry-run to preview)`);
+      exit(1);
+    }
   }
 
-  const dorksPath = resolve(opts.dorks);
-  const outPath = resolve(opts.out);
-  const all = parseDorks(dorksPath, opts.sections);
-  const queries = all.slice(0, opts.limit);
+  const queries = parseQueries(resolve(opts.queries), opts.sections).slice(0, opts.limit);
+  const seeds = loadSeedUrls(resolve(opts.seeds)).slice(0, opts.limit);
 
-  console.error(`parsed ${all.length} queries from ${opts.dorks} (running ${queries.length})`);
+  console.error(`mode: ${opts.mode}`);
+  console.error(`queries available: ${queries.length}  seeds available: ${seeds.length}`);
 
   if (opts.dryRun) {
-    for (const { section, query } of queries) {
-      console.log(`[${section}]  ${query}`);
-    }
+    if (opts.mode !== "find-similar") await runSearchMode({ queries, ...stub(opts) });
+    if (opts.mode !== "search") await runFindSimilarMode({ seeds, ...stub(opts) });
     return;
   }
 
-  const existing = loadExistingUrls(outPath);
-  const newUrls = new Set();
+  const sheet = makeClient({ saKeyJson, sheetId });
+  await sheet.ensureHeader();
+  const seen = await sheet.readUrls();
+  console.error(`existing URLs in sheet: ${seen.size}`);
 
-  if (!existsSync(outPath)) {
-    writeFileSync(outPath, CSV_COLUMNS.join(",") + "\n");
-  }
-
-  const today = new Date().toISOString().slice(0, 10);
   let appended = 0;
-  let skippedDup = 0;
-  let skippedDomain = 0;
-
-  for (const { section, query } of queries) {
-    let items;
-    try {
-      items = await runQuery({ query, perQuery: opts.perQuery, key, cx });
-    } catch (err) {
-      console.error(`  ! ${query.slice(0, 60)} — ${err.message}`);
-      if (String(err.message).includes("429") || String(err.message).includes("quota")) {
-        console.error("  hit quota, stopping.");
-        break;
-      }
-      continue;
-    }
-
-    let kept = 0;
-    for (let i = 0; i < items.length; i++) {
-      const it = items[i];
-      const host = hostOf(it.link);
-      if (SKIP_DOMAINS.has(host)) {
-        skippedDomain++;
-        continue;
-      }
-      if (existing.has(it.link) || newUrls.has(it.link)) {
-        skippedDup++;
-        continue;
-      }
-      newUrls.add(it.link);
-      const row = [
-        today,
-        section,
-        query,
-        i + 1,
-        it.title || "",
-        it.link,
-        host,
-        (it.snippet || "").replace(/\s+/g, " ").slice(0, 240),
-        "new",
-        "",
-        "",
-        "",
-        "",
-        "",
-      ];
-      appendFileSync(outPath, row.map(csvEscape).join(",") + "\n");
-      appended++;
-      kept++;
-    }
-    console.error(`  + [${kept}/${items.length}]  ${query.slice(0, 70)}`);
+  if (opts.mode !== "find-similar") {
+    appended += await runSearchMode({
+      queries,
+      perQuery: opts.perQuery,
+      since: opts.since,
+      apiKey,
+      sheet,
+      seen,
+      dryRun: false,
+    });
+  }
+  if (opts.mode !== "search") {
+    appended += await runFindSimilarMode({
+      seeds,
+      perQuery: opts.perQuery,
+      apiKey,
+      sheet,
+      seen,
+      dryRun: false,
+    });
   }
 
-  console.error(
-    `\ndone. wrote ${appended} new rows to ${opts.out} (skipped ${skippedDup} dup, ${skippedDomain} bad-domain)`,
-  );
+  console.error(`\ndone. appended ${appended} new rows.`);
+}
+
+function stub(opts) {
+  return {
+    perQuery: opts.perQuery,
+    since: opts.since,
+    apiKey: null,
+    sheet: null,
+    seen: new Set(),
+    dryRun: true,
+  };
 }
 
 main().catch((e) => {
-  console.error(e);
+  console.error(e.stack || e.message);
   exit(1);
 });

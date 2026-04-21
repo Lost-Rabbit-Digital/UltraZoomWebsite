@@ -1,0 +1,71 @@
+name: Find leads
+
+on:
+  schedule:
+    # 13:00 UTC = 06:00 PT. Runs once a day.
+    - cron: "0 13 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Search mode"
+        type: choice
+        options:
+          - both
+          - search
+          - find-similar
+        default: both
+      limit:
+        description: "Max queries/seeds to run"
+        default: "20"
+      sections:
+        description: "Regex filter on section headings (search mode only). Leave blank for all."
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  find-leads:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+      GOOGLE_SHEETS_SA_KEY: ${{ secrets.GOOGLE_SHEETS_SA_KEY }}
+      LEADS_SHEET_ID: ${{ vars.LEADS_SHEET_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Sanity-check secrets
+        run: |
+          missing=()
+          [ -z "$EXA_API_KEY" ] && missing+=("EXA_API_KEY")
+          [ -z "$GOOGLE_SHEETS_SA_KEY" ] && missing+=("GOOGLE_SHEETS_SA_KEY")
+          [ -z "$LEADS_SHEET_ID" ] && missing+=("LEADS_SHEET_ID")
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::missing secrets/vars: ${missing[*]}"
+            echo "See docs/outreach/sheets-setup.md"
+            exit 1
+          fi
+
+      - name: Run lead discovery
+        run: |
+          args=(--mode "${MODE:-both}" --limit "${LIMIT:-20}")
+          if [ -n "$SECTIONS" ]; then
+            args+=(--sections "$SECTIONS")
+          fi
+          echo "::group::args"
+          printf '%s\n' "${args[@]}"
+          echo "::endgroup::"
+          node scripts/find-leads.mjs "${args[@]}"
+        env:
+          MODE: ${{ github.event.inputs.mode }}
+          LIMIT: ${{ github.event.inputs.limit }}
+          SECTIONS: ${{ github.event.inputs.sections }}

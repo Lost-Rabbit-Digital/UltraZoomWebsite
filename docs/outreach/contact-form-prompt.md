@@ -5,8 +5,9 @@ A parallel lane to the email outreach flow (see `iteration-prompt.md` +
 filters, and require no contact-enrichment step — so for listicles where a
 quick pitch is enough, this is faster than cold email.
 
-**Target cadence:** 20–40 form submissions per week with zero research
-overhead per lead beyond "is this page a real fit?"
+**Target cadence:** 20–40 form submissions per week split across you and
+your cofounder, zero-research overhead per lead beyond "is this page a real
+fit?"
 
 **Budget constraint this lane solves:** the 50 emails/month ceiling. Form
 submissions aren't capped by email sending limits.
@@ -14,130 +15,136 @@ submissions aren't capped by email sending limits.
 ## Pipeline at a glance
 
 ```
-dorks.md  ──►  find-leads.mjs  ──►  leads-contact-form.csv
-                                            │
-                                            ▼
-                                    Google Sheets import
-                                            │
-                                            ▼
-                             triage → pick template → submit → track
+exa-queries.md  ─┐
+                 ├─►  GH Action (daily cron)  ─►  find-leads.mjs  ─►  Google Sheet (shared)
+leads.json URLs ─┘                                                         │
+   (find-similar seeds)                                                    ▼
+                                                             you + cofounder triage,
+                                                             submit, track in-sheet
 ```
 
-## 0. One-time setup
+One-time setup: **`sheets-setup.md`** (service account, sheet creation,
+GitHub secrets). ~20 minutes under boden@lostrabbitdigital.com.
 
-1. Get Google Custom Search API creds (see header of `scripts/find-leads.mjs`
-   for the 5-step setup). Export:
-   ```
-   export GOOGLE_CSE_KEY=...
-   export GOOGLE_CSE_ID=...
-   ```
-2. Import `docs/outreach/leads-contact-form.csv` into a Google Sheet once it
-   exists. Use **File → Import → Upload → Replace current sheet** (first row
-   is the header). Freeze the header row.
-3. Set a conditional-format rule on the `status` column: green for
-   `submitted` / `linked`, red for `kill` / `bounced`, yellow for
-   `replied_*`.
+## 1. Discovery (automatic, daily)
 
-## 1. Discover
+`.github/workflows/find-leads.yml` runs at 13:00 UTC daily and calls
+`scripts/find-leads.mjs` in `both` mode. It:
 
-Run the dork script. Defaults write to `docs/outreach/leads-contact-form.csv`
-and append new rows only (URL-level dedupe against the existing file).
+- Runs the natural-language queries in `docs/outreach/exa-queries.md`
+  against Exa's `/search`.
+- Runs `/findSimilar` on every article URL in `docs/outreach/leads.json`.
+- Dedupes against URLs already in the Sheet.
+- Appends only new rows. **It never edits existing rows**, so human status
+  edits are safe across runs.
+
+You can also trigger it manually: Actions tab → **Find leads** → **Run
+workflow**, optionally picking `mode`, `limit`, or a `sections` regex.
+
+### Running it locally
 
 ```
-# preview which queries would run
-npm run find-leads -- --dry-run --limit 20
+export EXA_API_KEY=...
+export GOOGLE_SHEETS_SA_KEY="$(cat path/to/sa-key.json)"
+export LEADS_SHEET_ID=...
 
-# run listicle + niche sections only, 10 queries
-npm run find-leads -- --sections "listicle|niche|photography|shopping" --limit 10
-
-# run everything (respect the 100 query/day free quota)
-npm run find-leads -- --limit 80
+npm run find-leads -- --mode search --limit 10
+npm run find-leads -- --mode find-similar --limit 20
+npm run find-leads -- --dry-run --limit 5     # preview without API calls
 ```
-
-Expected yield: ~4–8 usable rows per dork after dedupe + domain filter.
 
 ## 2. Triage in the Sheet
 
-Re-import the updated CSV (or copy-paste the new rows). For each `new` row:
+For each `status = new` row:
 
-- Open the URL. 5-second yes/no: is this a real listicle or niche article
-  where Ultra Zoom genuinely fits?
-  - **No** → set `status = kill`. Move on.
-  - **Yes** → continue.
-- Pick a template id from `contact-form-templates.md` and put it in the
-  `template` column (`form-listicle`, `form-photo-design`,
-  `form-shopping`, `form-genealogy`, `form-real-estate`, `form-privacy`,
-  `form-generic`).
-- Hunt for the contact page on the same domain (usually `/contact`,
-  `/about`, footer link, or author bio). Paste it into `contact_url`.
-  - If there is no contact form and only a bare email, move the lead to
-    the email flow (`leads.json`) — don't duplicate it here.
-- Set `status = triaged`.
+1. Open the URL. 5-second yes/no: is this a real listicle or niche article
+   where Ultra Zoom genuinely fits?
+   - **No** → `status = kill`. Leave row (it's a useful dedup anchor).
+   - **Yes** → continue.
+2. Pick a `template` id from `contact-form-templates.md` (`form-listicle`,
+   `form-photo-design`, `form-shopping`, `form-genealogy`,
+   `form-real-estate`, `form-privacy`, `form-generic`).
+3. Find the site's contact form (usually `/contact`, `/about`, or in the
+   footer). Paste the URL into `contact_url`. If there's no form and only
+   a bare email, move the lead to the email flow (`leads.json`) — don't
+   duplicate here.
+4. Set `assigned_to` to your name so your cofounder doesn't pick the same
+   row.
+5. `status = triaged`.
 
 ## 3. Submit
 
-Open each `triaged` row:
+Open each row where `assigned_to = you` and `status = triaged`:
 
 1. Copy the template from `contact-form-templates.md`.
-2. Replace `ARTICLE_TITLE`, `PUBLICATION`, `SECTION` with the values from
-   the row.
-3. Paste into the contact form.
-4. Submit.
-5. In the Sheet: set `status = submitted`, `message_sent` = today's date,
-   and any quirks in `notes` (captcha, "I'll hear back in 2 weeks",
-   auto-responder text, etc.).
-
-**Submission hygiene reminders:**
-- One URL max in the message body.
-- No markdown.
-- Don't mention Pro on first touch.
+2. Replace `ARTICLE_TITLE`, `PUBLICATION`, `SECTION` with the row's values.
+3. Paste into the form. One URL max in the body. No markdown. Submit.
+4. In the Sheet: `status = submitted`, `message_sent = YYYY-MM-DD`, any
+   quirks in `notes` (captcha, auto-responder, etc.).
 
 ## 4. Track replies
 
-When a reply comes back, update `status` to `replied_positive` /
-`replied_negative`. Drop the reply quote or a summary into `reply`.
+- Reply lands → `status = replied_positive` / `replied_negative`, paste a
+  quote or summary into `reply`.
+- Article gets updated to include Ultra Zoom → `status = linked`, note the
+  date in `notes`. These become backlink wins we can cite later.
 
-When the article gets updated to include Ultra Zoom, set `status = linked`
-and note the date in `notes`. These become backlink wins we can cite in
-later outreach.
+## 5. Sheet schema
 
-## 5. CSV schema
+The script writes these columns (see `scripts/lib/sheets.mjs` for the
+canonical list):
 
 | Column | Filled by | Notes |
 |---|---|---|
 | `found_at` | script | ISO date of discovery |
-| `category` | script | dork section heading |
-| `query` | script | exact dork that surfaced this row |
-| `rank` | script | position in CSE results (1–10) |
-| `title` | script | page `<title>` from Google |
+| `source` | script | `exa-search` or `exa-similar` |
+| `seed` | script | the query (search) or seed URL (find-similar) that surfaced this |
+| `title` | script | article title from Exa |
 | `url` | script | dedupe key |
-| `domain` | script | `url`'s hostname (no `www.`) |
-| `snippet` | script | first ~240 chars of CSE snippet |
-| `status` | human | see status table in `contact-form-templates.md` |
-| `template` | human | template id from `contact-form-templates.md` |
-| `contact_url` | human | direct link to the form |
-| `message_sent` | human | ISO date of submission |
-| `reply` | human | quote or summary of reply |
-| `notes` | human | anything else (captcha, auto-reply, etc.) |
+| `domain` | script | hostname, no `www.` |
+| `published_date` | script | Exa-reported publish date (often blank) |
+| `summary` | script | first ~300 chars of article text |
+| `status` | human | see values below |
+| `template` | human | template id |
+| `contact_url` | human | direct URL to the form |
+| `assigned_to` | human | who owns this lead |
+| `message_sent` | human | ISO date |
+| `reply` | human | quote or summary |
+| `notes` | human | anything else |
 
-## 6. Re-running
+### Status values
 
-- The script appends + dedupes, so you can run it weekly without creating
-  duplicate rows.
-- Roll any Reddit `after:YYYY-MM-DD` date cutoffs forward in `dorks.md`
-  every couple of months.
-- If a dork section stops producing `triaged`-worthy results, remove it from
-  the `--sections` filter instead of editing `dorks.md`.
+| Value | Meaning |
+|---|---|
+| `new` | Just discovered. Needs triage. |
+| `kill` | Not a fit. |
+| `triaged` | Reviewed, template picked, contact URL confirmed, assigned. |
+| `submitted` | Message posted. `message_sent` set. |
+| `replied_positive` | Reply received, willing to list / update. |
+| `replied_negative` | Decline. |
+| `linked` | Ultra Zoom visible in the article. |
+| `no_reply` | 30+ days since submit, nothing heard. |
+| `bounced` | Form failed (captcha, 500, auto-reject). |
 
-## 7. When to escalate to email instead
+## 6. When to escalate a lead to email instead
 
-Use email (the `leads.json` flow) when:
-- The publication has 10k+ readers and is worth personalizing for.
-- You already have a spear blog post that directly matches the niche.
-- The author has a personal byline + findable email and the contact form
-  routes to a shared inbox.
+Use the email flow (`leads.json`) when:
+- The publication is high-tier (10k+ readers) and worth personalizing for.
+- You already have a blog-post spear that perfectly matches the niche.
+- The author's byline links to a personal email.
 
 Use this lane (contact form) when:
-- The page is a generic "best extensions" listicle.
-- The site has a contact form but no individual author email.
-- You just need volume and the pitch is straightforward.
+- Generic "best extensions" listicle.
+- Contact form is the only surface.
+- You just want volume and the pitch is straightforward.
+
+## 7. Maintaining query quality
+
+- When a `find-similar` lead is outstanding, reverse-engineer it: add a new
+  query to `exa-queries.md` describing that article's *shape* so `search`
+  mode will surface more like it.
+- If a `sections` regex stops producing `triaged`-worthy results, tighten
+  the language in those bullets — Exa rewards specificity.
+- Periodically promote your best `status = linked` articles by adding
+  their URLs to `leads.json` (even as already-contacted) so future
+  `find-similar` passes use them as high-quality seeds.
