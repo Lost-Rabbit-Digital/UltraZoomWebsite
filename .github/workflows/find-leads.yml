@@ -1,0 +1,90 @@
+name: Find leads (Exa)
+
+on:
+  schedule:
+    # 13:00 UTC = 06:00 PT. Runs once a day.
+    - cron: "0 13 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Search mode"
+        type: choice
+        options:
+          - both
+          - search
+          - find-similar
+        default: both
+      limit:
+        description: "Max queries/seeds to run"
+        default: "20"
+      sections:
+        description: "Regex filter on section headings (search mode only). Leave blank for all."
+        default: ""
+      csv:
+        description: "Write results to a CSV artifact instead of Google Sheets (smoke-test mode)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  find-leads:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+      GOOGLE_SHEETS_SA_KEY: ${{ secrets.GOOGLE_SHEETS_SA_KEY }}
+      LEADS_SHEET_ID: ${{ vars.LEADS_SHEET_ID }}
+      CSV: ${{ github.event.inputs.csv }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Sanity-check secrets
+        run: |
+          missing=()
+          [ -z "$EXA_API_KEY" ] && missing+=("EXA_API_KEY")
+          if [ "$CSV" != "true" ]; then
+            [ -z "$GOOGLE_SHEETS_SA_KEY" ] && missing+=("GOOGLE_SHEETS_SA_KEY")
+            [ -z "$LEADS_SHEET_ID" ] && missing+=("LEADS_SHEET_ID")
+          fi
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::missing secrets/vars: ${missing[*]}"
+            echo "See docs/outreach/sheets-setup.md"
+            exit 1
+          fi
+
+      - name: Run lead discovery
+        run: |
+          args=(--provider exa --mode "${MODE:-both}" --limit "${LIMIT:-20}")
+          if [ -n "$SECTIONS" ]; then
+            args+=(--sections "$SECTIONS")
+          fi
+          if [ "$CSV" = "true" ]; then
+            args+=(--csv "leads-exa-$(date -u +%Y%m%d-%H%M%S).csv")
+          fi
+          echo "::group::args"
+          printf '%s\n' "${args[@]}"
+          echo "::endgroup::"
+          node scripts/find-leads.mjs "${args[@]}"
+        env:
+          MODE: ${{ github.event.inputs.mode }}
+          LIMIT: ${{ github.event.inputs.limit }}
+          SECTIONS: ${{ github.event.inputs.sections }}
+
+      - name: Upload CSV artifact
+        if: ${{ github.event.inputs.csv == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: leads-exa-csv
+          path: leads-exa-*.csv
+          if-no-files-found: warn
+          retention-days: 14
