@@ -29,24 +29,48 @@ const EXCLUDE_DOMAINS = [
   "ultrazoom.app",
 ];
 
+const RETRY_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
+const MAX_ATTEMPTS = 4; // 1 initial + 3 retries → 2s, 4s, 8s backoff
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 async function call(path, body, apiKey) {
-  const res = await fetch(BASE + path, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": apiKey,
-    },
-    body: JSON.stringify(body),
-  });
-  const text = await res.text();
-  if (!res.ok) {
+  let lastErr;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    let res;
+    try {
+      res = await fetch(BASE + path, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-api-key": apiKey,
+        },
+        body: JSON.stringify(body),
+      });
+    } catch (err) {
+      lastErr = err;
+      if (attempt === MAX_ATTEMPTS) throw err;
+      const wait = 2 ** attempt * 1000;
+      console.error(`  retry ${attempt}/${MAX_ATTEMPTS - 1} after ${wait}ms — network: ${err.message}`);
+      await sleep(wait);
+      continue;
+    }
+    const text = await res.text();
+    if (res.ok) {
+      try {
+        return JSON.parse(text);
+      } catch {
+        throw new Error(`Exa ${path}: non-JSON response: ${text.slice(0, 200)}`);
+      }
+    }
+    if (RETRY_STATUSES.has(res.status) && attempt < MAX_ATTEMPTS) {
+      const wait = 2 ** attempt * 1000;
+      console.error(`  retry ${attempt}/${MAX_ATTEMPTS - 1} after ${wait}ms — Exa ${path} ${res.status}`);
+      await sleep(wait);
+      continue;
+    }
     throw new Error(`Exa ${path} ${res.status}: ${text.slice(0, 300)}`);
   }
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new Error(`Exa ${path}: non-JSON response: ${text.slice(0, 200)}`);
-  }
+  throw lastErr || new Error(`Exa ${path}: exhausted ${MAX_ATTEMPTS} attempts`);
 }
 
 export async function search({ apiKey, query, numResults = 10, startPublishedDate }) {

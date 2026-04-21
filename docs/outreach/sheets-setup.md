@@ -1,10 +1,17 @@
-# One-time Setup — Google Sheets + Exa + GitHub Action
+# One-time Setup — Google Sheets + Exa + Brave + GitHub Action
 
 Do this under **boden@lostrabbitdigital.com** once. After it's done, daily
 lead discovery runs on cron and writes new rows to a shared Sheet that you
 and your cofounder edit directly. No more CSVs in git.
 
-Total time: about 20 minutes.
+Two search providers run on separate crons and append to the same Sheet:
+
+- **Exa** (neural search) — `.github/workflows/find-leads.yml`, 13:00 UTC
+- **Brave** (keyword + dorks) — `.github/workflows/find-leads-brave.yml`, 15:00 UTC
+
+Dedup is global by URL, so a page found by both providers only appears once.
+
+Total time: about 20 minutes (add ~2 min if you're also enabling Brave).
 
 ---
 
@@ -108,7 +115,8 @@ The SA can now write to this sheet and nothing else in your Google account.
 
 ## Part E — First run (3 min)
 
-1. Go to the **Actions** tab → **Find leads** workflow in the left sidebar.
+1. Go to the **Actions** tab → **Find leads (Exa)** workflow in the left
+   sidebar.
 2. Click **Run workflow** (top right). Pick `mode: both` and `limit: 5` for
    a tiny smoke test.
 3. Watch the run. If auth is set up right, you'll see a line like
@@ -128,6 +136,36 @@ The SA can now write to this sheet and nothing else in your Google account.
   against the existing `leads.json` URLs that were already seen. That's
   working as intended; try `--mode search` or edit `exa-queries.md` to
   widen the net.
+
+---
+
+## Part F — (Optional) Add the Brave Search provider (2 min)
+
+Brave gives us a second, independent lead stream using keyword dorks from
+`docs/outreach/dorks.md`. It's free-tier friendly (1 request/sec) and covers
+queries Exa's neural search misses, like exact-match site: or intitle:
+operators. Both providers write to the same Sheet; dedup runs globally on
+the URL column.
+
+1. Sign up at https://api-dashboard.search.brave.com with
+   boden@lostrabbitdigital.com. Pick the **Free** plan (requires a card on
+   file but won't charge at our volume — verify at
+   https://brave.com/search/api).
+2. Dashboard → **API Keys** → **Add API Key**. Name it
+   `ultrazoom-gh-action`. Copy the key.
+3. Go to
+   https://github.com/Lost-Rabbit-Digital/UltraZoomWebsite/settings/secrets/actions
+4. Add a new repository secret:
+   - Name: `BRAVE_SEARCH_KEY`
+     Value: the key from step 2.
+5. Go to **Actions** tab → **Find leads (Brave)** → **Run workflow**. Use
+   `limit: 5` for the smoke test. You should see a Step Summary reporting
+   queries run and rows appended.
+6. Once the smoke test works, the daily cron picks up automatically at
+   15:00 UTC (06:00 PT — 2 hours after the Exa run).
+
+The Brave workflow only needs `BRAVE_SEARCH_KEY` in addition to the shared
+`GOOGLE_SHEETS_SA_KEY` secret and `LEADS_SHEET_ID` variable.
 
 ---
 

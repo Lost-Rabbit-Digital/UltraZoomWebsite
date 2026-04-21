@@ -1,24 +1,20 @@
-name: Find leads (Exa)
+name: Find leads (Brave)
 
 on:
   schedule:
-    # 13:00 UTC = 06:00 PT. Runs once a day.
-    - cron: "0 13 * * *"
+    # 15:00 UTC = 08:00 PT. Offset 2h from the Exa run so the two providers
+    # don't race to append the same URL on the rare overlap.
+    - cron: "0 15 * * *"
   workflow_dispatch:
     inputs:
-      mode:
-        description: "Search mode"
-        type: choice
-        options:
-          - both
-          - search
-          - find-similar
-        default: both
       limit:
-        description: "Max queries/seeds to run"
+        description: "Max dork queries to run"
         default: "20"
       sections:
-        description: "Regex filter on section headings (search mode only). Leave blank for all."
+        description: "Regex filter on section headings. Leave blank for all."
+        default: ""
+      since:
+        description: "Freshness floor (YYYY-MM-DD). Leave blank for no filter."
         default: ""
 
 permissions:
@@ -29,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+      BRAVE_SEARCH_KEY: ${{ secrets.BRAVE_SEARCH_KEY }}
       GOOGLE_SHEETS_SA_KEY: ${{ secrets.GOOGLE_SHEETS_SA_KEY }}
       LEADS_SHEET_ID: ${{ vars.LEADS_SHEET_ID }}
     steps:
@@ -46,7 +42,7 @@ jobs:
       - name: Sanity-check secrets
         run: |
           missing=()
-          [ -z "$EXA_API_KEY" ] && missing+=("EXA_API_KEY")
+          [ -z "$BRAVE_SEARCH_KEY" ] && missing+=("BRAVE_SEARCH_KEY")
           [ -z "$GOOGLE_SHEETS_SA_KEY" ] && missing+=("GOOGLE_SHEETS_SA_KEY")
           [ -z "$LEADS_SHEET_ID" ] && missing+=("LEADS_SHEET_ID")
           if [ ${#missing[@]} -ne 0 ]; then
@@ -57,15 +53,18 @@ jobs:
 
       - name: Run lead discovery
         run: |
-          args=(--provider exa --mode "${MODE:-both}" --limit "${LIMIT:-20}")
+          args=(--provider brave --limit "${LIMIT:-20}")
           if [ -n "$SECTIONS" ]; then
             args+=(--sections "$SECTIONS")
+          fi
+          if [ -n "$SINCE" ]; then
+            args+=(--since "$SINCE")
           fi
           echo "::group::args"
           printf '%s\n' "${args[@]}"
           echo "::endgroup::"
           node scripts/find-leads.mjs "${args[@]}"
         env:
-          MODE: ${{ github.event.inputs.mode }}
           LIMIT: ${{ github.event.inputs.limit }}
           SECTIONS: ${{ github.event.inputs.sections }}
+          SINCE: ${{ github.event.inputs.since }}

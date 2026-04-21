@@ -15,12 +15,14 @@ submissions aren't capped by email sending limits.
 ## Pipeline at a glance
 
 ```
-exa-queries.md  ─┐
-                 ├─►  GH Action (daily cron)  ─►  find-leads.mjs  ─►  Google Sheet (shared)
-leads.json URLs ─┘                                                         │
-   (find-similar seeds)                                                    ▼
-                                                             you + cofounder triage,
-                                                             submit, track in-sheet
+exa-queries.md  ──►  Find leads (Exa)   ─┐
+leads.json URLs ──►  (13:00 UTC)         │
+                                         ├─►  find-leads.mjs  ─►  Google Sheet (shared)
+dorks.md        ──►  Find leads (Brave)  ─┘          │                  │
+                     (15:00 UTC)                     ▼                  ▼
+                                        contact-form auto-probe   you + cofounder
+                                        fills contact_url when    triage, submit,
+                                        detectable                track in-sheet
 ```
 
 One-time setup: **`sheets-setup.md`** (service account, sheet creation,
@@ -28,29 +30,51 @@ GitHub secrets). ~20 minutes under boden@lostrabbitdigital.com.
 
 ## 1. Discovery (automatic, daily)
 
-`.github/workflows/find-leads.yml` runs at 13:00 UTC daily and calls
-`scripts/find-leads.mjs` in `both` mode. It:
+Two GitHub Actions workflows write to the same Sheet:
 
-- Runs the natural-language queries in `docs/outreach/exa-queries.md`
-  against Exa's `/search`.
-- Runs `/findSimilar` on every article URL in `docs/outreach/leads.json`.
-- Dedupes against URLs already in the Sheet.
-- Appends only new rows. **It never edits existing rows**, so human status
+- `.github/workflows/find-leads.yml` — **Find leads (Exa)** at 13:00 UTC.
+  Runs NL queries from `docs/outreach/exa-queries.md` against Exa's
+  `/search`, and `/findSimilar` on every article URL in
+  `docs/outreach/leads.json`.
+- `.github/workflows/find-leads-brave.yml` — **Find leads (Brave)** at
+  15:00 UTC. Runs Google-style dorks from `docs/outreach/dorks.md` against
+  the Brave Search API. `YEAR` tokens are auto-substituted with the current
+  year; other placeholders (NICHE, BLOG_SPEAR, SUBREDDIT) are skipped.
+
+Both workflows:
+
+- Dedupe against URLs already in the Sheet (global, across providers).
+- Append only new rows. **They never edit existing rows**, so human status
   edits are safe across runs.
+- Run a best-effort contact-form probe on each new URL and pre-fill
+  `contact_url` when a form is detected (see §2 and §5 below).
 
-You can also trigger it manually: Actions tab → **Find leads** → **Run
-workflow**, optionally picking `mode`, `limit`, or a `sections` regex.
+Trigger either manually: Actions tab → **Find leads (Exa)** or **Find
+leads (Brave)** → **Run workflow**, optionally picking `mode`, `limit`,
+`sections` regex, or `since` date.
 
 ### Running it locally
 
 ```
-export EXA_API_KEY=...
 export GOOGLE_SHEETS_SA_KEY="$(cat path/to/sa-key.json)"
 export LEADS_SHEET_ID=...
 
-npm run find-leads -- --mode search --limit 10
-npm run find-leads -- --mode find-similar --limit 20
-npm run find-leads -- --dry-run --limit 5     # preview without API calls
+# Exa provider
+export EXA_API_KEY=...
+npm run find-leads -- --provider exa --mode search --limit 10
+npm run find-leads -- --provider exa --mode find-similar --limit 20
+
+# Brave provider
+export BRAVE_SEARCH_KEY=...
+npm run find-leads -- --provider brave --limit 20
+npm run find-leads -- --provider brave --sections "Listicle" --limit 5
+
+# Dry run (no API, no Sheet writes) — works with either provider
+npm run find-leads -- --provider exa --dry-run --limit 5
+npm run find-leads -- --provider brave --dry-run --limit 5
+
+# Skip contact-form auto-probe (faster, useful when debugging)
+npm run find-leads -- --provider exa --no-detect --limit 5
 ```
 
 ## 2. Triage in the Sheet
@@ -64,10 +88,14 @@ For each `status = new` row:
 2. Pick a `template` id from `contact-form-templates.md` (`form-listicle`,
    `form-photo-design`, `form-shopping`, `form-genealogy`,
    `form-real-estate`, `form-privacy`, `form-generic`).
-3. Find the site's contact form (usually `/contact`, `/about`, or in the
-   footer). Paste the URL into `contact_url`. If there's no form and only
-   a bare email, move the lead to the email flow (`leads.json`) — don't
-   duplicate here.
+3. Confirm the contact form:
+   - If `contact_url` is already filled (the script auto-detected one),
+     open it and verify the form actually loads and looks right. Keep as-is
+     or correct it.
+   - If `contact_url` is blank, hunt for a form manually (`/contact`,
+     `/about`, footer links). Paste the URL into `contact_url`. If there's
+     no form and only a bare email, move the lead to the email flow
+     (`leads.json`) — don't duplicate here.
 4. Set `assigned_to` to your name so your cofounder doesn't pick the same
    row.
 5. `status = triaged`.
@@ -97,20 +125,35 @@ canonical list):
 | Column | Filled by | Notes |
 |---|---|---|
 | `found_at` | script | ISO date of discovery |
-| `source` | script | `exa-search` or `exa-similar` |
+| `source` | script | `exa-search`, `exa-similar`, or `brave-search` |
 | `seed` | script | the query (search) or seed URL (find-similar) that surfaced this |
-| `title` | script | article title from Exa |
+| `title` | script | article title from the provider |
 | `url` | script | dedupe key |
 | `domain` | script | hostname, no `www.` |
-| `published_date` | script | Exa-reported publish date (often blank) |
-| `summary` | script | first ~300 chars of article text |
+| `published_date` | script | provider-reported publish date (often blank) |
+| `summary` | script | first ~300 chars of article text / description |
 | `status` | human | see values below |
 | `template` | human | template id |
-| `contact_url` | human | direct URL to the form |
+| `contact_url` | script + human | auto-filled when the probe finds a form; verify during triage, correct if wrong |
 | `assigned_to` | human | who owns this lead |
 | `message_sent` | human | ISO date |
 | `reply` | human | quote or summary |
 | `notes` | human | anything else |
+
+### About the `contact_url` auto-probe
+
+After each provider returns results, the script HEAD/GETs ~16 common
+contact paths on the article's origin (`/contact`, `/contact-us`,
+`/about`, `/write-for-us`, …) with a short per-URL budget. If it finds a
+page that contains a `<form>` with textarea/email input or an embed from
+a known form provider (Formspree, Typeform, JotForm, HubSpot, etc.), that
+URL lands in `contact_url`. It's best-effort:
+
+- **False negatives** happen on JS-rendered forms, Cloudflare-challenged
+  pages, or unusual path names. Blank `contact_url` is not proof there's
+  no form — still do a 10-second manual check during triage.
+- **False positives** are rare but possible (e.g. a page that embeds an
+  unrelated newsletter form). Always open the URL before submitting.
 
 ### Status values
 
