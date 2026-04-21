@@ -37,6 +37,8 @@
  *   --sections <re>    regex filter on section headings
  *   --since <iso>      pages/results after this date (YYYY-MM-DD)
  *   --no-detect        skip contact_url auto-detection
+ *   --csv <path>       write to a local CSV file instead of Google Sheets
+ *                      (useful for smoke-testing before Sheets is set up)
  *   --dry-run          preview queries, no API or Sheet calls
  */
 
@@ -47,6 +49,7 @@ import { argv, env, exit } from "node:process";
 import { search as exaSearch, findSimilar as exaFindSimilar } from "./lib/exa.mjs";
 import { search as braveSearch } from "./lib/brave.mjs";
 import { makeClient, rowFromResult, SHEET_COLUMNS } from "./lib/sheets.mjs";
+import { makeCsvClient } from "./lib/csv.mjs";
 import { enrichWithContactUrls } from "./lib/contact-form.mjs";
 
 const DEFAULTS = {
@@ -65,6 +68,7 @@ function parseArgs(raw) {
     sections: null,
     since: null,
     detect: true,
+    csv: null,
     dryRun: false,
   };
   for (let i = 2; i < raw.length; i++) {
@@ -79,6 +83,7 @@ function parseArgs(raw) {
     else if (a === "--sections") out.sections = new RegExp(next(), "i");
     else if (a === "--since") out.since = next();
     else if (a === "--no-detect") out.detect = false;
+    else if (a === "--csv") out.csv = next();
     else if (a === "--dry-run") out.dryRun = true;
     else if (a === "-h" || a === "--help") {
       console.log(readFileSync(new URL(import.meta.url), "utf8").split("*/")[0]);
@@ -278,7 +283,7 @@ async function enrichContactUrls(rows, dryRun) {
   return detected;
 }
 
-function writeStepSummary({ provider, mode, stats, sheetId }) {
+function writeStepSummary({ provider, mode, stats, sheetId, csvPath }) {
   const path = env.GITHUB_STEP_SUMMARY;
   if (!path) return;
   const md = [
@@ -288,6 +293,7 @@ function writeStepSummary({ provider, mode, stats, sheetId }) {
     `| --- | --- |`,
     `| provider | \`${provider}\` |`,
     `| mode | \`${mode}\` |`,
+    `| sink | ${csvPath ? `CSV (\`${csvPath}\`)` : "Google Sheets"} |`,
     `| queries run | ${stats.queries} |`,
     `| seeds run | ${stats.seeds} |`,
     `| new rows appended | **${stats.appended}** |`,
@@ -298,6 +304,8 @@ function writeStepSummary({ provider, mode, stats, sheetId }) {
   ];
   if (sheetId) {
     md.push(`[Open the Sheet →](https://docs.google.com/spreadsheets/d/${sheetId})`);
+  } else if (csvPath) {
+    md.push(`Download the CSV from the **Artifacts** section at the top of this run.`);
   }
   appendFileSync(path, md.join("\n") + "\n");
 }
@@ -313,11 +321,14 @@ async function main() {
     const missing = [];
     if (opts.provider === "exa" && !exaKey) missing.push("EXA_API_KEY");
     if (opts.provider === "brave" && !braveKey) missing.push("BRAVE_SEARCH_KEY");
-    if (!saKeyJson) missing.push("GOOGLE_SHEETS_SA_KEY");
-    if (!sheetId) missing.push("LEADS_SHEET_ID");
+    if (!opts.csv) {
+      if (!saKeyJson) missing.push("GOOGLE_SHEETS_SA_KEY");
+      if (!sheetId) missing.push("LEADS_SHEET_ID");
+    }
     if (missing.length) {
       console.error(`error: missing env vars: ${missing.join(", ")}`);
-      console.error(`       (re-run with --dry-run to preview without secrets)`);
+      console.error(`       (re-run with --dry-run to preview without secrets,`);
+      console.error(`        or --csv <path> to write locally instead of Sheets)`);
       exit(1);
     }
   }
@@ -351,11 +362,17 @@ async function main() {
     return;
   }
 
-  const sheet = makeClient({ saKeyJson, sheetId });
-  await sheet.ensureHeader();
-  const seen = await sheet.readUrls();
+  const sink = opts.csv
+    ? makeCsvClient({ path: resolve(opts.csv) })
+    : makeClient({ saKeyJson, sheetId });
+  await sink.ensureHeader();
+  const seen = await sink.readUrls();
   const seenBefore = seen.size;
-  console.error(`existing URLs in sheet: ${seenBefore}`);
+  console.error(
+    opts.csv
+      ? `csv sink: ${opts.csv}  existing URLs: ${seenBefore}`
+      : `existing URLs in sheet: ${seenBefore}`,
+  );
 
   const allRows = [];
   if (opts.provider === "exa") {
@@ -407,12 +424,18 @@ async function main() {
     stats.contactDetected = await enrichContactUrls(allRows, false);
   }
 
-  stats.appended = await sheet.appendRows(allRows);
+  stats.appended = await sink.appendRows(allRows);
 
   console.error(
     `\ndone. appended ${stats.appended} new rows, ${stats.contactDetected} with contact_url.`,
   );
-  writeStepSummary({ provider: opts.provider, mode: opts.mode, stats, sheetId });
+  writeStepSummary({
+    provider: opts.provider,
+    mode: opts.mode,
+    stats,
+    sheetId: opts.csv ? null : sheetId,
+    csvPath: opts.csv,
+  });
 }
 
 function stubArgs(opts, stats) {

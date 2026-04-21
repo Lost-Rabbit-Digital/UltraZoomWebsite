@@ -75,7 +75,20 @@ npm run find-leads -- --provider brave --dry-run --limit 5
 
 # Skip contact-form auto-probe (faster, useful when debugging)
 npm run find-leads -- --provider exa --no-detect --limit 5
+
+# Write to a local CSV instead of Google Sheets (skips SA/key setup)
+npm run find-leads -- --provider exa --csv leads.csv --limit 10
 ```
+
+### Smoke-testing in CI before Sheets is configured
+
+Both workflows accept a `csv` boolean input on manual dispatch. Running
+with `csv: true` skips the `GOOGLE_SHEETS_SA_KEY` / `LEADS_SHEET_ID`
+checks, writes results to `leads-<provider>-<timestamp>.csv`, and uploads
+that file as a workflow artifact (14-day retention). You only need the
+provider API key secret set (`EXA_API_KEY` or `BRAVE_SEARCH_KEY`) for
+this to work. Download the artifact from the run page to inspect the
+rows before committing to the Sheets setup.
 
 ## 2. Triage in the Sheet
 

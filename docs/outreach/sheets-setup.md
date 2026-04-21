@@ -13,6 +13,12 @@ Dedup is global by URL, so a page found by both providers only appears once.
 
 Total time: about 20 minutes (add ~2 min if you're also enabling Brave).
 
+> **Want to smoke-test first?** Both workflows have a `csv: true` manual
+> input that skips the Sheets checks entirely and uploads a CSV artifact
+> instead. You only need the provider API key (Part C or Part F) for that
+> path — handy for seeing what the rows look like before committing to
+> Parts A/B/D. See `contact-form-prompt.md` → "Smoke-testing in CI".
+
 ---
 
 ## Part A — Create the Google Sheet (2 min)
