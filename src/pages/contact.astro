@@ -124,6 +124,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 })
                 .then(function (response) {
                     if (response.ok) {
+                        if (window.rdt) {
+                            window.rdt('track', 'Lead', {
+                                conversionId: 'contact-' + Date.now()
+                            });
+                        }
                         form.reset();
                         showStatus('success', 'Message sent! We\'ll get back to you soon.');
                     } else {
