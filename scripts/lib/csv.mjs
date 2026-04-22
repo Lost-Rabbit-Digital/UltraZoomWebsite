@@ -7,10 +7,10 @@
 // on startup and skip any result whose URL is already present. Header is
 // written once on first run.
 //
-// Safe assumption about content: the provider normalizers collapse all
-// whitespace in `summary` to single spaces before trimming, so no field
-// we write contains embedded newlines. The parser therefore treats each
-// file line as one row.
+// The parser below walks the whole file with a single state machine so it
+// correctly handles fields that contain embedded newlines (e.g.
+// `message_draft` with paragraph breaks). Quoted cells preserve any
+// whitespace or commas verbatim.
 
 import { existsSync, readFileSync, appendFileSync, writeFileSync } from "node:fs";
 import { SHEET_COLUMNS, URL_COLUMN_INDEX } from "./sheets.mjs";
@@ -25,14 +25,15 @@ function toLine(cols) {
   return cols.map(escape).join(",") + "\n";
 }
 
-function parseLine(line) {
-  const out = [];
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
   let cur = "";
   let inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
     if (inQ) {
-      if (c === '"' && line[i + 1] === '"') {
+      if (c === '"' && text[i + 1] === '"') {
         cur += '"';
         i++;
       } else if (c === '"') {
@@ -43,14 +44,24 @@ function parseLine(line) {
     } else if (c === '"') {
       inQ = true;
     } else if (c === ",") {
-      out.push(cur);
+      row.push(cur);
+      cur = "";
+    } else if (c === "\n" || c === "\r") {
+      // Skip \r in \r\n line endings
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(cur);
+      rows.push(row);
+      row = [];
       cur = "";
     } else {
       cur += c;
     }
   }
-  out.push(cur);
-  return out;
+  if (cur.length > 0 || row.length > 0) {
+    row.push(cur);
+    rows.push(row);
+  }
+  return rows;
 }
 
 export function makeCsvClient({ path }) {
@@ -63,12 +74,9 @@ export function makeCsvClient({ path }) {
   async function readUrls() {
     const seen = new Set();
     if (!existsSync(path)) return seen;
-    const text = readFileSync(path, "utf8");
-    const lines = text.split(/\r?\n/);
-    for (let i = 1; i < lines.length; i++) {
-      if (!lines[i]) continue;
-      const cols = parseLine(lines[i]);
-      const u = cols[URL_COLUMN_INDEX];
+    const rows = parseCsv(readFileSync(path, "utf8"));
+    for (let i = 1; i < rows.length; i++) {
+      const u = rows[i][URL_COLUMN_INDEX];
       if (u) seen.add(u);
     }
     return seen;
