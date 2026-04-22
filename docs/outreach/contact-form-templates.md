@@ -11,7 +11,7 @@ Merge fields are UPPER_SNAKE — fill before submitting.
 
 Sign-off (reuse across all templates):
 ```
-— Boden Garman, Lost Rabbit Digital LLC
+— Boden McHale, Lost Rabbit Digital LLC
 https://ultrazoom.app
 ```
 
@@ -33,7 +33,7 @@ new tab. Free to use, no tracking, client-side only.
 If it's useful, I'd be grateful for a mention. Happy to send screenshots or a
 GIF, or answer anything you'd want to cover.
 
-— Boden Garman, Lost Rabbit Digital LLC
+— Boden McHale, Lost Rabbit Digital LLC
 https://ultrazoom.app
 ```
 
@@ -58,7 +58,7 @@ faster. Free, no tracking, Chrome + Firefox.
 
 Happy to send a GIF or chat about the design side if it's useful.
 
-— Boden Garman, Lost Rabbit Digital LLC
+— Boden McHale, Lost Rabbit Digital LLC
 https://ultrazoom.app
 ```
 
@@ -83,7 +83,7 @@ condition on used items. Free, Chrome + Firefox.
 If it's a fit, I'd love a mention in the article or a future update. Can send
 a GIF on request.
 
-— Boden Garman, Lost Rabbit Digital LLC
+— Boden McHale, Lost Rabbit Digital LLC
 https://ultrazoom.app
 ```
 
@@ -108,7 +108,7 @@ Chrome + Firefox, no tracking.
 If it's useful to your readers, a mention would mean a lot. Happy to send
 example workflows.
 
-— Boden Garman, Lost Rabbit Digital LLC
+— Boden McHale, Lost Rabbit Digital LLC
 https://ultrazoom.app
 ```
 
@@ -132,7 +132,7 @@ individually. Much faster for filtering homes at the shortlist stage.
 If it's worth a mention, I'd be grateful. Can share a GIF of the Zillow
 workflow if useful.
 
-— Boden Garman, Lost Rabbit Digital LLC
+— Boden McHale, Lost Rabbit Digital LLC
 https://ultrazoom.app
 ```
 
@@ -157,7 +157,7 @@ runs in-browser. Chrome and Firefox, free with optional Pro.
 If you cover the space, I'd love your take. Happy to walk through the
 zero-knowledge architecture.
 
-— Boden Garman, Lost Rabbit Digital LLC
+— Boden McHale, Lost Rabbit Digital LLC
 https://ultrazoom.app
 ```
 
@@ -181,7 +181,7 @@ built by a small indie studio.
 If it's something you'd consider covering or mentioning, I'd love that. Can
 send screenshots, a GIF, or anything else useful.
 
-— Boden Garman, Lost Rabbit Digital LLC
+— Boden McHale, Lost Rabbit Digital LLC
 https://ultrazoom.app
 ```
 
