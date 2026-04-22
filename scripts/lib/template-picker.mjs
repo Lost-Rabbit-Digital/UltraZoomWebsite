@@ -8,7 +8,7 @@
 // Rotation: two variants per bucket, selected deterministically from a hash of
 // the URL. Same lead → same draft across re-runs; across leads we alternate.
 
-const SIGN_OFF = "— Boden Garman, Lost Rabbit Digital LLC\nhttps://ultrazoom.app";
+const SIGN_OFF = "Thanks,\nBoden Garman, Lost Rabbit Digital LLC\nhttps://ultrazoom.app";
 
 const BUCKETS = [
   {
@@ -44,7 +44,7 @@ const TEMPLATES = {
 
 Found your "${title}" while looking for genealogy research tools worth sharing. Wanted to share one back: Ultra Zoom.
 
-It's a free hover-to-zoom browser extension. On Ancestry, FamilySearch, Findagrave, and 50+ other sites you hover a scanned document or photo and see the full-resolution image instantly — no modal, no re-loading. Saves a lot of clicks when reviewing census pages or old photos. Chrome + Firefox, no tracking.
+It's a free hover-to-zoom browser extension. On Ancestry, FamilySearch, Findagrave, and 50+ other sites you hover a scanned document or photo and see the full-resolution image instantly. No modal, no re-loading. Saves a lot of clicks when reviewing census pages or old photos. Chrome + Firefox, no tracking.
 
 If it's useful to your readers, a mention would mean a lot.
 
@@ -66,7 +66,7 @@ ${SIGN_OFF}`,
 
 Came across "${title}" and wanted to flag a browser tool that fits well with house-hunting research: Ultra Zoom.
 
-It's a free hover-to-zoom extension for Chrome and Firefox. On Zillow, Redfin, Realtor.com, and 50+ other sites you hover any listing photo and see the full-size image — no lightbox, no clicking through 40 photos individually. Much faster for filtering homes at the shortlist stage.
+It's a free hover-to-zoom extension for Chrome and Firefox. On Zillow, Redfin, Realtor.com, and 50+ other sites you hover any listing photo and see the full-size image. No lightbox, no clicking through 40 photos individually. Much faster for filtering homes at the shortlist stage.
 
 If it's worth a mention, I'd be grateful. Can share a short GIF of the Zillow workflow.
 
@@ -76,7 +76,7 @@ ${SIGN_OFF}`,
 
 Your "${title}" popped up while I was looking for resources people actually recommend to house-hunters. Wanted to flag Ultra Zoom.
 
-Free Chrome/Firefox extension, hover-to-zoom on Zillow, Redfin, Realtor.com and 50+ other sites — skip the lightbox, see the full-res listing photo instantly. Makes the shortlisting phase a lot less tedious.
+Free Chrome/Firefox extension, hover-to-zoom on Zillow, Redfin, Realtor.com and 50+ other sites. Skip the lightbox and see the full-res listing photo instantly. Makes the shortlisting phase a lot less tedious.
 
 Can send a quick GIF if it helps.
 
@@ -86,9 +86,9 @@ ${SIGN_OFF}`,
     ({ title }) =>
 `Hi,
 
-I read your "${title}" piece — useful for anyone who spends time sourcing on eBay or Amazon. Wanted to flag a tool that fits the workflow: Ultra Zoom.
+I read your "${title}" piece. Useful for anyone who spends time sourcing on eBay or Amazon. Wanted to flag a tool that fits the workflow: Ultra Zoom.
 
-It's a hover-to-zoom browser extension. Hover a listing thumbnail on eBay, Amazon, and dozens of other shopping sites and you see the full-resolution photo — no click-through, no back-button dance. Really handy for inspecting condition on used items. Free, Chrome + Firefox.
+It's a hover-to-zoom browser extension. Hover a listing thumbnail on eBay, Amazon, and dozens of other shopping sites and you see the full-resolution photo. No click-through, no back-button dance. Really handy for inspecting condition on used items. Free, Chrome + Firefox.
 
 If it's a fit, I'd love a mention. Can send a GIF on request.
 
@@ -98,7 +98,7 @@ ${SIGN_OFF}`,
 
 "${title}" came up while I was researching resources for people who research before they buy. Wanted to share Ultra Zoom in case it's worth covering.
 
-Free Chrome/Firefox extension — hover a thumbnail on eBay, Amazon, or 50+ other shopping sites and instantly see the full-resolution listing photo. No click, no new tab. Saves real time when comparing used items side by side.
+Free Chrome/Firefox extension. Hover a thumbnail on eBay, Amazon, or 50+ other shopping sites and instantly see the full-resolution listing photo. No click, no new tab. Saves real time when comparing used items side by side.
 
 Happy to send screenshots if useful.
 
@@ -120,7 +120,7 @@ ${SIGN_OFF}`,
 
 Found "${title}" while researching visual-workflow tools worth recommending. Wanted to flag Ultra Zoom in case it fits a future piece.
 
-Free Chrome/Firefox extension — hover any image on Pinterest, Behance, Dribbble, Google Images and 50+ other sites and you get the full-size preview immediately, no new tab. Reference hunting and moodboard browsing get noticeably less click-heavy. No tracking, runs client-side.
+Free Chrome/Firefox extension. Hover any image on Pinterest, Behance, Dribbble, Google Images or 50+ other sites and you get the full-size preview immediately, no new tab. Reference hunting and moodboard browsing get noticeably less click-heavy. No tracking, runs client-side.
 
 Can share a quick GIF of the Pinterest workflow.
 
@@ -132,7 +132,7 @@ ${SIGN_OFF}`,
 
 Your "${title}" came up while I was looking for privacy-minded publications. Wanted to share a project that fits the angle: Ultra Zoom.
 
-It's a hover-to-zoom browser extension, which is a category with an ugly history (the original Hover Zoom was caught selling browsing data in 2014). Ultra Zoom is the counter-argument: zero telemetry, no analytics, no history collection, no third-party servers — everything runs in-browser. Chrome and Firefox, free with optional Pro.
+It's a hover-to-zoom browser extension, which is a category with an ugly history (the original Hover Zoom was caught selling browsing data in 2014). Ultra Zoom is the counter-argument: zero telemetry, no analytics, no history collection, no third-party servers. Everything runs in-browser. Chrome and Firefox, free with optional Pro.
 
 Happy to walk through the architecture if useful.
 
@@ -142,7 +142,7 @@ ${SIGN_OFF}`,
 
 "${title}" came up in my research and I wanted to flag Ultra Zoom in case the privacy angle is interesting to you.
 
-Hover-to-zoom extensions have a long history of shipping telemetry (the original Hover Zoom sold browsing data). Ultra Zoom takes the opposite approach — zero telemetry, no analytics, no remote servers, everything runs locally. Chrome + Firefox, free tier covers everyone.
+Hover-to-zoom extensions have a long history of shipping telemetry (the original Hover Zoom sold browsing data). Ultra Zoom takes the opposite approach. Zero telemetry, no analytics, no remote servers, everything runs locally. Chrome + Firefox, free tier covers everyone.
 
 Glad to answer anything if you cover the category.
 
@@ -154,7 +154,7 @@ ${SIGN_OFF}`,
 
 I came across your piece "${title}" while researching browser extension roundups and wanted to flag one that fits the ${section} section: Ultra Zoom, a hover-to-zoom extension for Chrome and Firefox.
 
-It works on 60+ sites (Google Images, Amazon, Reddit, Pinterest, eBay, Zillow, Ancestry, etc.) — hover any thumbnail, see the full-size image, no click, no new tab. Free, no tracking, client-side only.
+It works on 60+ sites (Google Images, Amazon, Reddit, Pinterest, eBay, Zillow, Ancestry, etc.). Hover any thumbnail and see the full-size image. No click, no new tab. Free, no tracking, client-side only.
 
 If it's useful, I'd be grateful for a mention. Happy to send screenshots or a GIF.
 
@@ -164,7 +164,7 @@ ${SIGN_OFF}`,
 
 Found "${title}" while researching extension roundups and wanted to flag one I think fits the ${section} angle: Ultra Zoom.
 
-Free Chrome + Firefox extension, hover-to-zoom on 60+ sites — Google Images, Amazon, Reddit, Pinterest, eBay, Zillow, Ancestry and more. Hover a thumbnail, see the full-size image, no click or new tab. Client-side only, no tracking.
+Free Chrome + Firefox extension, hover-to-zoom on 60+ sites including Google Images, Amazon, Reddit, Pinterest, eBay, Zillow, and Ancestry. Hover a thumbnail, see the full-size image, no click or new tab. Client-side only, no tracking.
 
 Happy to send a GIF or screenshots if helpful.
 
@@ -176,7 +176,7 @@ ${SIGN_OFF}`,
 
 Found you through "${title}" and wanted to briefly introduce a project that might be a fit for your audience: Ultra Zoom, a hover-to-zoom browser extension for Chrome and Firefox.
 
-It works on 60+ websites — hover any image thumbnail, see the full-size image instantly, no click, no new tab. Free, privacy-first (no tracking), built by a small indie studio.
+It works on 60+ websites. Hover any image thumbnail and see the full-size image instantly. No click, no new tab. Free, privacy-first (no tracking), built by a small indie studio.
 
 If it's something you'd consider covering, I'd love that. Can send screenshots, a GIF, or anything else useful.
 
@@ -186,7 +186,7 @@ ${SIGN_OFF}`,
 
 "${title}" came up in my research and I wanted to briefly flag Ultra Zoom in case it's a fit for your audience.
 
-Free hover-to-zoom extension for Chrome and Firefox — works on 60+ sites (Google Images, Amazon, Pinterest, eBay, Zillow, Ancestry, and more). Hover a thumbnail, see the full-size image, no click, no new tab. No tracking, built by a small indie studio.
+Free hover-to-zoom extension for Chrome and Firefox. Works on 60+ sites (Google Images, Amazon, Pinterest, eBay, Zillow, Ancestry, and more). Hover a thumbnail, see the full-size image, no click, no new tab. No tracking, built by a small indie studio.
 
 Happy to send a GIF or answer anything useful.
 

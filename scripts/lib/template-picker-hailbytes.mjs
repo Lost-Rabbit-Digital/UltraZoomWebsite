@@ -18,7 +18,7 @@
 // Rotation: two variants per bucket, selected deterministically from a hash
 // of the URL so re-runs produce the same draft for the same lead.
 
-const SIGN_OFF = "— David McHale, HailBytes\nhttps://hailbytes.com";
+const SIGN_OFF = "Thanks,\nDavid McHale, HailBytes\nhttps://hailbytes.com";
 
 // Order matters: SAT first, then pentest, MSSP, vCISO, then fallback.
 const BUCKETS = [
@@ -49,7 +49,7 @@ const TEMPLATES = {
     () =>
 `Hi there,
 
-David McHale here — I'm launching HailBytes ASM, an attack surface management platform built for pen-testing and offensive-security firms. It orchestrates 30+ recon tools (subfinder, nmap, nuclei, httpx, ffuf, and more) into one continuous pipeline, runs in your own Azure or AWS tenant, and has no per-asset fee — so you can monitor every engagement's external surface without per-target licensing.
+David McHale here. I'm launching HailBytes ASM, an attack surface management platform built for pen-testing and offensive-security firms. It orchestrates 30+ recon tools (subfinder, nmap, nuclei, httpx, ffuf, and more) into one continuous pipeline, runs in your own Azure or AWS tenant, and has no per-asset fee, so you can monitor every engagement's external surface without per-target licensing.
 
 Would you try it free for 30 days and share honest feedback? Happy to set up a short demo.
 
@@ -57,9 +57,9 @@ ${SIGN_OFF}`,
     () =>
 `Hi,
 
-David McHale from HailBytes here. We're launching HailBytes ASM — an attack surface management platform aimed at pentest firms that want continuous external recon across all their engagements without per-target licensing. It chains 30+ tools (subfinder, nmap, nuclei, httpx, ffuf, etc.) into one pipeline, runs in your own cloud tenant, correlates findings in Postgres, and adds AI-assisted triage.
+David McHale from HailBytes here. We're launching HailBytes ASM, an attack surface management platform aimed at pentest firms that want continuous external recon across all their engagements without per-target licensing. It chains 30+ tools (subfinder, nmap, nuclei, httpx, ffuf, etc.) into one pipeline, runs in your own cloud tenant, correlates findings in Postgres, and adds AI-assisted triage.
 
-I'd love to get it in front of working pentesters. Free 30-day trial in exchange for feedback — interested?
+I'd love to get it in front of working pentesters. Free 30-day trial in exchange for feedback. Interested?
 
 ${SIGN_OFF}`,
   ],
@@ -67,7 +67,7 @@ ${SIGN_OFF}`,
     () =>
 `Hi there,
 
-David McHale here — I'm launching HailBytes ASM, an attack surface management platform built for MSSPs that want to add continuous external recon to their managed service catalog. It runs 7 automated scan phases across 30+ tools, deploys in your own Azure or AWS tenant (so client data never leaves your cloud), supports multi-tenant project isolation and RBAC, and has no per-asset fee — unlimited targets at every tier.
+David McHale here. I'm launching HailBytes ASM, an attack surface management platform built for MSSPs that want to add continuous external recon to their managed service catalog. It runs 7 automated scan phases across 30+ tools, deploys in your own Azure or AWS tenant (so client data never leaves your cloud), supports multi-tenant project isolation and RBAC, and has no per-asset fee, with unlimited targets at every tier.
 
 Would you try it free for 30 days and share feedback from an MSSP's perspective?
 
@@ -75,9 +75,9 @@ ${SIGN_OFF}`,
     () =>
 `Hi,
 
-David McHale from HailBytes here. We're launching HailBytes ASM — an attack surface management platform designed for MSSPs and MDR providers. It gives you continuous external recon across all your clients from a single deployment in your own tenant, with multi-tenant project isolation, RBAC, and unlimited targets (no per-asset fee). AI-powered triage generates executive reports automatically.
+David McHale from HailBytes here. We're launching HailBytes ASM, an attack surface management platform designed for MSSPs and MDR providers. It gives you continuous external recon across all your clients from a single deployment in your own tenant, with multi-tenant project isolation, RBAC, and unlimited targets (no per-asset fee). AI-powered triage generates executive reports automatically.
 
-Free 30-day trial — I'd love your feedback on whether it fits into an MSSP workflow. Happy to set up a demo.
+Free 30-day trial. I'd love your feedback on whether it fits into an MSSP workflow. Happy to set up a demo.
 
 ${SIGN_OFF}`,
   ],
@@ -85,7 +85,7 @@ ${SIGN_OFF}`,
     () =>
 `Hi there,
 
-David McHale here — I'm launching HailBytes ASM, an attack surface management platform that fits naturally into a vCISO or GRC engagement. It gives your clients continuous external-asset discovery and vulnerability monitoring from a single deployment in their own cloud tenant, with audit-logged findings that map to SOC 2, HIPAA, and PCI controls. No per-asset fee — unlimited targets.
+David McHale here. I'm launching HailBytes ASM, an attack surface management platform that fits naturally into a vCISO or GRC engagement. It gives your clients continuous external-asset discovery and vulnerability monitoring from a single deployment in their own cloud tenant, with audit-logged findings that map to SOC 2, HIPAA, and PCI controls. No per-asset fee, with unlimited targets.
 
 Would you try it free for 30 days and share feedback? Useful to hear whether it fits the vCISO toolkit.
 
@@ -93,7 +93,7 @@ ${SIGN_OFF}`,
     () =>
 `Hi,
 
-David McHale from HailBytes here. We're launching HailBytes ASM — an attack surface management platform that's been getting interest from vCISO and compliance-led practices. Deploys into a client's own Azure or AWS tenant, correlates 30+ tools into one scan pipeline, produces executive-ready risk reports via AI, and has full audit logging for SOC 2, HIPAA, and PCI programs. No per-asset fee at any tier.
+David McHale from HailBytes here. We're launching HailBytes ASM, an attack surface management platform that's been getting interest from vCISO and compliance-led practices. Deploys into a client's own Azure or AWS tenant, correlates 30+ tools into one scan pipeline, produces executive-ready risk reports via AI, and has full audit logging for SOC 2, HIPAA, and PCI programs. No per-asset fee at any tier.
 
 Free 30-day trial in exchange for honest feedback. Interested?
 
@@ -103,7 +103,7 @@ ${SIGN_OFF}`,
     () =>
 `Hi there,
 
-David McHale here — I'm launching HailBytes SAT, a security awareness training and phishing simulation platform built for firms that deliver SAT to their clients. It runs in your own Azure or AWS tenant (no client data in a vendor cloud), is Entra ID native with SCIM, has AI-assisted template generation, and — critically — has no per-user fee. Unlimited users on a single VM.
+David McHale here. I'm launching HailBytes SAT, a security awareness training and phishing simulation platform built for firms that deliver SAT to their clients. It runs in your own Azure or AWS tenant (no client data in a vendor cloud), is Entra ID native with SCIM, has AI-assisted template generation, and critically, no per-user fee. Unlimited users on a single VM.
 
 Would you try it free for 30 days and share feedback? I'd love to hear from a firm that actually runs awareness programs.
 
@@ -111,9 +111,9 @@ ${SIGN_OFF}`,
     () =>
 `Hi,
 
-David McHale from HailBytes here. We're launching HailBytes SAT — a phishing simulation and security awareness training platform for MSSPs, consultancies, and training providers that deliver SAT as a service. One VM in your (or your client's) cloud tenant supports up to 5,000 users with no per-user licensing. AI-assisted template generation, Entra ID SSO, and webhook-driven SIEM integration are built in.
+David McHale from HailBytes here. We're launching HailBytes SAT, a phishing simulation and security awareness training platform for MSSPs, consultancies, and training providers that deliver SAT as a service. One VM in your (or your client's) cloud tenant supports up to 5,000 users with no per-user licensing. AI-assisted template generation, Entra ID SSO, and webhook-driven SIEM integration are built in.
 
-Free 30-day trial — would you try it and share feedback? Happy to set up a demo.
+Free 30-day trial. Would you try it and share feedback? Happy to set up a demo.
 
 ${SIGN_OFF}`,
   ],
@@ -121,7 +121,7 @@ ${SIGN_OFF}`,
     () =>
 `Hi there,
 
-David McHale here — I'm launching HailBytes ASM, an attack surface management platform built for cybersecurity firms that want to add continuous external recon to their client offerings. It runs in your own cloud tenant, chains 30+ recon and vulnerability tools into one automated pipeline, has AI-powered triage, and charges no per-asset fee — unlimited targets at every tier. We're also launching HailBytes SAT (phishing simulation, no per-user fee) in the same family, in case that's a closer fit.
+David McHale here. I'm launching HailBytes ASM, an attack surface management platform built for cybersecurity firms that want to add continuous external recon to their client offerings. It runs in your own cloud tenant, chains 30+ recon and vulnerability tools into one automated pipeline, has AI-powered triage, and charges no per-asset fee, with unlimited targets at every tier. We're also launching HailBytes SAT (phishing simulation, no per-user fee) in the same family, in case that's a closer fit.
 
 Free 30-day trial of either in exchange for feedback. Which would be the better fit for your team?
 
