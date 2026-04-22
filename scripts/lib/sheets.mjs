@@ -12,12 +12,16 @@
 //   - appendRows(rows)    → append rows to the first sheet tab
 
 import { GoogleAuth } from "google-auth-library";
+import { pickTemplate } from "./template-picker.mjs";
 
 const SHEETS_BASE = "https://sheets.googleapis.com/v4/spreadsheets";
 const SCOPE = "https://www.googleapis.com/auth/spreadsheets";
 
 export const SHEET_TAB = "Leads";
 
+// Column order is append-only. New columns always go at the end so that
+// existing Sheets can be extended in place without reshuffling data — see
+// ensureHeader for the drift handling.
 export const SHEET_COLUMNS = [
   "found_at",
   "source",
@@ -34,6 +38,8 @@ export const SHEET_COLUMNS = [
   "message_sent",
   "reply",
   "notes",
+  "author",
+  "message_draft",
 ];
 
 export const URL_COLUMN_INDEX = SHEET_COLUMNS.indexOf("url"); // 4 → column E
@@ -67,7 +73,9 @@ export function makeClient({ sheetId }) {
   }
 
   async function ensureHeader() {
-    // Read row 1; if it's empty, write the header.
+    // Read row 1. If it's shorter than the target schema, extend it by
+    // appending the missing columns — existing data is untouched. We don't
+    // rename or reorder columns the human may have customized.
     const range = `${SHEET_TAB}!A1:${columnLetter(SHEET_COLUMNS.length - 1)}1`;
     const url = `${SHEETS_BASE}/${sheetId}/values/${encodeURIComponent(range)}`;
     const res = await fetch(url, { headers: await authHeaders() });
@@ -75,11 +83,13 @@ export function makeClient({ sheetId }) {
     const json = await res.json();
     const firstRow = json.values?.[0] || [];
     if (firstRow.length >= SHEET_COLUMNS.length) return;
+    const target = [...firstRow];
+    while (target.length < SHEET_COLUMNS.length) target.push(SHEET_COLUMNS[target.length]);
     const putUrl = `${SHEETS_BASE}/${sheetId}/values/${encodeURIComponent(range)}?valueInputOption=RAW`;
     const put = await fetch(putUrl, {
       method: "PUT",
       headers: { ...(await authHeaders()), "content-type": "application/json" },
-      body: JSON.stringify({ values: [SHEET_COLUMNS] }),
+      body: JSON.stringify({ values: [target] }),
     });
     if (!put.ok) throw new Error(`sheets write header ${put.status}: ${await put.text()}`);
   }
@@ -113,7 +123,10 @@ export function makeClient({ sheetId }) {
 }
 
 export function rowFromResult(result, { source, seed, foundAt }) {
-  // Match SHEET_COLUMNS order. Human columns (status onward) left blank.
+  // Match SHEET_COLUMNS order. `template` and `message_draft` are pre-filled
+  // from the keyword picker so triage starts with a copy-paste-ready message;
+  // humans override as needed. Other human columns (status onward) stay blank.
+  const { templateId, draft } = pickTemplate(result);
   return [
     foundAt,
     source,
@@ -124,11 +137,13 @@ export function rowFromResult(result, { source, seed, foundAt }) {
     result.published_date || "",
     result.summary,
     "new", // status
-    "", // template
+    templateId, // template
     "", // contact_url
     "", // assigned_to
     "", // message_sent
     "", // reply
     "", // notes
+    result.author || "", // author
+    draft, // message_draft
   ];
 }

@@ -101,9 +101,12 @@ For each `status = new` row:
    where Ultra Zoom genuinely fits?
    - **No** → `status = kill`. Leave row (it's a useful dedup anchor).
    - **Yes** → continue.
-2. Pick a `template` id from `contact-form-templates.md` (`form-listicle`,
-   `form-photo-design`, `form-shopping`, `form-genealogy`,
-   `form-real-estate`, `form-privacy`, `form-generic`).
+2. Review the auto-picked `template` and the draft in `message_draft`.
+   The script guesses a template from keywords in the title/summary/domain
+   (`form-listicle`, `form-photo-design`, `form-shopping`, `form-genealogy`,
+   `form-real-estate`, `form-privacy`, `form-generic`) and pre-fills a
+   copy-paste-ready draft. Swap the template if the guess is wrong — see
+   `contact-form-templates.md` for the canonical library.
 3. Confirm the contact form:
    - If `contact_url` is already filled (the script auto-detected one),
      open it and verify the form actually loads and looks right. Keep as-is
@@ -120,8 +123,12 @@ For each `status = new` row:
 
 Open each row where `assigned_to = you` and `status = triaged`:
 
-1. Copy the template from `contact-form-templates.md`.
-2. Replace `ARTICLE_TITLE`, `PUBLICATION`, `SECTION` with the row's values.
+1. Copy the pre-drafted message from `message_draft`. If the picker guessed
+   wrong, grab the right template from `contact-form-templates.md` and fill
+   `ARTICLE_TITLE` / `PUBLICATION` / `SECTION` by hand.
+2. If the page has an author byline and `author` is empty, personalize the
+   salutation (`Hi <first name>,`). The field is populated when the provider
+   reports one (Exa only — Brave doesn't).
 3. Paste into the form. One URL max in the body. No markdown. Submit.
 4. In the Sheet: `status = submitted`, `message_sent = YYYY-MM-DD`, any
    quirks in `notes` (captcha, auto-responder, etc.).
@@ -146,15 +153,35 @@ canonical list):
 | `title` | script | article title from the provider |
 | `url` | script | dedupe key |
 | `domain` | script | hostname, no `www.` |
-| `published_date` | script | provider-reported publish date (often blank) |
+| `published_date` | script | provider-reported publish date, coerced to `YYYY-MM-DD` (often blank) |
 | `summary` | script | first ~300 chars of article text / description |
 | `status` | human | see values below |
-| `template` | human | template id |
+| `template` | script + human | auto-picked template id from keyword routing; override during triage if wrong |
 | `contact_url` | script + human | auto-filled when the probe finds a form; verify during triage, correct if wrong |
 | `assigned_to` | human | who owns this lead |
 | `message_sent` | human | ISO date |
 | `reply` | human | quote or summary |
 | `notes` | human | anything else |
+| `author` | script | byline when the provider reports one (Exa only); empty otherwise |
+| `message_draft` | script + human | pre-filled short message from the picker, with `ARTICLE_TITLE` / `PUBLICATION` / `SECTION` merged. Copy-paste-ready; edit freely during triage |
+
+### About the `template` + `message_draft` auto-pick
+
+After each result is normalized, `scripts/lib/template-picker.mjs` matches
+title/summary/domain keywords against the template buckets in
+`contact-form-templates.md` (genealogy, real-estate, shopping,
+photo-design, privacy, listicle, generic fallback) and renders a short
+form-safe draft with `ARTICLE_TITLE`, `PUBLICATION`, and `SECTION` merged.
+It picks deterministically between two variants per bucket using a hash
+of the URL, so identical leads always produce identical drafts but the
+overall mix stays varied across a batch.
+
+- **Wrong bucket?** The keyword router is heuristic. If you see the wrong
+  template id, just change `template` in the Sheet and re-draft from
+  `contact-form-templates.md`.
+- **Wrong publication name?** The picker derives `PUBLICATION` from the
+  domain (e.g. `pinchofyum.com` → `Pinchofyum`). Fix it in
+  `message_draft` before submitting if the real name is different.
 
 ### About the `contact_url` auto-probe
 

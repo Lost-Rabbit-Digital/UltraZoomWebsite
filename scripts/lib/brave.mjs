@@ -8,6 +8,8 @@
 // Rate limit: 1 request/sec on the free tier. We serialize calls and enforce
 // the gap here so callers don't need to think about it.
 
+import { toIsoDate } from "./util.mjs";
+
 const BASE = "https://api.search.brave.com/res/v1";
 const MIN_GAP_MS = 1100; // free tier: 1 rps; leave 100ms slack
 const RETRY_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
@@ -116,7 +118,7 @@ function normalize(r) {
     url: r.url,
     title: r.title || "",
     domain: hostOf(r.url),
-    published_date: r.page_age || r.age || "",
+    published_date: toIsoDate(r.page_age || r.age || ""),
     author: "",
     summary: (r.description || "").replace(/\s+/g, " ").trim().slice(0, 300),
     score: null,
