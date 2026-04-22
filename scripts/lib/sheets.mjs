@@ -177,7 +177,7 @@ export function rowFromResult(result, { source, seed, foundAt, pickTemplate = de
   // `pickTemplate` is injectable so additional outreach lanes (e.g. the
   // HailBytes PoC in find-leads-hailbytes.mjs) can plug in their own picker
   // without forking this module.
-  const { templateId, draft } = pickTemplate(result);
+  const { templateId, draft } = pickTemplate(result, { seed });
   return [
     foundAt,
     source,
