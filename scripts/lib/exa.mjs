@@ -6,6 +6,8 @@
 //
 // Auth: single API key in the `x-api-key` header.
 
+import { toIsoDate } from "./util.mjs";
+
 const BASE = "https://api.exa.ai";
 
 const EXCLUDE_DOMAINS = [
@@ -104,7 +106,7 @@ function normalize(r) {
     url: r.url,
     title: r.title || "",
     domain: host,
-    published_date: r.publishedDate || "",
+    published_date: toIsoDate(r.publishedDate || ""),
     author: r.author || "",
     summary: (r.text || r.summary || "").replace(/\s+/g, " ").trim().slice(0, 300),
     score: typeof r.score === "number" ? r.score : null,
