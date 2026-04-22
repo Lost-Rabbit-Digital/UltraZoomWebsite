@@ -72,9 +72,12 @@ import { pickTemplate as pickHailBytesTemplate } from "./lib/template-picker-hai
 const DEFAULT_SHEET_ID = "1WAidnZYBbx9xuWMyGbC_ArJZAcAKqChapNcSxZJQ67c";
 
 // Domains that aren't prospects for this lane (our own site; big analyst
-// platforms that occasionally slip past the query-level excludes). The
-// shared exa/brave clients already drop social networks, job boards, and
-// the major extension stores.
+// platforms that occasionally slip past the query-level excludes; forum and
+// self-publishing hosts whose page types don't map cleanly to the opener
+// classifier; apparel/copywriting domains the scraper has historically
+// matched on fit-guide pages for seeds like "services page" or "sizing").
+// The shared exa/brave clients already drop social networks, job boards,
+// and the major extension stores.
 const SKIP_DOMAINS = new Set([
   "hailbytes.com",
   "gartner.com",
@@ -84,7 +87,29 @@ const SKIP_DOMAINS = new Set([
   "trustradius.com",
   "indeed.com",
   "glassdoor.com",
+  "quora.com",
+  "www.quora.com",
+  "reddit.com",
+  "www.reddit.com",
+  "medium.com",
+  "thetinyclosetshop.com",
+  "junkfoodclothing.com",
+  "juliannarae.com",
+  "hdcopywriting.com",
 ]);
+
+// Titles that betray an off-topic apparel/copywriting page even when the
+// domain is new. Keep this list narrow — false positives here drop otherwise
+// good leads. See docs/outreach-hailbytes/cold-opener-prompt.md §"Data-quality
+// flags" for the motivating sample.
+const OFF_TOPIC_TITLE_RE =
+  /\b(sizing|fit guide|size chart|size (?:&|and) fit|apparel|clothing)\b/i;
+
+function isOffTopicResult(item) {
+  if (!item) return false;
+  if (OFF_TOPIC_TITLE_RE.test(item.title || "")) return true;
+  return false;
+}
 
 const DEFAULTS = {
   exa: {
@@ -278,6 +303,7 @@ function collect({ items, source, seed, seen, rows }) {
     if (!it || !it.url || seen.has(it.url)) continue;
     // Drop prospects that aren't useful for HailBytes outreach.
     if (SKIP_DOMAINS.has(it.domain)) continue;
+    if (isOffTopicResult(it)) continue;
     seen.add(it.url);
     rows.push(rowFromResult(it, { source, seed, foundAt, pickTemplate: pickHailBytesTemplate }));
     kept++;

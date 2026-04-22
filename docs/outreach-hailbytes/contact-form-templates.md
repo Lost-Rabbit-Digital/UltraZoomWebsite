@@ -20,6 +20,27 @@ The live, form-ready drafts live in `scripts/lib/template-picker-hailbytes.mjs`.
 This doc is the human-readable reference so we can edit copy without diffing
 JS. If you change a template here, mirror it in the picker (or vice-versa).
 
+The picker now assembles each draft as:
+
+```
+Hi {company} team,
+
+David McHale from HailBytes here. {opener} {pitch}
+
+{cta}
+
+— David McHale, HailBytes
+https://hailbytes.com
+```
+
+`{opener}` is chosen by scraped page type (service page, homepage, contact
+page, article) using the canonical topic extracted from the title + seed
+query. See `docs/outreach-hailbytes/cold-opener-prompt.md` for the
+classifier and the opener-sentence table. The per-bucket samples below are
+historical full-message form (intro line `David McHale here — …`) — the live
+picker now standardizes on `David McHale from HailBytes here.` and prepends
+the page-type opener instead of leading straight into "I'm launching…".
+
 ---
 
 ## Product cheat sheet
