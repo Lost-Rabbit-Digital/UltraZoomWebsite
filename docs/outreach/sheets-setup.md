@@ -37,11 +37,23 @@ Total time: about 20 minutes (add ~2 min if you're also enabling Brave).
 
 ---
 
-## Part B — Create the Google service account (10 min)
+## Part B — Create the Google service account + Workload Identity Federation (10 min)
 
-A **service account** is a robot Google identity the GitHub Action signs in
-as. It's separate from your boden@ account. The SA gets Editor access only
-to the sheet, so blast radius is limited to that one file.
+A **service account** is a robot Google identity the GitHub Action acts as.
+It's separate from your boden@ account. The SA gets Editor access only to
+the sheet, so blast radius is limited to that one file.
+
+**Why Workload Identity Federation (WIF) instead of a JSON key?** JSON
+service-account keys are long-lived passwords you have to store in GitHub
+Secrets; if leaked, they're valid forever. WIF lets GitHub's short-lived
+OIDC token stand in for the SA — no secret to rotate. It's also what
+Google recommends, and newer GCP orgs (including
+`lostrabbitdigital.com`) block SA key creation by org policy, so WIF is
+the only option.
+
+Almost all of Part B is done from Google Cloud Shell (click the
+`>_` terminal icon top right of https://console.cloud.google.com while
+signed in as boden@). Copy-paste the commands as-is.
 
 ### B.1. Pick a Google Cloud project
 
@@ -51,38 +63,77 @@ to the sheet, so blast radius is limited to that one file.
    `ultrazoom-outreach`. Leave org / location defaults. Create.
 3. Make sure that project is selected in the top bar before continuing.
 
-### B.2. Enable the Sheets API
+### B.2. Enable the required APIs
 
-1. Left nav → **APIs & Services → Library**.
-2. Search "Google Sheets API". Click it. Click **Enable**.
+In Cloud Shell:
+
+```bash
+gcloud config set project ultrazoom-outreach
+
+gcloud services enable \
+  sheets.googleapis.com \
+  iam.googleapis.com \
+  iamcredentials.googleapis.com \
+  sts.googleapis.com
+```
 
 ### B.3. Create the service account
 
-1. Left nav → **IAM & Admin → Service Accounts**.
-2. Click **+ CREATE SERVICE ACCOUNT** at the top.
-3. Name it `leads-writer`. Service account ID auto-fills; leave it.
-4. Click **CREATE AND CONTINUE**.
-5. "Grant this service account access to project" → **Skip** (no project
-   roles needed — we only grant access to one specific sheet).
-6. "Grant users access to this service account" → **Skip**.
-7. Click **DONE**.
+```bash
+gcloud iam service-accounts create leads-writer \
+  --display-name="Leads writer (GitHub Actions)"
+```
 
-### B.4. Generate its JSON key
+The SA's email is now
+`leads-writer@ultrazoom-outreach.iam.gserviceaccount.com`. It needs no
+project-level roles — we grant access to one specific sheet in B.6.
 
-1. In the Service Accounts list, click the `leads-writer` row.
-2. Top tabs → **KEYS**.
-3. **ADD KEY → Create new key → JSON → CREATE**.
-4. A file named something like `ultrazoom-outreach-xxxx.json` downloads.
-   **Keep this safe** — it's a password. Don't commit it to git.
-5. Open the JSON file in a text editor. Copy the value of `client_email` —
-   it looks like
-   `leads-writer@ultrazoom-outreach-xxxx.iam.gserviceaccount.com`.
+### B.4. Create the Workload Identity Pool and GitHub provider
 
-### B.5. Share the sheet with the service account
+```bash
+gcloud iam workload-identity-pools create github-pool \
+  --location=global \
+  --display-name="GitHub Actions"
+
+gcloud iam workload-identity-pools providers create-oidc github-provider \
+  --location=global \
+  --workload-identity-pool=github-pool \
+  --display-name="GitHub OIDC" \
+  --issuer-uri="https://token.actions.githubusercontent.com" \
+  --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.repository_owner=assertion.repository_owner" \
+  --attribute-condition="assertion.repository_owner=='Lost-Rabbit-Digital'"
+```
+
+The `attribute-condition` is the trust boundary — it blocks any GitHub
+repo outside the `Lost-Rabbit-Digital` org from using this provider, even
+if someone leaked the provider name. Don't skip it.
+
+### B.5. Let the GitHub repo impersonate the service account
+
+```bash
+PROJECT_NUMBER=$(gcloud projects describe ultrazoom-outreach --format='value(projectNumber)')
+
+gcloud iam service-accounts add-iam-policy-binding \
+  leads-writer@ultrazoom-outreach.iam.gserviceaccount.com \
+  --role=roles/iam.workloadIdentityUser \
+  --member="principalSet://iam.googleapis.com/projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github-pool/attribute.repository/Lost-Rabbit-Digital/UltraZoomWebsite"
+```
+
+Then print the two strings you'll paste into GitHub in Part D:
+
+```bash
+echo "GCP_WORKLOAD_IDENTITY_PROVIDER=projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
+echo "GCP_SERVICE_ACCOUNT=leads-writer@ultrazoom-outreach.iam.gserviceaccount.com"
+```
+
+Save both.
+
+### B.6. Share the sheet with the service account
 
 1. Back in the Sheet (Part A) → **Share** button top right.
-2. Paste the `client_email` from step B.4. Set role to **Editor**. Uncheck
-   "Notify people" (it would bounce — service accounts have no mailbox).
+2. Paste `leads-writer@ultrazoom-outreach.iam.gserviceaccount.com`. Set
+   role to **Editor**. Uncheck "Notify people" (it would bounce — service
+   accounts have no mailbox).
 3. **Share**.
 
 The SA can now write to this sheet and nothing else in your Google account.
@@ -98,24 +149,29 @@ The SA can now write to this sheet and nothing else in your Google account.
 
 ---
 
-## Part D — Wire secrets into GitHub (3 min)
+## Part D — Wire secrets and variables into GitHub (3 min)
 
 1. Go to
    https://github.com/Lost-Rabbit-Digital/UltraZoomWebsite/settings/secrets/actions
 2. Under **Repository secrets**, click **New repository secret** and add:
    - Name: `EXA_API_KEY`
      Value: the key from Part C.
-   - Name: `GOOGLE_SHEETS_SA_KEY`
-     Value: **the entire contents of the JSON file from Part B.4**, as-is.
-     Open the file, select all, paste. Do not reformat or strip newlines.
 3. Switch to the **Variables** tab (same page).
-4. Click **New repository variable** and add:
+4. Click **New repository variable** and add all three:
    - Name: `LEADS_SHEET_ID`
      Value: the Sheet ID from Part A.6.
+   - Name: `GCP_WORKLOAD_IDENTITY_PROVIDER`
+     Value: the `projects/NUMBER/locations/global/.../providers/github-provider`
+     string printed at the end of Part B.5.
+   - Name: `GCP_SERVICE_ACCOUNT`
+     Value: `leads-writer@ultrazoom-outreach.iam.gserviceaccount.com`.
 
-> Why one goes in Secrets and one in Variables: the sheet ID isn't sensitive
-> (the SA is the only thing that can write to it). Keeping it as a Variable
-> makes it visible in workflow logs, which helps when debugging.
+> Why the WIF values live in Variables, not Secrets: neither the provider
+> name nor the SA email grants any access on its own. Access is gated by
+> the pool's `attribute-condition` (only `Lost-Rabbit-Digital/*` repos)
+> plus the `workloadIdentityUser` binding scoped to this repo. Keeping
+> them as Variables makes them visible in workflow logs, which helps when
+> debugging.
 
 ---
 
@@ -135,8 +191,17 @@ The SA can now write to this sheet and nothing else in your Google account.
 
 - **"missing env vars"** — secrets/variables aren't set or the name is
   misspelled. They are case-sensitive.
+- **"no Google credentials found"** — the `google-github-actions/auth`
+  step didn't run or didn't receive the WIF inputs. Check that
+  `GCP_WORKLOAD_IDENTITY_PROVIDER` and `GCP_SERVICE_ACCOUNT` are set as
+  repo **variables** (not secrets) and that the workflow has
+  `permissions: id-token: write`.
+- **"Permission denied" from IAM Credentials / STS** — the repo isn't
+  bound to the SA. Re-run the `add-iam-policy-binding` from Part B.5 and
+  double-check the `principalSet://` string matches
+  `attribute.repository/Lost-Rabbit-Digital/UltraZoomWebsite` exactly.
 - **"sheets read header 403"** — the service account isn't shared on the
-  sheet (Part B.5) or the Sheets API isn't enabled (Part B.2).
+  sheet (Part B.6) or the Sheets API isn't enabled (Part B.2).
 - **"Exa /search 401"** — API key is wrong or expired.
 - **Action completes but sheet stays empty** — you may be hitting dedup
   against the existing `leads.json` URLs that were already seen. That's
@@ -171,7 +236,8 @@ the URL column.
    15:00 UTC (06:00 PT — 2 hours after the Exa run).
 
 The Brave workflow only needs `BRAVE_SEARCH_KEY` in addition to the shared
-`GOOGLE_SHEETS_SA_KEY` secret and `LEADS_SHEET_ID` variable.
+`LEADS_SHEET_ID`, `GCP_WORKLOAD_IDENTITY_PROVIDER`, and
+`GCP_SERVICE_ACCOUNT` variables.
 
 ---
 

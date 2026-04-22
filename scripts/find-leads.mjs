@@ -18,7 +18,7 @@
  * runs with a per-URL budget so slow sites can't blow the Action timeout.
  *
  * Required env vars by provider:
- *   common: GOOGLE_SHEETS_SA_KEY, LEADS_SHEET_ID
+ *   common: LEADS_SHEET_ID  (plus Google ADC — see scripts/lib/sheets.mjs)
  *   exa:    EXA_API_KEY
  *   brave:  BRAVE_SEARCH_KEY
  *
@@ -314,17 +314,13 @@ async function main() {
   const opts = parseArgs(argv);
   const exaKey = env.EXA_API_KEY;
   const braveKey = env.BRAVE_SEARCH_KEY;
-  const saKeyJson = env.GOOGLE_SHEETS_SA_KEY;
   const sheetId = env.LEADS_SHEET_ID;
 
   if (!opts.dryRun) {
     const missing = [];
     if (opts.provider === "exa" && !exaKey) missing.push("EXA_API_KEY");
     if (opts.provider === "brave" && !braveKey) missing.push("BRAVE_SEARCH_KEY");
-    if (!opts.csv) {
-      if (!saKeyJson) missing.push("GOOGLE_SHEETS_SA_KEY");
-      if (!sheetId) missing.push("LEADS_SHEET_ID");
-    }
+    if (!opts.csv && !sheetId) missing.push("LEADS_SHEET_ID");
     if (missing.length) {
       console.error(`error: missing env vars: ${missing.join(", ")}`);
       console.error(`       (re-run with --dry-run to preview without secrets,`);
@@ -364,7 +360,7 @@ async function main() {
 
   const sink = opts.csv
     ? makeCsvClient({ path: resolve(opts.csv) })
-    : makeClient({ saKeyJson, sheetId });
+    : makeClient({ sheetId });
   await sink.ensureHeader();
   const seen = await sink.readUrls();
   const seenBefore = seen.size;

@@ -23,6 +23,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write  # required for Workload Identity Federation
 
 jobs:
   find-leads:
@@ -30,7 +31,6 @@ jobs:
     timeout-minutes: 15
     env:
       BRAVE_SEARCH_KEY: ${{ secrets.BRAVE_SEARCH_KEY }}
-      GOOGLE_SHEETS_SA_KEY: ${{ secrets.GOOGLE_SHEETS_SA_KEY }}
       LEADS_SHEET_ID: ${{ vars.LEADS_SHEET_ID }}
       CSV: ${{ github.event.inputs.csv }}
     steps:
@@ -49,14 +49,22 @@ jobs:
           missing=()
           [ -z "$BRAVE_SEARCH_KEY" ] && missing+=("BRAVE_SEARCH_KEY")
           if [ "$CSV" != "true" ]; then
-            [ -z "$GOOGLE_SHEETS_SA_KEY" ] && missing+=("GOOGLE_SHEETS_SA_KEY")
             [ -z "$LEADS_SHEET_ID" ] && missing+=("LEADS_SHEET_ID")
+            [ -z "${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}" ] && missing+=("GCP_WORKLOAD_IDENTITY_PROVIDER")
+            [ -z "${{ vars.GCP_SERVICE_ACCOUNT }}" ] && missing+=("GCP_SERVICE_ACCOUNT")
           fi
           if [ ${#missing[@]} -ne 0 ]; then
             echo "::error::missing secrets/vars: ${missing[*]}"
             echo "See docs/outreach/sheets-setup.md"
             exit 1
           fi
+
+      - name: Authenticate to Google Cloud
+        if: ${{ github.event.inputs.csv != 'true' }}
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
       - name: Run lead discovery
         run: |

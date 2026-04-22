@@ -1,13 +1,17 @@
 // Minimal Google Sheets client for the lead-discovery workflow.
 //
-// Auth: service-account JWT via google-auth-library. The SA JSON key is
-// passed in as a string (GOOGLE_SHEETS_SA_KEY env var, raw JSON).
+// Auth: Application Default Credentials via google-auth-library. In CI,
+// google-github-actions/auth@v2 exchanges the workflow's OIDC token for a
+// short-lived service-account credential and points GOOGLE_APPLICATION_-
+// CREDENTIALS at the credential file. Locally, run
+// `gcloud auth application-default login` once and ADC will pick up your
+// user credentials.
 //
 // Only two operations:
 //   - readColumn(range)   → read a single column, for URL dedup
 //   - appendRows(rows)    → append rows to the first sheet tab
 
-import { JWT } from "google-auth-library";
+import { GoogleAuth } from "google-auth-library";
 import { pickTemplate } from "./template-picker.mjs";
 
 const SHEETS_BASE = "https://sheets.googleapis.com/v4/spreadsheets";
@@ -51,26 +55,20 @@ function columnLetter(i) {
   return s;
 }
 
-export function makeClient({ saKeyJson, sheetId }) {
-  let creds;
-  try {
-    creds = typeof saKeyJson === "string" ? JSON.parse(saKeyJson) : saKeyJson;
-  } catch (e) {
-    throw new Error("GOOGLE_SHEETS_SA_KEY is not valid JSON: " + e.message);
-  }
-  if (!creds.client_email || !creds.private_key) {
-    throw new Error("service account JSON missing client_email or private_key");
-  }
+export function makeClient({ sheetId }) {
   if (!sheetId) throw new Error("sheetId required (LEADS_SHEET_ID env var)");
 
-  const jwt = new JWT({
-    email: creds.client_email,
-    key: creds.private_key,
-    scopes: [SCOPE],
-  });
+  const auth = new GoogleAuth({ scopes: [SCOPE] });
 
   async function authHeaders() {
-    const { token } = await jwt.getAccessToken();
+    const token = await auth.getAccessToken();
+    if (!token) {
+      throw new Error(
+        "no Google credentials found. In CI, confirm the google-github-" +
+          "actions/auth step ran. Locally, run `gcloud auth application-" +
+          "default login`.",
+      );
+    }
     return { authorization: `Bearer ${token}` };
   }
 
