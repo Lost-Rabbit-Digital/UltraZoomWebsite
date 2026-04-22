@@ -3,29 +3,29 @@
 // Canonical human-readable templates live in docs/outreach/contact-form-templates.md.
 // The drafts below mirror them as short, form-safe variants (no markdown, one URL,
 // ~500 chars) so the `message_draft` column is copy-paste-ready. Humans can edit
-// or swap templates during triage — this is a starting point, not a final message.
+// or swap templates during triage; this is a starting point, not a final message.
 //
 // Rotation: two variants per bucket, selected deterministically from a hash of
 // the URL. Same lead → same draft across re-runs; across leads we alternate.
 
-const SIGN_OFF = "Thanks,\nBoden Garman, Lost Rabbit Digital LLC\nhttps://ultrazoom.app";
+const SIGN_OFF = "Thanks,\nBoden McHale, Lost Rabbit Digital LLC\nhttps://ultrazoom.app";
 
 const BUCKETS = [
   {
     id: "form-genealogy",
-    pattern: /\b(genealog|ancestry|familysearch|findagrave|find a grave|census|archive\.org|old photos?|family history)\b/i,
+    pattern: /\b(genealog\w*|ancestry|familysearch|findagrave|find a grave|census|archive\.org|old photos?|family history)\b/i,
   },
   {
     id: "form-real-estate",
-    pattern: /\b(zillow|redfin|realtor|real[-\s]?estate|house[-\s]?hunt|home[-\s]?buyer|mortgage|property listing)\b/i,
+    pattern: /\b(zillow|redfin|realtor|real[-\s]?estate|house[-\s]?hunt\w*|home[-\s]?buyer|mortgage|property listing)\b/i,
   },
   {
     id: "form-shopping",
-    pattern: /\b(ebay|amazon|dropship|reseller|resell|auction|online shopping|deal hunter|product research)\b/i,
+    pattern: /\b(ebay|amazon|dropship\w*|reseller|resell\w*|auction|online shopping|deal hunter|product research)\b/i,
   },
   {
     id: "form-photo-design",
-    pattern: /\b(photograph|designer|pinterest|dribbble|behance|moodboard|mood board|figma|reference image|visual research)\b/i,
+    pattern: /\b(photograph\w*|designer|pinterest|dribbble|behance|moodboard|mood board|figma|reference image|visual research)\b/i,
   },
   {
     id: "form-privacy",
@@ -39,8 +39,8 @@ const BUCKETS = [
 
 const TEMPLATES = {
   "form-genealogy": [
-    ({ title }) =>
-`Hi there,
+    ({ title, publication }) =>
+`Hi ${publication},
 
 Found your "${title}" while looking for genealogy research tools worth sharing. Wanted to share one back: Ultra Zoom.
 
@@ -49,8 +49,8 @@ It's a free hover-to-zoom browser extension. On Ancestry, FamilySearch, Findagra
 If it's useful to your readers, a mention would mean a lot.
 
 ${SIGN_OFF}`,
-    ({ title }) =>
-`Hi,
+    ({ title, publication }) =>
+`Hi ${publication},
 
 "${title}" came up while I was researching tools the genealogy community actually uses. Thought I'd flag Ultra Zoom in case it's a fit for a future roundup.
 
@@ -61,8 +61,8 @@ Happy to share example workflows if useful.
 ${SIGN_OFF}`,
   ],
   "form-real-estate": [
-    ({ title }) =>
-`Hi,
+    ({ title, publication }) =>
+`Hi ${publication},
 
 Came across "${title}" and wanted to flag a browser tool that fits well with house-hunting research: Ultra Zoom.
 
@@ -71,8 +71,8 @@ It's a free hover-to-zoom extension for Chrome and Firefox. On Zillow, Redfin, R
 If it's worth a mention, I'd be grateful. Can share a short GIF of the Zillow workflow.
 
 ${SIGN_OFF}`,
-    ({ title }) =>
-`Hi there,
+    ({ title, publication }) =>
+`Hi ${publication},
 
 Your "${title}" popped up while I was looking for resources people actually recommend to house-hunters. Wanted to flag Ultra Zoom.
 
@@ -83,8 +83,8 @@ Can send a quick GIF if it helps.
 ${SIGN_OFF}`,
   ],
   "form-shopping": [
-    ({ title }) =>
-`Hi,
+    ({ title, publication }) =>
+`Hi ${publication},
 
 I read your "${title}" piece. Useful for anyone who spends time sourcing on eBay or Amazon. Wanted to flag a tool that fits the workflow: Ultra Zoom.
 
@@ -93,8 +93,8 @@ It's a hover-to-zoom browser extension. Hover a listing thumbnail on eBay, Amazo
 If it's a fit, I'd love a mention. Can send a GIF on request.
 
 ${SIGN_OFF}`,
-    ({ title }) =>
-`Hi there,
+    ({ title, publication }) =>
+`Hi ${publication},
 
 "${title}" came up while I was researching resources for people who research before they buy. Wanted to share Ultra Zoom in case it's worth covering.
 
@@ -106,7 +106,7 @@ ${SIGN_OFF}`,
   ],
   "form-photo-design": [
     ({ title, publication }) =>
-`Hi ${publication} team,
+`Hi ${publication},
 
 Your "${title}" post popped up while I was researching tools for image-heavy workflows. Wanted to share Ultra Zoom in case it's worth a mention in a future update.
 
@@ -115,8 +115,8 @@ It's a hover-to-zoom browser extension that previews full-size images on Pintere
 Happy to send a GIF if it helps.
 
 ${SIGN_OFF}`,
-    ({ title }) =>
-`Hi,
+    ({ title, publication }) =>
+`Hi ${publication},
 
 Found "${title}" while researching visual-workflow tools worth recommending. Wanted to flag Ultra Zoom in case it fits a future piece.
 
@@ -127,8 +127,8 @@ Can share a quick GIF of the Pinterest workflow.
 ${SIGN_OFF}`,
   ],
   "form-privacy": [
-    ({ title }) =>
-`Hi,
+    ({ title, publication }) =>
+`Hi ${publication},
 
 Your "${title}" came up while I was looking for privacy-minded publications. Wanted to share a project that fits the angle: Ultra Zoom.
 
@@ -137,8 +137,8 @@ It's a hover-to-zoom browser extension, which is a category with an ugly history
 Happy to walk through the architecture if useful.
 
 ${SIGN_OFF}`,
-    ({ title }) =>
-`Hi there,
+    ({ title, publication }) =>
+`Hi ${publication},
 
 "${title}" came up in my research and I wanted to flag Ultra Zoom in case the privacy angle is interesting to you.
 
@@ -149,8 +149,8 @@ Glad to answer anything if you cover the category.
 ${SIGN_OFF}`,
   ],
   "form-listicle": [
-    ({ title, section }) =>
-`Hi there,
+    ({ title, section, publication }) =>
+`Hi ${publication},
 
 I came across your piece "${title}" while researching browser extension roundups and wanted to flag one that fits the ${section} section: Ultra Zoom, a hover-to-zoom extension for Chrome and Firefox.
 
@@ -159,8 +159,8 @@ It works on 60+ sites (Google Images, Amazon, Reddit, Pinterest, eBay, Zillow, A
 If it's useful, I'd be grateful for a mention. Happy to send screenshots or a GIF.
 
 ${SIGN_OFF}`,
-    ({ title, section }) =>
-`Hi,
+    ({ title, section, publication }) =>
+`Hi ${publication},
 
 Found "${title}" while researching extension roundups and wanted to flag one I think fits the ${section} angle: Ultra Zoom.
 
@@ -171,8 +171,8 @@ Happy to send a GIF or screenshots if helpful.
 ${SIGN_OFF}`,
   ],
   "form-generic": [
-    ({ title }) =>
-`Hi,
+    ({ title, publication }) =>
+`Hi ${publication},
 
 Found you through "${title}" and wanted to briefly introduce a project that might be a fit for your audience: Ultra Zoom, a hover-to-zoom browser extension for Chrome and Firefox.
 
@@ -181,8 +181,8 @@ It works on 60+ websites. Hover any image thumbnail and see the full-size image 
 If it's something you'd consider covering, I'd love that. Can send screenshots, a GIF, or anything else useful.
 
 ${SIGN_OFF}`,
-    ({ title }) =>
-`Hi there,
+    ({ title, publication }) =>
+`Hi ${publication},
 
 "${title}" came up in my research and I wanted to briefly flag Ultra Zoom in case it's a fit for your audience.
 
@@ -200,16 +200,18 @@ function hash(s) {
   return Math.abs(h);
 }
 
-// Turn "pinchofyum.com" → "Pinchofyum", "tech-crunch.com" → "Tech Crunch".
-// Good enough for a greeting; humans retouch during triage.
+// "pinchofyum.com" → "Pinchofyum team"; "tech-crunch.com" → "Tech Crunch team".
+// Falls back to "there" when no domain is available so the greeting still reads.
+// Humans retouch during triage.
 function publicationFromDomain(domain) {
   if (!domain) return "there";
   const base = domain.split(".")[0].replace(/[-_]+/g, " ").trim();
   if (!base) return "there";
-  return base
+  const name = base
     .split(" ")
     .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
     .join(" ");
+  return `${name} team`;
 }
 
 // Best-effort section label for listicle drafts ("productivity", "design", …).

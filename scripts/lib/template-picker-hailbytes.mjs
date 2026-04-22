@@ -46,90 +46,90 @@ const BUCKETS = [
 
 const TEMPLATES = {
   "hb-asm-pentest": [
-    () =>
-`Hi there,
+    ({ publication, hook }) =>
+`Hi ${publication},
 
-David McHale here. I'm launching HailBytes ASM, an attack surface management platform built for pen-testing and offensive-security firms. It orchestrates 30+ recon tools (subfinder, nmap, nuclei, httpx, ffuf, and more) into one continuous pipeline, runs in your own Azure or AWS tenant, and has no per-asset fee, so you can monitor every engagement's external surface without per-target licensing.
+David McHale here. ${hook}I'm launching HailBytes ASM, an attack surface management platform built for pen-testing and offensive-security firms. It orchestrates 30+ recon tools (subfinder, nmap, nuclei, httpx, ffuf, and more) into one continuous pipeline, runs in your own Azure or AWS tenant, and has no per-asset fee, so you can monitor every engagement's external surface without per-target licensing.
 
 Would you try it free for 30 days and share honest feedback? Happy to set up a short demo.
 
 ${SIGN_OFF}`,
-    () =>
-`Hi,
+    ({ publication, hook }) =>
+`Hi ${publication},
 
-David McHale from HailBytes here. We're launching HailBytes ASM, an attack surface management platform aimed at pentest firms that want continuous external recon across all their engagements without per-target licensing. It chains 30+ tools (subfinder, nmap, nuclei, httpx, ffuf, etc.) into one pipeline, runs in your own cloud tenant, correlates findings in Postgres, and adds AI-assisted triage.
+David McHale from HailBytes here. ${hook}We're launching HailBytes ASM, an attack surface management platform aimed at pentest firms that want continuous external recon across all their engagements without per-target licensing. It chains 30+ tools (subfinder, nmap, nuclei, httpx, ffuf, etc.) into one pipeline, runs in your own cloud tenant, correlates findings in Postgres, and adds AI-assisted triage.
 
 I'd love to get it in front of working pentesters. Free 30-day trial in exchange for feedback. Interested?
 
 ${SIGN_OFF}`,
   ],
   "hb-asm-mssp": [
-    () =>
-`Hi there,
+    ({ publication, hook }) =>
+`Hi ${publication},
 
-David McHale here. I'm launching HailBytes ASM, an attack surface management platform built for MSSPs that want to add continuous external recon to their managed service catalog. It runs 7 automated scan phases across 30+ tools, deploys in your own Azure or AWS tenant (so client data never leaves your cloud), supports multi-tenant project isolation and RBAC, and has no per-asset fee, with unlimited targets at every tier.
+David McHale here. ${hook}I'm launching HailBytes ASM, an attack surface management platform built for MSSPs that want to add continuous external recon to their managed service catalog. It runs 7 automated scan phases across 30+ tools, deploys in your own Azure or AWS tenant (so client data never leaves your cloud), supports multi-tenant project isolation and RBAC, and has no per-asset fee, with unlimited targets at every tier.
 
 Would you try it free for 30 days and share feedback from an MSSP's perspective?
 
 ${SIGN_OFF}`,
-    () =>
-`Hi,
+    ({ publication, hook }) =>
+`Hi ${publication},
 
-David McHale from HailBytes here. We're launching HailBytes ASM, an attack surface management platform designed for MSSPs and MDR providers. It gives you continuous external recon across all your clients from a single deployment in your own tenant, with multi-tenant project isolation, RBAC, and unlimited targets (no per-asset fee). AI-powered triage generates executive reports automatically.
+David McHale from HailBytes here. ${hook}We're launching HailBytes ASM, an attack surface management platform designed for MSSPs and MDR providers. It gives you continuous external recon across all your clients from a single deployment in your own tenant, with multi-tenant project isolation, RBAC, and unlimited targets (no per-asset fee). AI-powered triage generates executive reports automatically.
 
 Free 30-day trial. I'd love your feedback on whether it fits into an MSSP workflow. Happy to set up a demo.
 
 ${SIGN_OFF}`,
   ],
   "hb-asm-vciso": [
-    () =>
-`Hi there,
+    ({ publication, hook }) =>
+`Hi ${publication},
 
-David McHale here. I'm launching HailBytes ASM, an attack surface management platform that fits naturally into a vCISO or GRC engagement. It gives your clients continuous external-asset discovery and vulnerability monitoring from a single deployment in their own cloud tenant, with audit-logged findings that map to SOC 2, HIPAA, and PCI controls. No per-asset fee, with unlimited targets.
+David McHale here. ${hook}I'm launching HailBytes ASM, an attack surface management platform that fits naturally into a vCISO or GRC engagement. It gives your clients continuous external-asset discovery and vulnerability monitoring from a single deployment in their own cloud tenant, with audit-logged findings that map to SOC 2, HIPAA, and PCI controls. No per-asset fee, with unlimited targets.
 
 Would you try it free for 30 days and share feedback? Useful to hear whether it fits the vCISO toolkit.
 
 ${SIGN_OFF}`,
-    () =>
-`Hi,
+    ({ publication, hook }) =>
+`Hi ${publication},
 
-David McHale from HailBytes here. We're launching HailBytes ASM, an attack surface management platform that's been getting interest from vCISO and compliance-led practices. Deploys into a client's own Azure or AWS tenant, correlates 30+ tools into one scan pipeline, produces executive-ready risk reports via AI, and has full audit logging for SOC 2, HIPAA, and PCI programs. No per-asset fee at any tier.
+David McHale from HailBytes here. ${hook}We're launching HailBytes ASM, an attack surface management platform that's been getting interest from vCISO and compliance-led practices. Deploys into a client's own Azure or AWS tenant, correlates 30+ tools into one scan pipeline, produces executive-ready risk reports via AI, and has full audit logging for SOC 2, HIPAA, and PCI programs. No per-asset fee at any tier.
 
 Free 30-day trial in exchange for honest feedback. Interested?
 
 ${SIGN_OFF}`,
   ],
   "hb-sat-training": [
-    () =>
-`Hi there,
+    ({ publication, hook }) =>
+`Hi ${publication},
 
-David McHale here. I'm launching HailBytes SAT, a security awareness training and phishing simulation platform built for firms that deliver SAT to their clients. It runs in your own Azure or AWS tenant (no client data in a vendor cloud), is Entra ID native with SCIM, has AI-assisted template generation, and critically, no per-user fee. Unlimited users on a single VM.
+David McHale here. ${hook}I'm launching HailBytes SAT, a security awareness training and phishing simulation platform built for firms that deliver SAT to their clients. It runs in your own Azure or AWS tenant (no client data in a vendor cloud), is Entra ID native with SCIM, has AI-assisted template generation, and critically, no per-user fee. Unlimited users on a single VM.
 
 Would you try it free for 30 days and share feedback? I'd love to hear from a firm that actually runs awareness programs.
 
 ${SIGN_OFF}`,
-    () =>
-`Hi,
+    ({ publication, hook }) =>
+`Hi ${publication},
 
-David McHale from HailBytes here. We're launching HailBytes SAT, a phishing simulation and security awareness training platform for MSSPs, consultancies, and training providers that deliver SAT as a service. One VM in your (or your client's) cloud tenant supports up to 5,000 users with no per-user licensing. AI-assisted template generation, Entra ID SSO, and webhook-driven SIEM integration are built in.
+David McHale from HailBytes here. ${hook}We're launching HailBytes SAT, a phishing simulation and security awareness training platform for MSSPs, consultancies, and training providers that deliver SAT as a service. One VM in your (or your client's) cloud tenant supports up to 5,000 users with no per-user licensing. AI-assisted template generation, Entra ID SSO, and webhook-driven SIEM integration are built in.
 
 Free 30-day trial. Would you try it and share feedback? Happy to set up a demo.
 
 ${SIGN_OFF}`,
   ],
   "hb-asm-generic": [
-    () =>
-`Hi there,
+    ({ publication, hook }) =>
+`Hi ${publication},
 
-David McHale here. I'm launching HailBytes ASM, an attack surface management platform built for cybersecurity firms that want to add continuous external recon to their client offerings. It runs in your own cloud tenant, chains 30+ recon and vulnerability tools into one automated pipeline, has AI-powered triage, and charges no per-asset fee, with unlimited targets at every tier. We're also launching HailBytes SAT (phishing simulation, no per-user fee) in the same family, in case that's a closer fit.
+David McHale here. ${hook}I'm launching HailBytes ASM, an attack surface management platform built for cybersecurity firms that want to add continuous external recon to their client offerings. It runs in your own cloud tenant, chains 30+ recon and vulnerability tools into one automated pipeline, has AI-powered triage, and charges no per-asset fee, with unlimited targets at every tier. We're also launching HailBytes SAT (phishing simulation, no per-user fee) in the same family, in case that's a closer fit.
 
 Free 30-day trial of either in exchange for feedback. Which would be the better fit for your team?
 
 ${SIGN_OFF}`,
-    () =>
-`Hi,
+    ({ publication, hook }) =>
+`Hi ${publication},
 
-David McHale from HailBytes here. We're launching two platforms aimed at cybersecurity firms: HailBytes ASM (attack surface management, 30+ tools, unlimited targets, no per-asset fee) and HailBytes SAT (phishing simulation and awareness training, unlimited users, no per-user fee). Both deploy into your own Azure or AWS tenant, so client data stays in your cloud.
+David McHale from HailBytes here. ${hook}We're launching two platforms aimed at cybersecurity firms: HailBytes ASM (attack surface management, 30+ tools, unlimited targets, no per-asset fee) and HailBytes SAT (phishing simulation and awareness training, unlimited users, no per-user fee). Both deploy into your own Azure or AWS tenant, so client data stays in your cloud.
 
 We're offering a free 30-day trial of either in exchange for honest feedback. Would one fit your current service mix better than the other?
 
@@ -143,15 +143,50 @@ function hash(s) {
   return Math.abs(h);
 }
 
+// "hailbytes.com" → "HailBytes team"; "pentest-pros.com" → "Pentest Pros team".
+// Falls back to "there" when no domain is available. Humans retouch during triage.
+function publicationFromDomain(domain) {
+  if (!domain) return "there";
+  const base = domain.split(".")[0].replace(/[-_]+/g, " ").trim();
+  if (!base) return "there";
+  const name = base
+    .split(" ")
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
+  return `${name} team`;
+}
+
+// Exact substring that triggered the bucket match, with whitespace
+// normalized. Case is preserved so acronyms like "vCISO" and "MSSP" survive.
+function matchedKeyword(blob, pattern) {
+  const m = blob.match(pattern);
+  if (!m) return "";
+  return m[0].replace(/\s+/g, " ").trim();
+}
+
+// Short hook sentence that references the article title or matched keyword.
+// Returns "" when we have neither, so the template degrades cleanly to the
+// original cold opener.
+function hookSentence({ title, keyword }) {
+  const t = (title || "").trim();
+  if (t && keyword) return `Saw your "${t}" piece while researching firms working on ${keyword}. `;
+  if (t) return `Saw your "${t}" piece. `;
+  if (keyword) return `Noticed your ${keyword} work. `;
+  return "";
+}
+
 export function pickTemplate(result) {
   const blob = `${result.title || ""} ${result.summary || ""} ${result.domain || ""}`;
   const bucket = BUCKETS.find((b) => b.pattern.test(blob));
   const id = bucket ? bucket.id : "hb-asm-generic";
   const variants = TEMPLATES[id];
   const idx = hash(result.url || "") % variants.length;
+  const keyword = bucket ? matchedKeyword(blob, bucket.pattern) : "";
   const draft = variants[idx]({
     title: result.title || "",
-    domain: result.domain || "",
+    publication: publicationFromDomain(result.domain),
+    keyword,
+    hook: hookSentence({ title: result.title, keyword }),
   });
   return { templateId: id, draft };
 }

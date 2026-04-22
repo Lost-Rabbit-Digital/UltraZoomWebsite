@@ -12,7 +12,7 @@ All templates:
 Sign-off block (reuse across templates):
 ```
 Best,
-Boden Garman
+Boden McHale
 Founder, Lost Rabbit Digital LLC
 https://ultrazoom.app
 ```
