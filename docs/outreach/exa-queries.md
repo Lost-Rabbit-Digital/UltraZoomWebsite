@@ -94,6 +94,74 @@ you want to an intern, not as Google operators. Think: "a blog post that…".
 - a developer blog about browser extension performance and bundle size
 - a Preact or React blog post about building browser UIs
 
+## Teachers, librarians, and educators
+
+- a teacher blog post about Chrome extensions for the classroom
+- an article listing browser extensions for K-12 educators
+- a librarian blog post recommending browser tools for digital reference work
+- a school library blog about Chrome extensions for student research
+- a roundup of Chrome extensions for higher education instructors
+- a blog post about browser extensions that help with grading and lesson planning
+- an EdTech blog post about must-have Chrome extensions for 2026
+
+## Academic researchers and grad students
+
+- a grad student blog post about Chrome extensions for academic research
+- a digital humanities blog about browser tools for archival research
+- an article about Chrome extensions for reading and annotating PDFs in research
+- a researcher's "tools I use" Substack post mentioning browser extensions
+- a librarian blog post about browser tools for working with digitized manuscripts
+
+## Writers, editors, and translators
+
+- a writer's blog post titled "the chrome extensions in my writing toolkit"
+- a freelance editor's blog post recommending browser extensions
+- a translator blog post about Chrome extensions for translation work
+- a journalist's "my workflow" post that mentions browser extensions
+- a Substack newsletter from a working writer about their tool stack
+
+## Newsletter curators and "tool of the week" pubs
+
+- a Substack newsletter that reviews a new browser extension each week
+- a weekly tools newsletter mentioning a Chrome extension worth trying
+- a beehiiv newsletter about productivity tools that includes browser extensions
+- a "tool of the week" blog post featuring a Chrome extension
+- an indie newsletter post titled "my favorite finds this month" with browser tools
+
+## YouTube and video creators (description-box outreach)
+
+- a YouTuber's blog post mirroring their "best chrome extensions" video
+- a video creator's article reviewing browser extensions for content production
+- a screencaster blog about Chrome extensions used in their tutorials
+
+## International / non-English
+
+- a German blog post titled "die besten Chrome Erweiterungen 2026"
+- a French article listing "meilleures extensions Chrome" for productivity
+- a Japanese blog post reviewing image-zoom Chrome extensions
+- a Spanish blog post about "mejores extensiones de Chrome" for online shopping
+- a Portuguese blog post recommending browser extensions for designers
+
+## Marketers, social media, and ecommerce operators
+
+- a digital marketer blog post about Chrome extensions for SEO and content research
+- an article listing Chrome extensions for social media managers and community managers
+- a Shopify or BigCommerce blog about browser extensions for ecommerce sellers
+- an Amazon FBA seller's blog post about browser tools for product research
+- an affiliate marketer blog post listing must-have Chrome extensions
+
+## Lawyers, paralegals, and other office professionals
+
+- a legaltech blog post about Chrome extensions for lawyers and paralegals
+- an article listing browser extensions for accountants and bookkeepers
+- a blog post about Chrome extensions for project managers and consultants
+
+## Seasonal and gift-guide angles
+
+- a 2026 holiday gift guide that includes browser extensions or productivity tools
+- a back-to-school blog post listing Chrome extensions for students
+- a "new year, new browser setup" article with extension recommendations
+
 ---
 
 ## Tips for editing this file

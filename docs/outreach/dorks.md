@@ -169,6 +169,99 @@ Common reliable patterns to try in order:
 link:ultrazoom.app  (deprecated, but try the Bing equivalent)
 ```
 
+## 13. "My stack / tools I use" personal posts
+
+```
+"my stack" "chrome extension"
+"our stack" "browser extension"
+"tools I use daily" "chrome extension"
+"tools I use" inurl:blog "extension"
+"my setup" "chrome extension" YEAR
+"workflow" "chrome extensions I use"
+"my browser setup" YEAR
+intitle:"uses" "chrome extension"
+```
+
+## 14. Long-tail audiences we don't have dorks for yet
+
+```
+"chrome extensions for teachers" YEAR
+"chrome extensions for librarians"
+"chrome extensions for translators"
+"chrome extensions for writers" YEAR
+"chrome extensions for editors" YEAR
+"chrome extensions for journalists"
+"chrome extensions for lawyers" OR "for paralegals"
+"chrome extensions for marketers" YEAR
+"chrome extensions for SEOs" OR "for SEO"
+"chrome extensions for grad students" OR "for graduate students"
+"chrome extensions for academic research"
+"chrome extensions for podcasters"
+"chrome extensions for accountants" OR "for bookkeepers"
+"chrome extensions for project managers"
+"chrome extensions for consultants"
+"chrome extensions for indie hackers"
+"chrome extensions for content creators"
+"chrome extensions for affiliate marketers"
+"chrome extensions for amazon sellers" OR "for FBA"
+"chrome extensions for shopify"
+"chrome extensions for etsy sellers"
+```
+
+## 15. Public Notion / are.na / Glasp curations
+
+```
+site:notion.so "chrome extensions"
+site:notion.site "chrome extensions"
+site:are.na "chrome extension"
+site:glasp.co "chrome extension"
+site:readwise.io "chrome extension"
+```
+
+## 16. Warm-intent: image-zoom users actively searching
+
+```
+inurl:/blog/ "hover zoom"
+"hover zoom" "alternative" YEAR
+"imagus" "alternative" YEAR
+"hover zoom plus" "review"
+"chrome extension" "preview images" YEAR
+"see full size image" "chrome extension"
+"zoom on hover" extension chrome OR firefox
+```
+
+## 17. International (non-English) listicles
+
+```
+"die besten chrome erweiterungen" YEAR
+"meilleures extensions chrome" YEAR
+"mejores extensiones de chrome" YEAR
+"melhores extensões do chrome" YEAR
+"おすすめ chrome 拡張機能" YEAR
+"chrome 확장 프로그램" YEAR
+```
+
+## 18. Seasonal / evergreen angles
+
+```
+"holiday gift guide" "chrome extension" YEAR
+"back to school" "chrome extension" YEAR
+"new year" "browser setup" YEAR
+"spring cleaning" "chrome extensions"
+"black friday" "chrome extension" deals YEAR
+```
+
+## 19. Indie blog platforms we under-mine
+
+```
+site:bearblog.dev "chrome extension"
+site:write.as "chrome extension"
+site:micro.blog "chrome extension"
+site:ghost.io "chrome extensions" YEAR
+site:hashnode.dev "chrome extensions" YEAR
+site:pages.dev "chrome extensions"
+```
+
 ---
 
 ## Prospect categories we're still thin on
