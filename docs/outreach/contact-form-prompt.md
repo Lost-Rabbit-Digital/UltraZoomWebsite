@@ -56,7 +56,9 @@ leads (Brave)** → **Run workflow**, optionally picking `mode`, `limit`,
 ### Running it locally
 
 ```
-export GOOGLE_SHEETS_SA_KEY="$(cat path/to/sa-key.json)"
+# Google Sheets auth via ADC (run once, then the token auto-refreshes).
+# Share the sheet with your own Google account first, then:
+gcloud auth application-default login
 export LEADS_SHEET_ID=...
 
 # Exa provider
@@ -83,12 +85,13 @@ npm run find-leads -- --provider exa --csv leads.csv --limit 10
 ### Smoke-testing in CI before Sheets is configured
 
 Both workflows accept a `csv` boolean input on manual dispatch. Running
-with `csv: true` skips the `GOOGLE_SHEETS_SA_KEY` / `LEADS_SHEET_ID`
-checks, writes results to `leads-<provider>-<timestamp>.csv`, and uploads
-that file as a workflow artifact (14-day retention). You only need the
-provider API key secret set (`EXA_API_KEY` or `BRAVE_SEARCH_KEY`) for
-this to work. Download the artifact from the run page to inspect the
-rows before committing to the Sheets setup.
+with `csv: true` skips the Google Cloud auth step and the
+`LEADS_SHEET_ID` check, writes results to
+`leads-<provider>-<timestamp>.csv`, and uploads that file as a workflow
+artifact (14-day retention). You only need the provider API key secret
+set (`EXA_API_KEY` or `BRAVE_SEARCH_KEY`) for this to work. Download the
+artifact from the run page to inspect the rows before committing to the
+Sheets setup.
 
 ## 2. Triage in the Sheet
 
