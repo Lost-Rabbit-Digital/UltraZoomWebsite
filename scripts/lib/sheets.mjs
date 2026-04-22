@@ -12,7 +12,7 @@
 //   - appendRows(rows)    → append rows to the first sheet tab
 
 import { GoogleAuth } from "google-auth-library";
-import { pickTemplate } from "./template-picker.mjs";
+import { pickTemplate as defaultPickTemplate } from "./template-picker.mjs";
 
 const SHEETS_BASE = "https://sheets.googleapis.com/v4/spreadsheets";
 const SCOPE = "https://www.googleapis.com/auth/spreadsheets";
@@ -169,10 +169,14 @@ function leadScore(result) {
   return Math.max(0, Math.min(100, score));
 }
 
-export function rowFromResult(result, { source, seed, foundAt }) {
+export function rowFromResult(result, { source, seed, foundAt, pickTemplate = defaultPickTemplate }) {
   // Match SHEET_COLUMNS order. `template` and `message_draft` are pre-filled
   // from the keyword picker so triage starts with a copy-paste-ready message;
   // humans override as needed. Other human columns (status onward) stay blank.
+  //
+  // `pickTemplate` is injectable so additional outreach lanes (e.g. the
+  // HailBytes PoC in find-leads-hailbytes.mjs) can plug in their own picker
+  // without forking this module.
   const { templateId, draft } = pickTemplate(result);
   return [
     foundAt,
