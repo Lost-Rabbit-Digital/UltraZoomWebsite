@@ -26,17 +26,23 @@ public/
   images/              Icons and assets
 wrangler.jsonc         Cloudflare Workers config (static assets from dist/)
 astro.config.mjs       Astro configuration
+scripts/
+  find-leads.mjs       Exa-powered lead discovery (search + findSimilar → Google Sheet)
+  lib/
+    exa.mjs            Exa API client (/search, /findSimilar)
+    sheets.mjs         Google Sheets append client (service-account JWT)
 .github/
   workflows/
     static.yml         CI pipeline
     record-scroll.yml  Promotional video recording (Playwright)
+    find-leads.yml     Daily cron that runs find-leads.mjs
   lighthouse/
     lighthouserc.json  Lighthouse CI config
   scripts/             Automation scripts
 docs/
   diagrams/            Mermaid diagram source files
   growth/              Growth plan notes
-  outreach/            Outreach leads, drafts, prompts
+  outreach/            Outreach leads, drafts, prompts, contact-form templates
 ```
 
 ## Technology Stack

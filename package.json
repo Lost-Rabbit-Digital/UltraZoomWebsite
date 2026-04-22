@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "find-leads": "node scripts/find-leads.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.18",
@@ -18,6 +19,7 @@
   "devDependencies": {
     "@capsizecss/metrics": "^3.7.0",
     "@fontsource/inter": "^5.2.8",
+    "google-auth-library": "^10.6.2",
     "inter-ui": "^4.1.1"
   }
 }

@@ -100,7 +100,7 @@ G. On my confirm, write:
      specific detail you saw in the article
    Sign-off block:
      Best,
-     Boden Garman
+     Boden McHale
      Founder, Lost Rabbit Digital LLC
      https://ultrazoom.app
 

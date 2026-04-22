@@ -1,0 +1,118 @@
+name: Find leads — HailBytes (Exa)
+
+# PoC lead discovery for HailBytes ASM / HailBytes SAT outreach.
+# Sibling of find-leads.yml (Ultra Zoom lane). Writes to the HailBytes sheet
+# (ID baked into scripts/find-leads-hailbytes.mjs; override with repo var
+# HAILBYTES_LEADS_SHEET_ID). Prereq: share the sheet with the service
+# account used by vars.GCP_SERVICE_ACCOUNT (Editor access).
+
+on:
+  schedule:
+    # Weekly: Monday 14:00 UTC = 07:00 PT. One hour after the Ultra Zoom
+    # daily Exa run (13:00 UTC) to avoid piling onto the Exa API. Relies
+    # on --rotate daily so each week's run covers a different slice of
+    # docs/outreach-hailbytes/exa-queries.md.
+    - cron: "0 14 * * 1"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Search mode (find-similar needs a populated leads.json)"
+        type: choice
+        options:
+          - search
+          - both
+          - find-similar
+        default: search
+      limit:
+        description: "Max queries/seeds to run"
+        default: "20"
+      sections:
+        description: "Regex filter on section headings. Leave blank for all."
+        default: ""
+      rotate:
+        description: "Query-rotation mode"
+        type: choice
+        options:
+          - daily
+          - shuffle
+          - none
+        default: daily
+      csv:
+        description: "Write results to a CSV artifact instead of Google Sheets (smoke-test mode)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write  # required for Workload Identity Federation
+
+jobs:
+  find-leads:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+      HAILBYTES_LEADS_SHEET_ID: ${{ vars.HAILBYTES_LEADS_SHEET_ID }}
+      CSV: ${{ github.event.inputs.csv }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Sanity-check secrets
+        run: |
+          missing=()
+          [ -z "$EXA_API_KEY" ] && missing+=("EXA_API_KEY")
+          if [ "$CSV" != "true" ]; then
+            # HAILBYTES_LEADS_SHEET_ID is optional — the script has a
+            # hardcoded default. We only require the GCP auth vars.
+            [ -z "${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}" ] && missing+=("GCP_WORKLOAD_IDENTITY_PROVIDER")
+            [ -z "${{ vars.GCP_SERVICE_ACCOUNT }}" ] && missing+=("GCP_SERVICE_ACCOUNT")
+          fi
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::missing secrets/vars: ${missing[*]}"
+            echo "See docs/outreach/sheets-setup.md. Also make sure the HailBytes sheet"
+            echo "is shared (Editor) with the service account referenced by GCP_SERVICE_ACCOUNT."
+            exit 1
+          fi
+
+      - name: Authenticate to Google Cloud
+        if: ${{ github.event.inputs.csv != 'true' }}
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Run lead discovery
+        run: |
+          args=(--provider exa --mode "${MODE:-search}" --limit "${LIMIT:-20}" --rotate "${ROTATE:-daily}")
+          if [ -n "$SECTIONS" ]; then
+            args+=(--sections "$SECTIONS")
+          fi
+          if [ "$CSV" = "true" ]; then
+            args+=(--csv "leads-hailbytes-exa-$(date -u +%Y%m%d-%H%M%S).csv")
+          fi
+          echo "::group::args"
+          printf '%s\n' "${args[@]}"
+          echo "::endgroup::"
+          node scripts/find-leads-hailbytes.mjs "${args[@]}"
+        env:
+          MODE: ${{ github.event.inputs.mode }}
+          LIMIT: ${{ github.event.inputs.limit }}
+          SECTIONS: ${{ github.event.inputs.sections }}
+          ROTATE: ${{ github.event.inputs.rotate }}
+
+      - name: Upload CSV artifact
+        if: ${{ github.event.inputs.csv == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: leads-hailbytes-exa-csv
+          path: leads-hailbytes-exa-*.csv
+          if-no-files-found: warn
+          retention-days: 14

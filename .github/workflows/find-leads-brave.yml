@@ -1,0 +1,97 @@
+name: Find leads (Brave)
+
+on:
+  schedule:
+    # 15:00 UTC = 08:00 PT. Offset 2h from the Exa run so the two providers
+    # don't race to append the same URL on the rare overlap.
+    - cron: "0 15 * * *"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Max dork queries to run"
+        default: "20"
+      sections:
+        description: "Regex filter on section headings. Leave blank for all."
+        default: ""
+      since:
+        description: "Freshness floor (YYYY-MM-DD). Leave blank for no filter."
+        default: ""
+      csv:
+        description: "Write results to a CSV artifact instead of Google Sheets (smoke-test mode)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write  # required for Workload Identity Federation
+
+jobs:
+  find-leads:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BRAVE_SEARCH_KEY: ${{ secrets.BRAVE_SEARCH_KEY }}
+      LEADS_SHEET_ID: ${{ vars.LEADS_SHEET_ID }}
+      CSV: ${{ github.event.inputs.csv }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Sanity-check secrets
+        run: |
+          missing=()
+          [ -z "$BRAVE_SEARCH_KEY" ] && missing+=("BRAVE_SEARCH_KEY")
+          if [ "$CSV" != "true" ]; then
+            [ -z "$LEADS_SHEET_ID" ] && missing+=("LEADS_SHEET_ID")
+            [ -z "${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}" ] && missing+=("GCP_WORKLOAD_IDENTITY_PROVIDER")
+            [ -z "${{ vars.GCP_SERVICE_ACCOUNT }}" ] && missing+=("GCP_SERVICE_ACCOUNT")
+          fi
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::missing secrets/vars: ${missing[*]}"
+            echo "See docs/outreach/sheets-setup.md"
+            exit 1
+          fi
+
+      - name: Authenticate to Google Cloud
+        if: ${{ github.event.inputs.csv != 'true' }}
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Run lead discovery
+        run: |
+          args=(--provider brave --limit "${LIMIT:-20}")
+          if [ -n "$SECTIONS" ]; then
+            args+=(--sections "$SECTIONS")
+          fi
+          if [ -n "$SINCE" ]; then
+            args+=(--since "$SINCE")
+          fi
+          if [ "$CSV" = "true" ]; then
+            args+=(--csv "leads-brave-$(date -u +%Y%m%d-%H%M%S).csv")
+          fi
+          echo "::group::args"
+          printf '%s\n' "${args[@]}"
+          echo "::endgroup::"
+          node scripts/find-leads.mjs "${args[@]}"
+        env:
+          LIMIT: ${{ github.event.inputs.limit }}
+          SECTIONS: ${{ github.event.inputs.sections }}
+          SINCE: ${{ github.event.inputs.since }}
+
+      - name: Upload CSV artifact
+        if: ${{ github.event.inputs.csv == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: leads-brave-csv
+          path: leads-brave-*.csv
+          if-no-files-found: warn
+          retention-days: 14

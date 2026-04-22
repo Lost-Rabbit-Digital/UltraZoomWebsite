@@ -108,7 +108,7 @@ For every lead with status "draft_ready":
 - Choose the right spear from docs/outreach/templates.md based on blog_spear
 - Personalize paragraph 1 with a specific detail from their article
 - Keep emails 3–5 short paragraphs, one ask, soft close
-- Sign off: Boden Garman / Founder, Lost Rabbit Digital LLC /
+- Sign off: Boden McHale / Founder, Lost Rabbit Digital LLC /
   https://ultrazoom.app
 
 ### Prioritize
@@ -204,7 +204,7 @@ STEPS
    c. Subject, Send window, To fields filled.
    d. Sign-off block:
         Best,
-        Boden Garman
+        Boden McHale
         Founder, Lost Rabbit Digital LLC
         https://ultrazoom.app
 
