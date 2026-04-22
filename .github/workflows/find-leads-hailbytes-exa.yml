@@ -7,8 +7,12 @@ name: Find leads — HailBytes (Exa)
 # account used by vars.GCP_SERVICE_ACCOUNT (Editor access).
 
 on:
-  # Manual-only by default — this is a PoC. Flip to a cron once results
-  # look good (suggest: "0 14 * * *" to offset from the Ultra Zoom lane).
+  schedule:
+    # Weekly: Monday 14:00 UTC = 07:00 PT. One hour after the Ultra Zoom
+    # daily Exa run (13:00 UTC) to avoid piling onto the Exa API. Relies
+    # on --rotate daily so each week's run covers a different slice of
+    # docs/outreach-hailbytes/exa-queries.md.
+    - cron: "0 14 * * 1"
   workflow_dispatch:
     inputs:
       mode:
@@ -25,6 +29,14 @@ on:
       sections:
         description: "Regex filter on section headings. Leave blank for all."
         default: ""
+      rotate:
+        description: "Query-rotation mode"
+        type: choice
+        options:
+          - daily
+          - shuffle
+          - none
+        default: daily
       csv:
         description: "Write results to a CSV artifact instead of Google Sheets (smoke-test mode)"
         type: boolean
@@ -79,7 +91,7 @@ jobs:
 
       - name: Run lead discovery
         run: |
-          args=(--provider exa --mode "${MODE:-search}" --limit "${LIMIT:-20}")
+          args=(--provider exa --mode "${MODE:-search}" --limit "${LIMIT:-20}" --rotate "${ROTATE:-daily}")
           if [ -n "$SECTIONS" ]; then
             args+=(--sections "$SECTIONS")
           fi
@@ -94,6 +106,7 @@ jobs:
           MODE: ${{ github.event.inputs.mode }}
           LIMIT: ${{ github.event.inputs.limit }}
           SECTIONS: ${{ github.event.inputs.sections }}
+          ROTATE: ${{ github.event.inputs.rotate }}
 
       - name: Upload CSV artifact
         if: ${{ github.event.inputs.csv == 'true' }}

@@ -42,6 +42,14 @@
  *   --sections <re>    regex filter on section headings
  *   --since <iso>      pages/results after this date (YYYY-MM-DD)
  *   --no-detect        skip contact_url auto-detection
+ *   --rotate <mode>    daily | shuffle | none. Controls which slice of
+ *                      the query file we run when --limit < total.
+ *                      daily (default): rotate a window so every query
+ *                        runs within ceil(total/limit) days — useful for
+ *                        the weekly cron so coverage sweeps the whole file
+ *                        over a handful of runs.
+ *                      shuffle: randomize and pick the first --limit.
+ *                      none: take the first --limit in file order.
  *   --csv <path>       write to a local CSV file instead of Google Sheets
  *   --dry-run          preview queries, no API or Sheet calls
  */
@@ -100,6 +108,7 @@ function parseArgs(raw) {
     sections: null,
     since: null,
     detect: true,
+    rotate: "daily",
     csv: null,
     dryRun: false,
   };
@@ -115,6 +124,7 @@ function parseArgs(raw) {
     else if (a === "--sections") out.sections = new RegExp(next(), "i");
     else if (a === "--since") out.since = next();
     else if (a === "--no-detect") out.detect = false;
+    else if (a === "--rotate") out.rotate = next();
     else if (a === "--csv") out.csv = next();
     else if (a === "--dry-run") out.dryRun = true;
     else if (a === "-h" || a === "--help") {
@@ -133,8 +143,61 @@ function parseArgs(raw) {
     console.error(`--mode must be search, find-similar, or both`);
     exit(2);
   }
+  if (!["daily", "shuffle", "none"].includes(out.rotate)) {
+    console.error(`--rotate must be daily, shuffle, or none`);
+    exit(2);
+  }
   if (!out.queries) out.queries = DEFAULTS[out.provider].queries;
   return out;
+}
+
+// Stable hash of an arbitrary string, used to seed the daily-rotation
+// window so a query's bucket position is deterministic but well-mixed.
+function hashStr(s) {
+  let h = 2166136261; // FNV-1a basis
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+// Deterministic shuffle (Fisher-Yates) seeded by an integer.
+function seededShuffle(arr, seed) {
+  const out = arr.slice();
+  let state = seed >>> 0 || 1;
+  for (let i = out.length - 1; i > 0; i--) {
+    state ^= state << 13;
+    state ^= state >>> 17;
+    state ^= state << 5;
+    state >>>= 0;
+    const j = state % (i + 1);
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+// Pick which `limit` queries to run this run.
+//   daily   — hash(query+day) ordering; every day (or week) produces a
+//             different but deterministic slice. With a weekly cron this
+//             means the full query file gets swept over ceil(total/limit)
+//             weeks.
+//   shuffle — randomize once per process and slice.
+//   none    — file order, slice (useful for debugging).
+function selectQueries(queries, limit, mode, provider) {
+  if (queries.length <= limit || mode === "none") {
+    return queries.slice(0, limit);
+  }
+  if (mode === "shuffle") {
+    return seededShuffle(queries, Date.now() & 0xffffffff).slice(0, limit);
+  }
+  const day = Math.floor(Date.now() / 86_400_000);
+  const tagged = queries.map((q) => ({
+    q,
+    rank: hashStr(`${provider}|${day}|${q.section}|${q.query}`),
+  }));
+  tagged.sort((a, b) => a.rank - b.rank);
+  return tagged.slice(0, limit).map((t) => t.q);
 }
 
 // Natural-language query parser (same rules as find-leads.mjs).
@@ -299,16 +362,36 @@ async function runBraveSearch({ queries, perQuery, since, apiKey, seen, stats, d
 async function enrichContactUrls(rows, dryRun) {
   if (dryRun || rows.length === 0) return 0;
   console.error(`\n== contact-form detection (${rows.length} rows) ==`);
+  const urlIdx = SHEET_COLUMNS.indexOf("url");
   const tmpRows = rows.map((r) => ({
-    url: r[SHEET_COLUMNS.indexOf("url")],
+    url: r[urlIdx],
     contact_url: "",
+    contact_email: "",
+    contact_method: "",
   }));
   const detected = await enrichWithContactUrls(tmpRows);
-  const idx = SHEET_COLUMNS.indexOf("contact_url");
+  const today = new Date().toISOString().slice(0, 10);
+  const cuIdx = SHEET_COLUMNS.indexOf("contact_url");
+  const ceIdx = SHEET_COLUMNS.indexOf("contact_email");
+  const cmIdx = SHEET_COLUMNS.indexOf("contact_method");
+  const lcIdx = SHEET_COLUMNS.indexOf("last_checked_at");
+  let formCount = 0;
+  let emailCount = 0;
   for (let i = 0; i < rows.length; i++) {
-    if (tmpRows[i].contact_url) rows[i][idx] = tmpRows[i].contact_url;
+    if (tmpRows[i].contact_url) {
+      rows[i][cuIdx] = tmpRows[i].contact_url;
+      formCount++;
+    }
+    if (tmpRows[i].contact_email) {
+      rows[i][ceIdx] = tmpRows[i].contact_email;
+      if (!tmpRows[i].contact_url) emailCount++;
+    }
+    if (tmpRows[i].contact_method) rows[i][cmIdx] = tmpRows[i].contact_method;
+    rows[i][lcIdx] = today;
   }
-  console.error(`  detected ${detected}/${rows.length} contact URLs`);
+  console.error(
+    `  detected ${detected}/${rows.length}: ${formCount} forms, ${emailCount} email-only`,
+  );
   return detected;
 }
 
@@ -358,13 +441,28 @@ async function main() {
   }
 
   const parseQueries = opts.provider === "exa" ? parseNlQueries : parseDorkQueries;
-  const queries = parseQueries(resolve(opts.queries), opts.sections).slice(0, opts.limit);
-  const seeds = opts.provider === "exa"
-    ? loadSeedUrls(resolve(opts.seeds)).slice(0, opts.limit)
-    : [];
+  const allQueries = parseQueries(resolve(opts.queries), opts.sections);
+  const queries = selectQueries(allQueries, opts.limit, opts.rotate, opts.provider);
+  const allSeeds = opts.provider === "exa" ? loadSeedUrls(resolve(opts.seeds)) : [];
+  // Seeds use the same rotation: shuffle them deterministically by day so
+  // find-similar sweeps all seeds across runs instead of always hitting
+  // the first `limit`.
+  const seeds =
+    allSeeds.length <= opts.limit || opts.rotate === "none"
+      ? allSeeds.slice(0, opts.limit)
+      : opts.rotate === "shuffle"
+        ? seededShuffle(allSeeds, Date.now() & 0xffffffff).slice(0, opts.limit)
+        : allSeeds
+            .map((u) => ({ u, r: hashStr(`seed|${Math.floor(Date.now() / 86_400_000)}|${u}`) }))
+            .sort((a, b) => a.r - b.r)
+            .slice(0, opts.limit)
+            .map((t) => t.u);
 
-  console.error(`provider: ${opts.provider}  mode: ${opts.mode}`);
-  console.error(`queries available: ${queries.length}  seeds available: ${seeds.length}`);
+  console.error(`provider: ${opts.provider}  mode: ${opts.mode}  rotate: ${opts.rotate}`);
+  console.error(
+    `queries: ${queries.length}/${allQueries.length}  ` +
+      `seeds: ${seeds.length}/${allSeeds.length}`,
+  );
   if (opts.since) console.error(`since: ${opts.since}`);
 
   const stats = {

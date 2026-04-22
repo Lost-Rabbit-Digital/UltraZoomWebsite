@@ -40,6 +40,12 @@ export const SHEET_COLUMNS = [
   "notes",
   "author",
   "message_draft",
+  "contact_email",
+  "contact_method",
+  "last_checked_at",
+  "personalization_hook",
+  "lead_score",
+  "priority",
 ];
 
 export const URL_COLUMN_INDEX = SHEET_COLUMNS.indexOf("url"); // 4 → column E
@@ -122,6 +128,47 @@ export function makeClient({ sheetId }) {
   return { ensureHeader, readUrls, appendRows };
 }
 
+// Pull a short, copy-paste-ready hook out of the article summary the human
+// can drop into the first sentence of an outreach message. We grab the
+// first complete sentence with some signal-bearing words; if nothing
+// matches we just take the first sentence outright. Falls back to "" so
+// the column is always written.
+function personalizationHook(result) {
+  const text = (result.summary || "").replace(/\s+/g, " ").trim();
+  if (!text) return "";
+  const sentences = text.split(/(?<=[.!?])\s+/).filter((s) => s.length >= 30 && s.length <= 220);
+  if (sentences.length === 0) {
+    return text.length <= 200 ? text : text.slice(0, 197) + "…";
+  }
+  const SIGNAL = /\b(extension|browser|chrome|firefox|hover|zoom|image|photo|tool|recommend|favorite|use|workflow)\b/i;
+  const ranked = sentences.find((s) => SIGNAL.test(s)) || sentences[0];
+  return ranked;
+}
+
+// Composite lead-score in [0, 100]. Combines Exa's neural-similarity
+// score with freshness and a small bonus for a known author. Designed
+// for sorting, not statistics — the human just wants top-N per day.
+function leadScore(result) {
+  let score = 0;
+  if (typeof result.score === "number") {
+    // Exa scores cluster around 0.1-0.5 for good results.
+    score += Math.min(60, Math.round(result.score * 120));
+  } else {
+    score += 30; // Brave doesn't return a score; assume midrange.
+  }
+  if (result.published_date) {
+    const ageDays =
+      (Date.now() - new Date(result.published_date).getTime()) / 86_400_000;
+    if (Number.isFinite(ageDays)) {
+      if (ageDays < 90) score += 25;
+      else if (ageDays < 365) score += 15;
+      else if (ageDays < 730) score += 5;
+    }
+  }
+  if (result.author) score += 5;
+  return Math.max(0, Math.min(100, score));
+}
+
 export function rowFromResult(result, { source, seed, foundAt, pickTemplate = defaultPickTemplate }) {
   // Match SHEET_COLUMNS order. `template` and `message_draft` are pre-filled
   // from the keyword picker so triage starts with a copy-paste-ready message;
@@ -142,12 +189,18 @@ export function rowFromResult(result, { source, seed, foundAt, pickTemplate = de
     result.summary,
     "new", // status
     templateId, // template
-    "", // contact_url
+    "", // contact_url — filled by enrichment
     "", // assigned_to
     "", // message_sent
     "", // reply
     "", // notes
     result.author || "", // author
     draft, // message_draft
+    "", // contact_email — filled by enrichment
+    "", // contact_method — filled by enrichment ("form" | "email" | "")
+    "", // last_checked_at — filled when we probe contact info
+    personalizationHook(result),
+    String(leadScore(result)),
+    "", // priority — human-assigned
   ];
 }

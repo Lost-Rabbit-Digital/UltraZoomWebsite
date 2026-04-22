@@ -7,6 +7,12 @@ name: Find leads — HailBytes (Brave)
 # account used by vars.GCP_SERVICE_ACCOUNT (Editor access).
 
 on:
+  schedule:
+    # Weekly: Monday 16:00 UTC = 09:00 PT. Offset 2h from the HailBytes
+    # Exa run to spread API load and leave a buffer between provider
+    # writes to the same sheet. Uses --rotate daily so the dork file
+    # sweeps fully over several weeks.
+    - cron: "0 16 * * 1"
   workflow_dispatch:
     inputs:
       limit:
@@ -18,6 +24,14 @@ on:
       since:
         description: "Freshness floor (YYYY-MM-DD). Leave blank for no filter."
         default: ""
+      rotate:
+        description: "Query-rotation mode"
+        type: choice
+        options:
+          - daily
+          - shuffle
+          - none
+        default: daily
       csv:
         description: "Write results to a CSV artifact instead of Google Sheets (smoke-test mode)"
         type: boolean
@@ -72,7 +86,7 @@ jobs:
 
       - name: Run lead discovery
         run: |
-          args=(--provider brave --limit "${LIMIT:-20}")
+          args=(--provider brave --limit "${LIMIT:-20}" --rotate "${ROTATE:-daily}")
           if [ -n "$SECTIONS" ]; then
             args+=(--sections "$SECTIONS")
           fi
@@ -90,6 +104,7 @@ jobs:
           LIMIT: ${{ github.event.inputs.limit }}
           SECTIONS: ${{ github.event.inputs.sections }}
           SINCE: ${{ github.event.inputs.since }}
+          ROTATE: ${{ github.event.inputs.rotate }}
 
       - name: Upload CSV artifact
         if: ${{ github.event.inputs.csv == 'true' }}
