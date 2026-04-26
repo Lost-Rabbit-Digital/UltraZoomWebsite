@@ -1,0 +1,126 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Ultra Zoom vs. Imagus — A Privacy-First Imagus Alternative"
+  description="Looking for an Imagus alternative? Ultra Zoom matches the workflow you already know — sieve rules, gallery navigation, theater mode — with zero telemetry and an actively maintained release cadence."
+  currentPage="compare"
+  og={{
+    url: 'https://ultrazoom.app/compare/imagus',
+    title: 'Ultra Zoom vs. Imagus',
+    description: 'A privacy-first, actively maintained Imagus alternative for Chrome and Firefox.',
+    image: 'https://ultrazoom.app/images/icon-128.png',
+  }}
+>
+    <main class="main page-content" id="main-content">
+        <h1>Ultra Zoom vs. Imagus</h1>
+
+        <p class="pricing-intro">If you came up with Imagus, you already know what you want from a hover-zoom tool: sieve rules, full-resolution previews, gallery navigation, theater mode. Ultra Zoom keeps the workflow and adds something Imagus stopped offering: <strong>zero telemetry, an actively maintained release cadence, and a clear company behind it</strong>.</p>
+
+        <section class="help-section" id="why-switch">
+            <h2>Why people are switching</h2>
+            <ul class="help-list">
+                <li><strong>Active development.</strong> Ultra Zoom ships releases every few weeks, with new site plugins added on each one. The Imagus catalogue depends almost entirely on the community sieve.</li>
+                <li><strong>Modern browser support.</strong> Native Manifest V3 builds for Chrome, Edge, Brave, and a current Firefox add-on &mdash; <a href="/blog/manifest-v3-trap">without the V3 traps</a> that broke older zoom tools.</li>
+                <li><strong>Zero telemetry, on purpose.</strong> No analytics endpoint, no remote code, no server that sees your browsing. <a href="/blog/zero-knowledge-architecture">Read the architecture</a>.</li>
+                <li><strong>One-tab Pro upgrade.</strong> If you want power features (advanced gallery, video controls, history search), they&rsquo;re a managed Stripe subscription &mdash; no opaque license server.</li>
+            </ul>
+        </section>
+
+        <section class="help-section" id="feature-parity">
+            <h2>Feature parity at a glance</h2>
+            <div class="pricing-compare-wrap">
+                <table class="pricing-compare">
+                    <thead>
+                        <tr>
+                            <th scope="col">Feature</th>
+                            <th scope="col">Imagus</th>
+                            <th scope="col">Ultra Zoom</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Hover-to-zoom on every site</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Sieve / URL rules pack</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Theater mode (Z)</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Reverse image search shortcuts</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Gallery navigation</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Video preview &amp; playback controls</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003; (Pro)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Hover history</th>
+                            <td>Local only</td>
+                            <td>50 free / 1,000 + search (Pro)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Manifest V3 native</th>
+                            <td aria-label="Not native">Partial</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Active release cadence</th>
+                            <td aria-label="Not active">Slowed</td>
+                            <td aria-label="Included">Every few weeks</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Zero telemetry guarantee</th>
+                            <td aria-label="Unclear">Unclear</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Open billing &amp; account portal</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">Stripe-managed</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="help-section" id="migration">
+            <h2>Coming over from Imagus</h2>
+            <p>The default Ultra Zoom configuration covers the same site catalogue Imagus power users rely on. Three quick tips:</p>
+            <ul class="help-list">
+                <li>Install Ultra Zoom and disable Imagus &mdash; running both at once will fight for the hover overlay.</li>
+                <li>Open the popup, enable <em>All sites</em> mode if you used Imagus that way, and toggle the community URL-rules pack.</li>
+                <li>If you wrote your own sieve entries, the <a href="/pricing">Pro plan</a> ships with custom URL rule support so you can port them.</li>
+            </ul>
+        </section>
+
+        <section class="help-section" id="cta">
+            <h2>Try it free</h2>
+            <p>The core extension is free forever, with the entire site catalogue. Pro is a 7-day free trial when you&rsquo;re ready &mdash; <a href="/pricing">see plans</a>.</p>
+            <ul class="install-links">
+                <li>
+                    <a href="https://chromewebstore.google.com/detail/ultra-zoom/jalclpdejbeamaamcpbolkclpnleagmg" class="install-button chrome" target="_blank" rel="noopener">Install for Chrome</a>
+                </li>
+                <li>
+                    <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/" class="install-button firefox" target="_blank" rel="noopener">Install for Firefox</a>
+                </li>
+            </ul>
+        </section>
+    </main>
+</BaseLayout>

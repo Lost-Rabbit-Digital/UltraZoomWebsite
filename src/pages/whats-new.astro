@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="What's New | Ultra Zoom"
+  description="Recent Ultra Zoom releases, including the Imagus-parity release with theater mode, reverse image search, advanced gallery, and twelve new site plugins."
+  currentPage="whats-new"
+  og={{
+    url: 'https://ultrazoom.app/whats-new',
+    title: "What's New in Ultra Zoom",
+    description: 'Latest Ultra Zoom releases at a glance: theater mode, reverse image search, advanced gallery, video playback controls, and a dozen new free sites.',
+    image: 'https://ultrazoom.app/images/icon-128.png',
+  }}
+>
+    <main class="main page-content" id="main-content">
+        <h1>What&rsquo;s New</h1>
+
+        <p class="pricing-intro">A running log of Ultra Zoom releases. The TL;DR for power users coming from another hover-zoom tool: feature parity is here, and the basics that used to require Pro are now free.</p>
+
+        <article class="help-section" id="parity-release">
+            <h2>Imagus-parity release <span class="badge-pro">Latest</span></h2>
+            <p>The big one: every staple of the legacy hover-zoom tools is now in Ultra Zoom, plus a dozen new site plugins and a power-user upgrade path.</p>
+
+            <h3>Free for everyone</h3>
+            <ul class="help-list">
+                <li><strong>Theater mode</strong> &mdash; press <kbd>Z</kbd> to expand any zoomed image to a full-window view.</li>
+                <li><strong>Reverse image search shortcuts</strong> &mdash; <kbd>G</kbd> / <kbd>T</kbd> / <kbd>N</kbd> / <kbd>Y</kbd> / <kbd>Q</kbd> / <kbd>J</kbd> kick off a search on Google, TinEye, Yandex, and other engines without leaving the page.</li>
+                <li><strong>Keyboard shortcut help overlay</strong> &mdash; press <kbd>?</kbd> over any zoom to see every binding.</li>
+                <li><strong>Premium site plugins are now free</strong> &mdash; Instagram, Amazon, Pinterest, Reddit, eBay, and the rest of the catalogue ship for everyone.</li>
+                <li><strong>Basic gallery navigation</strong> &mdash; <kbd>&larr;</kbd> / <kbd>&rarr;</kbd> through any gallery while the overlay is open.</li>
+                <li><strong>Hover history</strong> &mdash; the last 50 images you hovered are saved locally so you can re-open one you scrolled past.</li>
+                <li><strong>Community URL rules pack</strong> &mdash; pull the latest sieve from the popup to unlock new sites without waiting for a release.</li>
+            </ul>
+
+            <h3>New Pro power features</h3>
+            <ul class="help-list">
+                <li><strong>Video playback controls</strong> &mdash; <kbd>M</kbd> mutes, <kbd>&uarr;</kbd>/<kbd>&darr;</kbd> tweak volume, <kbd>,</kbd>/<kbd>.</kbd> step frames.</li>
+                <li><strong>Advanced gallery</strong> &mdash; filmstrip view, slideshow, and batch-download of every image in the active gallery.</li>
+                <li><strong>Hover history power-ups</strong> &mdash; capacity bumped to 1,000 entries with full-text search and CSV export.</li>
+                <li><strong>Custom &amp; extended URL rules</strong> &mdash; teach Ultra Zoom about your private CDN or any site we don&rsquo;t cover yet.</li>
+            </ul>
+
+            <h3>Twelve new site plugins</h3>
+            <p>Out-of-the-box hover-zoom for Unsplash, Pexels, Wikimedia, Alamy, AP News, Getty, Bilibili, Weibo, 9GAG, AliExpress, Avito, and more &mdash; on top of the existing 60+ supported sites.</p>
+
+            <p class="pro-cta">
+                <a href="/pricing" class="pro-cta-btn">See Pro plans</a>
+            </p>
+        </article>
+
+        <h2>Coming from Imagus or Hover Zoom Plus?</h2>
+        <p>Ultra Zoom now covers the workflows you relied on, with a privacy story those tools can&rsquo;t match: zero telemetry, zero analytics, no server that sees your browsing. <a href="/blog/hover-zoom-privacy-scandal">Read the architecture story</a>.</p>
+
+        <p>Spot something missing or want a new site supported? <a href="/contact">Tell us</a> &mdash; release notes for the next build are already in motion.</p>
+    </main>
+</BaseLayout>

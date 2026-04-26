@@ -4,7 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout
   title="Help &amp; Documentation | Ultra Zoom"
-  description="Learn how to use the Ultra Zoom browser extension to hover-zoom images on 60+ websites."
+  description="Learn how to use the Ultra Zoom browser extension to hover-zoom images on 70+ websites."
   currentPage="help"
   og={{
     url: 'https://ultrazoom.app/help',
@@ -43,7 +43,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
         <section class="help-section" id="getting-started">
             <h2>Getting Started</h2>
-            <p>Ultra Zoom adds instant hover-to-zoom to images across 60+ websites. Follow these steps to get set up:</p>
+            <p>Ultra Zoom adds instant hover-to-zoom to images across 70+ websites. Follow these steps to get set up:</p>
             <div class="help-screenshot">
                 <img src="/images/ultra_zoom_screen_1.png" alt="Ultra Zoom welcome page showing how it works step by step" width="800" height="600" loading="lazy">
             </div>
@@ -59,7 +59,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     <span class="step-number">2</span>
                     <div class="step-content">
                         <strong>Visit any supported site</strong>
-                        <p>Go to Google Images, Amazon, Reddit, Twitter/X, Instagram, YouTube, or any of the 60+ supported websites.</p>
+                        <p>Go to Google Images, Amazon, Reddit, Twitter/X, Instagram, YouTube, or any of the 70+ supported websites.</p>
                     </div>
                 </li>
                 <li class="step-item">
@@ -103,8 +103,32 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                         <td>Navigate to the previous or next image in a gallery</td>
                     </tr>
                     <tr>
+                        <td><kbd>?</kbd></td>
+                        <td>Open the keyboard shortcut help overlay</td>
+                    </tr>
+                    <tr>
+                        <td><kbd>Z</kbd></td>
+                        <td>Toggle theater mode (full-window view)</td>
+                    </tr>
+                    <tr>
+                        <td><kbd>G</kbd> <kbd>T</kbd> <kbd>N</kbd> <kbd>Y</kbd> <kbd>Q</kbd> <kbd>J</kbd></td>
+                        <td>Reverse image search the hovered image (Google, TinEye, Yandex, and more)</td>
+                    </tr>
+                    <tr>
                         <td><kbd>Ctrl</kbd> + <kbd>C</kbd></td>
                         <td>Copy current image at the adjusted size <span class="badge-pro">Pro</span></td>
+                    </tr>
+                    <tr>
+                        <td><kbd>M</kbd></td>
+                        <td>Mute or unmute previewed video <span class="badge-pro">Pro</span></td>
+                    </tr>
+                    <tr>
+                        <td><kbd>&uarr;</kbd> / <kbd>&darr;</kbd></td>
+                        <td>Adjust previewed video volume <span class="badge-pro">Pro</span></td>
+                    </tr>
+                    <tr>
+                        <td><kbd>,</kbd> / <kbd>.</kbd></td>
+                        <td>Step video frame backward / forward <span class="badge-pro">Pro</span></td>
                     </tr>
                 </tbody>
             </table>
@@ -133,8 +157,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 <li>Steam</li>
                 <li>Wikipedia</li>
                 <li>GitHub</li>
-                <li>and 40+ more&hellip;</li>
+                <li>and 50+ more&hellip;</li>
             </ul>
+            <p class="help-note"><a href="/sites">See the full categorized list of supported sites &rarr;</a></p>
             <div class="help-screenshot">
                 <img src="/images/ultra_zoom_screen_3.png" alt="Plugins tab showing per-site toggle switches for supported websites" width="800" height="600" loading="lazy">
             </div>
@@ -151,31 +176,70 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </ul>
         </section>
 
+        <section class="help-section" id="free-features">
+            <h2>Free Features</h2>
+            <p>Every install ships with the full plugin catalogue and these power features at no cost:</p>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Theater Mode</h3>
+                    <p>Press <kbd>Z</kbd> while hovering to expand the image into a full-window view, ideal for reading small text or inspecting detail.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Reverse Image Search</h3>
+                    <p>Press <kbd>G</kbd>, <kbd>T</kbd>, <kbd>N</kbd>, <kbd>Y</kbd>, <kbd>Q</kbd>, or <kbd>J</kbd> on any zoomed image to look it up on Google, TinEye, Yandex, and other engines in a new tab.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Basic Gallery Navigation</h3>
+                    <p>Tap <kbd>&larr;</kbd> / <kbd>&rarr;</kbd> while a zoom overlay is open to step through the previous and next images in the gallery without leaving the page.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Hover History</h3>
+                    <p>Your last 50 hovered images are saved locally so you can re-open one you scrolled past — without sending anything to a server.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Community URL Rules</h3>
+                    <p>Ship-without-update support for new sites: pull the latest community rules pack from the popup and unlock more domains without waiting for a release.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Premium Site Plugins</h3>
+                    <p>Every site plugin (Instagram, Amazon, Pinterest, Reddit, eBay, and the rest) is included free, with full-resolution sources where available.</p>
+                </div>
+            </div>
+        </section>
+
         <section class="help-section" id="pro-features">
             <h2>Pro Features</h2>
             <p>Upgrade to Pro to unlock additional capabilities:</p>
             <div class="feature-grid">
                 <div class="feature-card">
-                    <h3>Video Preview</h3>
-                    <p>Hover over video thumbnails on YouTube, Twitter/X, and other supported sites to preview the video without opening it.</p>
+                    <h3>Video Preview &amp; Playback Controls</h3>
+                    <p>Hover videos to preview them in place, then mute with <kbd>M</kbd>, scrub with <kbd>,</kbd>/<kbd>.</kbd>, and adjust volume with <kbd>&uarr;</kbd>/<kbd>&darr;</kbd> — without opening the source page.</p>
                 </div>
                 <div class="feature-card">
-                    <h3>Gallery Navigation</h3>
-                    <p>Use arrow keys to browse through image galleries on Reddit, Instagram, and more without leaving the page.</p>
+                    <h3>Advanced Gallery</h3>
+                    <p>Open a filmstrip, run a slideshow, and batch-download every image in the active gallery in a single keystroke.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Hover History Power-ups</h3>
+                    <p>Bump history capacity to 1,000 entries with full-text search and export to CSV so you can find any image you previewed this month.</p>
                 </div>
                 <div class="feature-card">
                     <h3>Image Copy</h3>
                     <p>Press <kbd>Ctrl</kbd> + <kbd>C</kbd> while an image is zoomed to copy it at the adjusted size directly to your clipboard.</p>
                 </div>
                 <div class="feature-card">
-                    <h3>Caption Overlays</h3>
-                    <p>View image titles, alt text, and captions in a readable overlay while hovering.</p>
+                    <h3>Custom &amp; Extended URL Rules</h3>
+                    <p>Write your own URL rewrite rules to teach Ultra Zoom about a private CDN, internal tool, or any site we don&rsquo;t cover yet.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Settings Sync</h3>
+                    <p>Your toggles, rules, and history sync across up to 3 devices through your Ultra Zoom account.</p>
                 </div>
             </div>
             <div class="help-screenshot">
                 <img src="/images/ultra_zoom_screen_4.png" alt="Account settings showing Pro upgrade options and pricing tiers" width="800" height="600" loading="lazy">
             </div>
-            <p class="pro-note">Pro is available for <strong>$3.99/month</strong> (7-day free trial), <strong>$29.99/year</strong>, or <strong>$59.99 one-time</strong>. Managed through Stripe, supports up to 3 devices.</p>
+            <p class="pro-note">Pro plans start with a 7-day free trial. <a href="/pricing">See current plans and pricing</a> &mdash; managed through Stripe, supports up to 3 devices.</p>
             <p class="pro-cta">
                 <a href="/pricing" class="pro-cta-btn">See Pro plans</a>
             </p>
@@ -212,7 +276,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <div class="faq-list">
                 <div class="faq-item">
                     <h3>Is Ultra Zoom free?</h3>
-                    <p>Yes. Core hover-to-zoom across 60+ sites is completely free. <a href="#pro-features">Pro features</a> (video preview, gallery nav, download, captions) are available for $3.99/month (7-day free trial), $29.99/year, or $59.99 one-time.</p>
+                    <p>Yes. Core hover-to-zoom across 70+ sites is completely free, along with theater mode, reverse image search, basic gallery navigation, and hover history. <a href="#pro-features">Pro features</a> (video playback controls, advanced gallery, image copy, custom URL rules) start with a 7-day free trial &mdash; <a href="/pricing">see current plans</a>.</p>
                 </div>
                 <div class="faq-item">
                     <h3>Does Ultra Zoom collect my data?</h3>

@@ -1,0 +1,125 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Ultra Zoom vs. Hover Zoom Plus — A Modern Hover Zoom Plus Alternative"
+  description="Hover Zoom Plus has a complicated history. Ultra Zoom is a privacy-first, actively maintained hover-to-zoom extension for Chrome and Firefox with the workflow you already know."
+  currentPage="compare"
+  og={{
+    url: 'https://ultrazoom.app/compare/hover-zoom-plus',
+    title: 'Ultra Zoom vs. Hover Zoom Plus',
+    description: 'A privacy-first, actively maintained Hover Zoom Plus alternative for Chrome and Firefox.',
+    image: 'https://ultrazoom.app/images/icon-128.png',
+  }}
+>
+    <main class="main page-content" id="main-content">
+        <h1>Ultra Zoom vs. Hover Zoom Plus</h1>
+
+        <p class="pricing-intro">Hover Zoom set the standard for image-zoom extensions, but its <a href="/blog/hover-zoom-privacy-scandal">history with user data</a> made many people walk away. Hover Zoom Plus picked up where it left off as a community fork &mdash; useful, but light on active development. Ultra Zoom is the modern alternative: same workflow, better Pro tier, and a privacy story those tools can&rsquo;t match.</p>
+
+        <section class="help-section" id="why-switch">
+            <h2>Why people are switching</h2>
+            <ul class="help-list">
+                <li><strong>Zero telemetry by design.</strong> No analytics endpoint, no remote code, no server that sees your browsing. <a href="/blog/zero-knowledge-architecture">Read the architecture</a>.</li>
+                <li><strong>Active development.</strong> New plugins and bug fixes ship every few weeks &mdash; you don&rsquo;t have to hope a fork stays maintained.</li>
+                <li><strong>Manifest V3 native.</strong> Built for the current Chrome extension platform <a href="/blog/manifest-v3-trap">without the V3 trap</a> that broke older hover-zoom forks.</li>
+                <li><strong>Real Pro tier.</strong> Power features (video controls, advanced gallery, history search, custom URL rules) are bundled in a transparent Stripe-managed plan with a 7-day free trial.</li>
+            </ul>
+        </section>
+
+        <section class="help-section" id="feature-parity">
+            <h2>Feature parity at a glance</h2>
+            <div class="pricing-compare-wrap">
+                <table class="pricing-compare">
+                    <thead>
+                        <tr>
+                            <th scope="col">Feature</th>
+                            <th scope="col">Hover Zoom Plus</th>
+                            <th scope="col">Ultra Zoom</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Hover-to-zoom on every site</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Site-specific plugins (Instagram, Amazon, etc.)</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Theater mode (Z)</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Reverse image search shortcuts</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Gallery navigation</th>
+                            <td aria-label="Partial">Partial</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Video preview &amp; playback controls</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003; (Pro)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Advanced gallery (filmstrip, slideshow, batch download)</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003; (Pro)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Hover history</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td>50 free / 1,000 + search (Pro)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Manifest V3 native</th>
+                            <td aria-label="Partial">Partial</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Active release cadence</th>
+                            <td aria-label="Not active">Limited</td>
+                            <td aria-label="Included">Every few weeks</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Zero telemetry guarantee</th>
+                            <td aria-label="Unclear">Unclear</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="help-section" id="migration">
+            <h2>Coming over from Hover Zoom Plus</h2>
+            <ul class="help-list">
+                <li>Install Ultra Zoom and disable Hover Zoom Plus &mdash; running both at once will conflict on the hover overlay.</li>
+                <li>Open the popup and toggle the sites you want active. The default catalogue covers everything Hover Zoom Plus does, plus newer sources like Unsplash, Pexels, Wikimedia, Bilibili, and Avito.</li>
+                <li>If you used the Hover Zoom Plus blacklist heavily, Ultra Zoom&rsquo;s per-site toggle is one click away in the toolbar popup &mdash; same workflow.</li>
+            </ul>
+        </section>
+
+        <section class="help-section" id="cta">
+            <h2>Try it free</h2>
+            <p>The core extension is free forever, with the entire site catalogue. Pro is a 7-day free trial when you&rsquo;re ready &mdash; <a href="/pricing">see plans</a>.</p>
+            <ul class="install-links">
+                <li>
+                    <a href="https://chromewebstore.google.com/detail/ultra-zoom/jalclpdejbeamaamcpbolkclpnleagmg" class="install-button chrome" target="_blank" rel="noopener">Install for Chrome</a>
+                </li>
+                <li>
+                    <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/" class="install-button firefox" target="_blank" rel="noopener">Install for Firefox</a>
+                </li>
+            </ul>
+        </section>
+    </main>
+</BaseLayout>
