@@ -1299,6 +1299,37 @@ kbd {
     text-underline-offset: 2px;
 }
 
+/* ── Referral strip (Landing) ──────────────────────── */
+
+.referral-strip {
+    background: var(--bg-secondary);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin: 0 auto 3rem;
+    max-width: 720px;
+}
+
+.referral-strip-inner {
+    text-align: center;
+}
+
+.referral-strip-title {
+    font-size: 1.1rem;
+    margin: 0 0 0.5rem;
+    color: var(--text-primary);
+}
+
+.referral-strip-body {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin: 0;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 /* ── Screenshot Gallery (Landing) ────────────────── */
 
 .screenshot-gallery {
