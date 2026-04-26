@@ -78,7 +78,22 @@ const footerLinks = [
     <script is:inline>
     !function(w,d){if(!w.rdt){var p=w.rdt=function(){p.sendEvent?p.sendEvent.apply(p,arguments):p.callQueue.push(arguments)};p.callQueue=[];var t=d.createElement("script");t.src="https://www.redditstatic.com/ads/pixel.js",t.async=!0;var s=d.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}}(window,document);rdt('init','a2_gm9ylf7cid88');rdt('track','PageVisit');
     </script>
-    <!-- End Reddit Pixel --></head>
+    <!-- End Reddit Pixel -->
+    <!-- Free install Lead tracking -->
+    <script is:inline>
+    document.addEventListener('click', function (e) {
+        var el = e.target instanceof Element ? e.target.closest('.install-button') : null;
+        if (!el || !window.rdt) return;
+        var store = el.classList.contains('firefox') ? 'firefox' : 'chrome';
+        try {
+            window.rdt('track', 'Lead', {
+                conversionId: 'install-' + store,
+                products: [{ id: 'free-install-' + store, name: 'Ultra Zoom free install', category: 'extension' }]
+            });
+        } catch (_) {}
+    });
+    </script>
+    <!-- End Free install Lead tracking --></head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <header class="header">
