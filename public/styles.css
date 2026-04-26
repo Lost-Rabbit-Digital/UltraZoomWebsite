@@ -1099,7 +1099,42 @@ kbd {
 }
 
 .landing-install {
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.hero-proof {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.hero-proof a {
+    color: var(--brand-light);
+    text-decoration: none;
+}
+
+.hero-proof a:hover,
+.hero-proof a:focus {
+    text-decoration: underline;
+}
+
+.hero-proof-pill {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+.hero-proof-pill a {
+    color: inherit;
 }
 
 .landing-blurb {
