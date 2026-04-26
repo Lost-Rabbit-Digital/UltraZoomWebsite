@@ -39,6 +39,17 @@ const SKIP_DOMAINS = new Set([
   "ultrazoom.app",
 ]);
 
+// Suffix-matched skips for hosts that use per-tenant subdomains. Blogspot
+// blogs (foo.blogspot.com) essentially never expose a usable contact form
+// or address, so drop the whole TLD instead of probing them.
+const SKIP_DOMAIN_SUFFIXES = [".blogspot.com"];
+
+function isSkippedDomain(d) {
+  if (!d) return false;
+  if (SKIP_DOMAINS.has(d)) return true;
+  return SKIP_DOMAIN_SUFFIXES.some((s) => d.endsWith(s));
+}
+
 let lastCallAt = 0;
 
 async function throttle() {
@@ -109,7 +120,7 @@ export async function search({ apiKey, query, numResults = 10, since }) {
     apiKey,
   );
   const items = json?.web?.results || [];
-  return items.map(normalize).filter((r) => r && !SKIP_DOMAINS.has(r.domain));
+  return items.map(normalize).filter((r) => r && !isSkippedDomain(r.domain));
 }
 
 function normalize(r) {

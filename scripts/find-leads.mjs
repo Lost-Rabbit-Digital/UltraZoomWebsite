@@ -9,9 +9,11 @@
  *            dork library in docs/outreach/dorks.md.
  *
  * Both write to the same Google Sheet, distinguished by the `source` column
- * (exa-search, exa-similar, brave-search). Dedup by URL is global across
- * providers, so you never get duplicate rows regardless of who found the
- * article first.
+ * (exa-search, exa-similar, brave-search). Dedup is per-domain and global
+ * across providers and prior runs: once a domain has been written to the
+ * sheet, no further articles from that domain will be appended. Contact
+ * forms tend to be a single shared inbox per site, so a second article from
+ * the same domain just means a duplicate message to the same person.
  *
  * After Exa/Brave returns results, each row is enriched with a best-effort
  * contact_url probe (HTTP HEAD/GET against common contact paths). Detection
@@ -249,19 +251,20 @@ function loadSeedUrls(path) {
   }
 }
 
-function collect({ items, source, seed, seen, rows }) {
+function collect({ items, source, seed, seenDomains, rows }) {
   const foundAt = new Date().toISOString().slice(0, 10);
   let kept = 0;
   for (const it of items) {
-    if (!it || !it.url || seen.has(it.url)) continue;
-    seen.add(it.url);
+    if (!it || !it.url || !it.domain) continue;
+    if (seenDomains.has(it.domain)) continue;
+    seenDomains.add(it.domain);
     rows.push(rowFromResult(it, { source, seed, foundAt }));
     kept++;
   }
   return kept;
 }
 
-async function runExaSearch({ queries, perQuery, since, apiKey, seen, stats, dryRun }) {
+async function runExaSearch({ queries, perQuery, since, apiKey, seenDomains, stats, dryRun }) {
   console.error(`\n== exa search (${queries.length} queries) ==`);
   const rows = [];
   for (const { section, query } of queries) {
@@ -283,13 +286,13 @@ async function runExaSearch({ queries, perQuery, since, apiKey, seen, stats, dry
       stats.errors++;
       continue;
     }
-    const kept = collect({ items, source: "exa-search", seed: query, seen, rows });
+    const kept = collect({ items, source: "exa-search", seed: query, seenDomains, rows });
     console.error(`  + [${kept}/${items.length}]  ${query.slice(0, 70)}`);
   }
   return rows;
 }
 
-async function runExaFindSimilar({ seeds, perQuery, apiKey, seen, stats, dryRun }) {
+async function runExaFindSimilar({ seeds, perQuery, apiKey, seenDomains, stats, dryRun }) {
   console.error(`\n== exa find-similar (${seeds.length} seed URLs) ==`);
   const rows = [];
   for (const seedUrl of seeds) {
@@ -306,13 +309,13 @@ async function runExaFindSimilar({ seeds, perQuery, apiKey, seen, stats, dryRun 
       stats.errors++;
       continue;
     }
-    const kept = collect({ items, source: "exa-similar", seed: seedUrl, seen, rows });
+    const kept = collect({ items, source: "exa-similar", seed: seedUrl, seenDomains, rows });
     console.error(`  + [${kept}/${items.length}]  ${seedUrl.slice(0, 70)}`);
   }
   return rows;
 }
 
-async function runBraveSearch({ queries, perQuery, since, apiKey, seen, stats, dryRun }) {
+async function runBraveSearch({ queries, perQuery, since, apiKey, seenDomains, stats, dryRun }) {
   console.error(`\n== brave search (${queries.length} queries) ==`);
   const rows = [];
   for (const { section, query } of queries) {
@@ -329,7 +332,7 @@ async function runBraveSearch({ queries, perQuery, since, apiKey, seen, stats, d
       stats.errors++;
       continue;
     }
-    const kept = collect({ items, source: "brave-search", seed: query, seen, rows });
+    const kept = collect({ items, source: "brave-search", seed: query, seenDomains, rows });
     console.error(`  + [${kept}/${items.length}]  ${query.slice(0, 70)}`);
   }
   return rows;
@@ -464,12 +467,23 @@ async function main() {
     ? makeCsvClient({ path: resolve(opts.csv) })
     : makeClient({ sheetId });
   await sink.ensureHeader();
-  const seen = await sink.readUrls();
-  const seenBefore = seen.size;
+  // Dedup is by domain. We derive the seed set from the URLs already in the
+  // sheet rather than reading the `domain` column directly so that
+  // hand-edited rows missing a domain value still count.
+  const existingUrls = await sink.readUrls();
+  const seenDomains = new Set();
+  for (const u of existingUrls) {
+    try {
+      const host = new URL(u).hostname.replace(/^www\./, "");
+      if (host) seenDomains.add(host);
+    } catch {
+      // ignore malformed URLs
+    }
+  }
   console.error(
     opts.csv
-      ? `csv sink: ${opts.csv}  existing URLs: ${seenBefore}`
-      : `existing URLs in sheet: ${seenBefore}`,
+      ? `csv sink: ${opts.csv}  existing domains: ${seenDomains.size}`
+      : `existing domains in sheet: ${seenDomains.size}`,
   );
 
   const allRows = [];
@@ -481,7 +495,7 @@ async function main() {
           perQuery: opts.perQuery,
           since: opts.since,
           apiKey: exaKey,
-          seen,
+          seenDomains,
           stats,
           dryRun: false,
         })),
@@ -493,7 +507,7 @@ async function main() {
           seeds,
           perQuery: opts.perQuery,
           apiKey: exaKey,
-          seen,
+          seenDomains,
           stats,
           dryRun: false,
         })),
@@ -506,7 +520,7 @@ async function main() {
         perQuery: opts.perQuery,
         since: opts.since,
         apiKey: braveKey,
-        seen,
+        seenDomains,
         stats,
         dryRun: false,
       })),
@@ -514,9 +528,9 @@ async function main() {
   }
 
   // Duplicates skipped = total returned by providers minus what we collected.
-  // We don't count them here because `seen` already filters; instead track
-  // growth of `seen` since start as the new-URL count.
-  stats.duplicates = 0; // left as 0 — the producer loops skip silently
+  // We don't count them here because `seenDomains` already filters; the
+  // producer loops skip same-domain hits silently.
+  stats.duplicates = 0;
 
   if (opts.detect) {
     stats.contactDetected = await enrichContactUrls(allRows, false);
@@ -541,7 +555,7 @@ function stubArgs(opts, stats) {
     perQuery: opts.perQuery,
     since: opts.since,
     apiKey: null,
-    seen: new Set(),
+    seenDomains: new Set(),
     stats,
     dryRun: true,
   };
