@@ -38,7 +38,6 @@
  *   --limit <n>        max queries/seeds per mode     (default: 20)
  *   --per-query <n>    results per call (1–25)        (default: 10)
  *   --queries <file>   override query file            (default depends on provider)
- *   --seeds <file>     override seeds file (Exa only) (default: docs/outreach-hailbytes/leads.json)
  *   --sections <re>    regex filter on section headings
  *   --since <iso>      pages/results after this date (YYYY-MM-DD)
  *   --no-detect        skip contact_url auto-detection
@@ -54,7 +53,7 @@
  *   --dry-run          preview queries, no API or Sheet calls
  */
 
-import { readFileSync, existsSync, appendFileSync } from "node:fs";
+import { readFileSync, appendFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { argv, env, exit } from "node:process";
 
@@ -112,24 +111,17 @@ function isOffTopicResult(item) {
 }
 
 const DEFAULTS = {
-  exa: {
-    queries: "docs/outreach-hailbytes/exa-queries.md",
-    seeds: "docs/outreach-hailbytes/leads.json",
-  },
+  exa: { queries: "docs/outreach-hailbytes/exa-queries.md" },
   brave: { queries: "docs/outreach-hailbytes/dorks.md" },
 };
 
 function parseArgs(raw) {
   const out = {
     provider: "exa",
-    // Default to `search` for HailBytes — no curated seed set exists yet,
-    // so find-similar would no-op. Users can still pass --mode both once
-    // leads.json is populated.
     mode: "search",
     limit: 20,
     perQuery: 10,
     queries: null,
-    seeds: DEFAULTS.exa.seeds,
     sections: null,
     since: null,
     detect: true,
@@ -145,7 +137,6 @@ function parseArgs(raw) {
     else if (a === "--limit") out.limit = Number(next());
     else if (a === "--per-query") out.perQuery = Math.min(25, Number(next()));
     else if (a === "--queries") out.queries = next();
-    else if (a === "--seeds") out.seeds = next();
     else if (a === "--sections") out.sections = new RegExp(next(), "i");
     else if (a === "--since") out.since = next();
     else if (a === "--no-detect") out.detect = false;
@@ -282,28 +273,20 @@ function parseDorkQueries(path, sectionFilter) {
   return out;
 }
 
-function loadSeedUrls(path) {
-  if (!existsSync(path)) return [];
-  try {
-    const data = JSON.parse(readFileSync(path, "utf8"));
-    const leads = Array.isArray(data) ? data : data.leads || [];
-    return leads
-      .map((l) => l.article_url || l.url)
-      .filter((u) => typeof u === "string" && u.startsWith("http"));
-  } catch (e) {
-    console.error(`could not parse seeds file ${path}: ${e.message}`);
-    return [];
-  }
-}
+const FIVE_YEARS_MS = 5 * 365.25 * 24 * 60 * 60 * 1000;
 
 function collect({ items, source, seed, seen, rows }) {
   const foundAt = new Date().toISOString().slice(0, 10);
+  const cutoff = Date.now() - FIVE_YEARS_MS;
   let kept = 0;
   for (const it of items) {
     if (!it || !it.url || seen.has(it.url)) continue;
-    // Drop prospects that aren't useful for HailBytes outreach.
     if (SKIP_DOMAINS.has(it.domain)) continue;
     if (isOffTopicResult(it)) continue;
+    if (it.published_date) {
+      const pub = new Date(it.published_date).getTime();
+      if (Number.isFinite(pub) && pub < cutoff) continue;
+    }
     seen.add(it.url);
     rows.push(rowFromResult(it, { source, seed, foundAt, pickTemplate: pickHailBytesTemplate }));
     kept++;
@@ -469,26 +452,9 @@ async function main() {
   const parseQueries = opts.provider === "exa" ? parseNlQueries : parseDorkQueries;
   const allQueries = parseQueries(resolve(opts.queries), opts.sections);
   const queries = selectQueries(allQueries, opts.limit, opts.rotate, opts.provider);
-  const allSeeds = opts.provider === "exa" ? loadSeedUrls(resolve(opts.seeds)) : [];
-  // Seeds use the same rotation: shuffle them deterministically by day so
-  // find-similar sweeps all seeds across runs instead of always hitting
-  // the first `limit`.
-  const seeds =
-    allSeeds.length <= opts.limit || opts.rotate === "none"
-      ? allSeeds.slice(0, opts.limit)
-      : opts.rotate === "shuffle"
-        ? seededShuffle(allSeeds, Date.now() & 0xffffffff).slice(0, opts.limit)
-        : allSeeds
-            .map((u) => ({ u, r: hashStr(`seed|${Math.floor(Date.now() / 86_400_000)}|${u}`) }))
-            .sort((a, b) => a.r - b.r)
-            .slice(0, opts.limit)
-            .map((t) => t.u);
 
   console.error(`provider: ${opts.provider}  mode: ${opts.mode}  rotate: ${opts.rotate}`);
-  console.error(
-    `queries: ${queries.length}/${allQueries.length}  ` +
-      `seeds: ${seeds.length}/${allSeeds.length}`,
-  );
+  console.error(`queries: ${queries.length}/${allQueries.length}`);
   if (opts.since) console.error(`since: ${opts.since}`);
 
   const stats = {
@@ -502,7 +468,9 @@ async function main() {
   if (opts.dryRun) {
     if (opts.provider === "exa") {
       if (opts.mode !== "find-similar") await runExaSearch({ queries, ...stubArgs(opts, stats) });
-      if (opts.mode !== "search") await runExaFindSimilar({ seeds, ...stubArgs(opts, stats) });
+      if (opts.mode !== "search") {
+        console.error(`\n== exa find-similar (seeds will be read from sheet at runtime) ==`);
+      }
     } else {
       await runBraveSearch({ queries, ...stubArgs(opts, stats) });
     }
@@ -514,12 +482,27 @@ async function main() {
     : makeClient({ sheetId });
   await sink.ensureHeader();
   const seen = await sink.readUrls();
-  const seenBefore = seen.size;
   console.error(
     opts.csv
-      ? `csv sink: ${opts.csv}  existing URLs: ${seenBefore}`
-      : `existing URLs in sheet: ${seenBefore}`,
+      ? `csv sink: ${opts.csv}  existing URLs: ${seen.size}`
+      : `existing URLs in sheet: ${seen.size}`,
   );
+
+  // For find-similar: pick seed URLs at random from URLs already in the sheet.
+  const allSeeds = opts.provider === "exa" ? [...seen] : [];
+  const seeds =
+    allSeeds.length === 0 || allSeeds.length <= opts.limit || opts.rotate === "none"
+      ? allSeeds.slice(0, opts.limit)
+      : opts.rotate === "shuffle"
+        ? seededShuffle(allSeeds, Date.now() & 0xffffffff).slice(0, opts.limit)
+        : allSeeds
+            .map((u) => ({ u, r: hashStr(`seed|${Math.floor(Date.now() / 86_400_000)}|${u}`) }))
+            .sort((a, b) => a.r - b.r)
+            .slice(0, opts.limit)
+            .map((t) => t.u);
+  if (opts.provider === "exa") {
+    console.error(`seeds: ${seeds.length}/${allSeeds.length} (from sheet)`);
+  }
 
   const allRows = [];
   if (opts.provider === "exa") {

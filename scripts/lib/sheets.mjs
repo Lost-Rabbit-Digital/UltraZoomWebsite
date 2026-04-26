@@ -34,11 +34,6 @@ export const SHEET_COLUMNS = [
   "status",
   "template",
   "contact_url",
-  "assigned_to",
-  "message_sent",
-  "reply",
-  "notes",
-  "author",
   "message_draft",
   "contact_email",
   "contact_method",
@@ -128,21 +123,21 @@ export function makeClient({ sheetId }) {
   return { ensureHeader, readUrls, appendRows };
 }
 
-// Pull a short, copy-paste-ready hook out of the article summary the human
-// can drop into the first sentence of an outreach message. We grab the
-// first complete sentence with some signal-bearing words; if nothing
-// matches we just take the first sentence outright. Falls back to "" so
-// the column is always written.
-function personalizationHook(result) {
-  const text = (result.summary || "").replace(/\s+/g, " ").trim();
-  if (!text) return "";
-  const sentences = text.split(/(?<=[.!?])\s+/).filter((s) => s.length >= 30 && s.length <= 220);
-  if (sentences.length === 0) {
-    return text.length <= 200 ? text : text.slice(0, 197) + "…";
-  }
-  const SIGNAL = /\b(extension|browser|chrome|firefox|hover|zoom|image|photo|tool|recommend|favorite|use|workflow)\b/i;
-  const ranked = sentences.find((s) => SIGNAL.test(s)) || sentences[0];
-  return ranked;
+// Short email subject lines keyed by template bucket. Used as the
+// personalization_hook column so the value can be pasted directly into a
+// contact-form "Subject" field or a cold-email subject line.
+const SUBJECTS = {
+  "form-genealogy":   "Free hover-to-zoom extension for genealogy research",
+  "form-real-estate": "Hover-to-zoom browser extension for house hunting",
+  "form-shopping":    "Free browser extension for eBay & Amazon shoppers",
+  "form-photo-design":"Hover-to-zoom extension for images & moodboards",
+  "form-privacy":     "Privacy-first hover-to-zoom browser extension",
+  "form-listicle":    "Ultra Zoom — hover-to-zoom extension for your roundup",
+  "form-generic":     "Quick note about Ultra Zoom",
+};
+
+function subjectLine(templateId) {
+  return SUBJECTS[templateId] || SUBJECTS["form-generic"];
 }
 
 // Composite lead-score in [0, 100]. Combines Exa's neural-similarity
@@ -165,7 +160,6 @@ function leadScore(result) {
       else if (ageDays < 730) score += 5;
     }
   }
-  if (result.author) score += 5;
   return Math.max(0, Math.min(100, score));
 }
 
@@ -190,16 +184,11 @@ export function rowFromResult(result, { source, seed, foundAt, pickTemplate = de
     "new", // status
     templateId, // template
     "", // contact_url — filled by enrichment
-    "", // assigned_to
-    "", // message_sent
-    "", // reply
-    "", // notes
-    result.author || "", // author
     draft, // message_draft
     "", // contact_email — filled by enrichment
     "", // contact_method — filled by enrichment ("form" | "email" | "")
     "", // last_checked_at — filled when we probe contact info
-    personalizationHook(result),
+    subjectLine(templateId), // personalization_hook — paste as email/form subject
     String(leadScore(result)),
     "", // priority — human-assigned
   ];
