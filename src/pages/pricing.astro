@@ -4,19 +4,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout
   title="Pricing | Ultra Zoom"
-  description="Ultra Zoom Pro pricing: monthly, annual, and lifetime plans. Free to use on every site; upgrade for premium plugins and power features."
+  description="Ultra Zoom Pro pricing: monthly, annual, and lifetime plans. The free tier covers hover-to-zoom, theater mode, gallery navigation, and reverse image search on every site."
   currentPage="pricing"
   og={{
     url: 'https://ultrazoom.app/pricing',
     title: 'Pricing | Ultra Zoom',
-    description: 'Ultra Zoom is free on every site. Upgrade to Pro for premium plugins and power features.',
+    description: 'Ultra Zoom is free on every site, with theater mode, gallery navigation, and reverse image search included. Upgrade to Pro for video controls, advanced gallery, EXIF, and premium plugins.',
     image: 'https://ultrazoom.app/images/icon-128.png',
   }}
 >
     <main class="main page-content" id="main-content">
         <h1>Pricing</h1>
 
-        <p class="pricing-intro">Ultra Zoom is free to use on every site. Upgrade to Pro for premium plugins and power features.</p>
+        <p class="pricing-intro">Ultra Zoom is free to use on every site. The free tier includes hover-to-zoom, theater mode, gallery navigation, reverse image search, and 50-item hover history. Upgrade to Pro for video playback controls, advanced gallery tools, EXIF metadata, and premium plugins for sites like Instagram and YouTube.</p>
 
         <section class="pricing-plans" aria-label="Pricing plans">
             <article class="pricing-card">
@@ -29,16 +29,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <article class="pricing-card">
                 <h2 class="pricing-card-name">Annual</h2>
                 <p class="pricing-card-price"><strong>$29.99</strong><span class="pricing-card-per">/yr</span></p>
-                <p class="pricing-card-note">Save $17.89/yr vs. monthly</p>
-                <button type="button" class="pricing-card-cta" data-plan="annual">Subscribe annually</button>
+                <p class="pricing-card-note">7-day trial &middot; save $17.89/yr</p>
+                <button type="button" class="pricing-card-cta" data-plan="annual">Start free trial</button>
             </article>
 
             <article class="pricing-card pricing-card--featured">
                 <span class="pricing-card-badge">Best value</span>
                 <h2 class="pricing-card-name">Lifetime</h2>
                 <p class="pricing-card-price"><strong>$59.99</strong><span class="pricing-card-per">one-time</span></p>
-                <p class="pricing-card-note">Pay once, keep forever</p>
-                <button type="button" class="pricing-card-cta" data-plan="lifetime">Buy lifetime</button>
+                <p class="pricing-card-note">7-day trial &middot; pay once, keep forever</p>
+                <button type="button" class="pricing-card-cta" data-plan="lifetime">Start free trial</button>
             </article>
         </section>
 
@@ -49,9 +49,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <p>Pro is built for people who live in their browser. If you&rsquo;re a researcher, buyer, designer, or collector who opens a hundred tabs a day, these features pay for themselves fast.</p>
             <ul class="why-pro-list">
                 <li><strong>Power shoppers</strong> use Pro to inspect thousands of <a href="/blog/online-shopping-product-photo-zoom">Amazon, Etsy, and eBay product photos</a> at full resolution without opening every listing.</li>
-                <li><strong>Collectors and auction bidders</strong> rely on Pro to triage <a href="/blog/collector-auction-photo-zoom">eBay, Heritage, and Catawiki lots</a> before placing a bid.</li>
-                <li><strong>Designers and art directors</strong> scan <a href="/blog/designer-moodboard-hover-zoom">Pinterest, Behance, and Dribbble</a> faster, with gallery navigation and caption overlays.</li>
-                <li><strong>Genealogy researchers</strong> read handwritten <a href="/blog/genealogy-archive-photo-zoom">census pages and archive scans</a> without opening a separate viewer for every record.</li>
+                <li><strong>Collectors and auction bidders</strong> rely on Pro to triage <a href="/blog/collector-auction-photo-zoom">eBay, Heritage, and Catawiki lots</a> before placing a bid &mdash; with EXIF metadata and the filmstrip view to compare angles.</li>
+                <li><strong>Designers and art directors</strong> scan <a href="/blog/designer-moodboard-hover-zoom">Pinterest, Behance, and Dribbble</a> faster, with batch download, color palette extraction, and caption overlays.</li>
+                <li><strong>Genealogy researchers</strong> read handwritten <a href="/blog/genealogy-archive-photo-zoom">census pages and archive scans</a> with the slideshow view and full-image download for offline annotation.</li>
             </ul>
         </section>
 
@@ -73,52 +73,82 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                         <td aria-label="Included">&#10003;</td>
                     </tr>
                     <tr>
-                        <th scope="row">Universal CDN plugins (Imgur, CloudFront, etc.)</th>
+                        <th scope="row">30+ site-specific &amp; universal CDN plugins</th>
                         <td aria-label="Included">&#10003;</td>
                         <td aria-label="Included">&#10003;</td>
                     </tr>
                     <tr>
-                        <th scope="row">Basic settings</th>
+                        <th scope="row">Community URL-rules pack (auto-updated)</th>
                         <td aria-label="Included">&#10003;</td>
                         <td aria-label="Included">&#10003;</td>
                     </tr>
                     <tr>
-                        <th scope="row">Premium site plugins (Instagram, Amazon, etc.)</th>
+                        <th scope="row">Theater / fullscreen mode</th>
+                        <td aria-label="Included">&#10003;</td>
+                        <td aria-label="Included">&#10003;</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Gallery navigation (arrow keys)</th>
+                        <td aria-label="Included">&#10003;</td>
+                        <td aria-label="Included">&#10003;</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Reverse image search (Google Lens, TinEye, Yandex, Bing)</th>
+                        <td aria-label="Included">&#10003;</td>
+                        <td aria-label="Included">&#10003;</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Hover history</th>
+                        <td aria-label="Included">50 items</td>
+                        <td aria-label="Included">1,000 items, searchable</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Keyboard shortcut help (<kbd>?</kbd>)</th>
+                        <td aria-label="Included">&#10003;</td>
+                        <td aria-label="Included">&#10003;</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Audio file detection</th>
+                        <td aria-label="Included">&#10003;</td>
+                        <td aria-label="Included">&#10003;</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Premium plugins (Instagram, YouTube, TikTok, Pixiv, DeviantArt, Flickr, Facebook, LinkedIn, eBay, Steam, Twitch, VK)</th>
                         <td aria-label="Not included">&ndash;</td>
                         <td aria-label="Included">&#10003;</td>
                     </tr>
                     <tr>
-                        <th scope="row">Gallery navigation</th>
+                        <th scope="row">Video preview with playback controls (play/pause, scrub, speed)</th>
                         <td aria-label="Not included">&ndash;</td>
                         <td aria-label="Included">&#10003;</td>
                     </tr>
                     <tr>
-                        <th scope="row">Video preview</th>
+                        <th scope="row">Advanced gallery: filmstrip, slideshow, batch download</th>
                         <td aria-label="Not included">&ndash;</td>
                         <td aria-label="Included">&#10003;</td>
                     </tr>
                     <tr>
-                        <th scope="row">Stats, history, EXIF viewer</th>
+                        <th scope="row">EXIF / metadata viewer</th>
                         <td aria-label="Not included">&ndash;</td>
                         <td aria-label="Included">&#10003;</td>
                     </tr>
                     <tr>
-                        <th scope="row">Batch download</th>
+                        <th scope="row">Color palette extraction</th>
                         <td aria-label="Not included">&ndash;</td>
                         <td aria-label="Included">&#10003;</td>
                     </tr>
                     <tr>
-                        <th scope="row">Watermark-free exports</th>
+                        <th scope="row">Caption overlay (titles, descriptions, alt text)</th>
                         <td aria-label="Not included">&ndash;</td>
                         <td aria-label="Included">&#10003;</td>
                     </tr>
                     <tr>
-                        <th scope="row">Custom rules &amp; favorites</th>
+                        <th scope="row">Custom &amp; extended URL rules</th>
                         <td aria-label="Not included">&ndash;</td>
                         <td aria-label="Included">&#10003;</td>
                     </tr>
                     <tr>
-                        <th scope="row">Settings sync</th>
+                        <th scope="row">Settings sync across devices</th>
                         <td aria-label="Not included">&ndash;</td>
                         <td aria-label="Included">&#10003;</td>
                     </tr>
@@ -127,7 +157,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
 
         <h2>Questions?</h2>
-        <p>Visit the <a href="/help">Help page</a> for setup and supported sites, or review our <a href="/privacy">Privacy policy</a>. Already Pro? Manage billing on your <a href="/account">Account</a> page.</p>
+        <p>Visit the <a href="/help">Help page</a> for setup and supported sites, see how Ultra Zoom <a href="/compare/hover-zoom-plus">compares to Hover Zoom+</a> and <a href="/compare/imagus">to Imagus</a>, or review our <a href="/privacy">Privacy policy</a>. Already Pro? Manage billing on your <a href="/account">Account</a> page.</p>
     </main>
 
     <script is:inline>
