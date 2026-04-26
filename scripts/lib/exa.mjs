@@ -29,6 +29,9 @@ const EXCLUDE_DOMAINS = [
   "google.com",
   "bing.com",
   "ultrazoom.app",
+  // Blogspot subdomains essentially never expose a usable contact channel,
+  // so skip the whole TLD instead of burning probe budget on them.
+  "blogspot.com",
 ];
 
 const RETRY_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
