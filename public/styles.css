@@ -409,6 +409,16 @@ img {
     color: var(--text-primary);
 }
 
+.footer-group-label {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-left: 0.5rem;
+    border-left: 1px solid var(--border);
+    margin-left: 0.25rem;
+}
+
 .footer-copy {
     font-size: 0.85rem;
     color: var(--text-muted);
