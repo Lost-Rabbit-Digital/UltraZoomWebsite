@@ -6,8 +6,3 @@
 # Referral links: same pattern — /r/<code> serves the /r page which
 # reads the code from location.pathname.
 /r/:code  /r?code=:code    200
-
-# Zoom-score result links: /zoom-score/r/<id> rewrites to /zoom-score/r
-# with ?id=<id>. The page's inline script reads either the query string
-# or location.pathname to resolve the id.
-/zoom-score/r/:id  /zoom-score/r?id=:id    200
