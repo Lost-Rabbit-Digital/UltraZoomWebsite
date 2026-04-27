@@ -1,10 +1,13 @@
 name: Find leads (Brave)
 
+# DEPRECATED 2026-04-27: superseded by the Wiza-direct cold-email lanes
+# (ultrazoom-people.yml + hailbytes-outreach.yml). Cron disabled; left
+# in place so workflow_dispatch still works for manual backfill of the
+# listicle/contact-form sheet.
+
 on:
-  schedule:
-    # 15:00 UTC = 08:00 PT. Offset 2h from the Exa run so the two providers
-    # don't race to append the same URL on the rare overlap.
-    - cron: "0 15 * * *"
+  # schedule:
+  #   - cron: "0 15 * * *"  # disabled — see header
   workflow_dispatch:
     inputs:
       limit:

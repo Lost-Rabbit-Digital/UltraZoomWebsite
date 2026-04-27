@@ -1,12 +1,15 @@
 """HailBytes MSSP/pentest outreach pipeline.
 
-Independent from the listicle pipeline (run_pipeline.py) so the two
-lanes can run on separate schedules without sharing state. Flow:
+Wiza-direct cold-email lane. Flow:
 
-    Brave web search (seed → company URLs)
-      → Hunter domain search (decision-maker title priority)
-      → email verify (Hunter / NeverBounce / ZeroBounce)
-      → Claude personalized opener (2 sentences in David's voice)
+    plain-English seed (kind of security firm)
+      → Claude translates to Wiza filter object (decision-maker titles
+        + security industry; cached 7 days)
+      → Wiza prospect_search preview (free; logs match count)
+      → Wiza create_prospect_list (charges credits; max_profiles cap)
+      → poll list until finished, fetch enriched contacts
+      → optional verify fallback
+      → Claude personalized opener anchored to SAT or ASM (rotates daily)
       → append to "HailBytes" tab of the source Sheet
 
 Dedupe is per-email against the HailBytes tab — domains aren't reused
@@ -15,9 +18,13 @@ SAT and ASM outreach. The MailMeteor template fills in the product
 pitch + signature; the pipeline's job is to land a verified address +
 two strong personalized sentences.
 
-Required env vars (set as repo Secrets / Variables):
-  BRAVE_SEARCH_API_KEY, HUNTER_API_KEY, ANTHROPIC_API_KEY
-  GOOGLE_SHEET_ID + Workload Identity Federation for Sheets access
+Credit cost (partial enrichment): ~2 API email credits per returned
+profile. Default max_profiles=5 keeps a single run under 10 credits.
+
+Required env vars:
+  WIZA_API_KEY, ANTHROPIC_API_KEY, GOOGLE_SHEET_ID + WIF for Sheets.
+  Optional verifier keys: HUNTER_API_KEY / NEVERBOUNCE_API_KEY /
+  ZEROBOUNCE_API_KEY.
 """
 
 from __future__ import annotations
@@ -29,7 +36,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from . import discover_brave
+from . import discover_wiza, translate_filters
 from .config import (
     DEFAULT_MODEL,
     OUTREACH_DIR,
@@ -38,91 +45,55 @@ from .config import (
     Config,
     ensure_dirs,
 )
-from .enrich_hunter import lookup as hunter_lookup
 from .enrich_personalize import MODEL_IDS, _call_anthropic
 from .enrich_verify import verify as email_verify
 from .stage_sheet import stage as stage_to_sheet
-from .util import host_of, log, now_iso, today_iso
+from .util import log, now_iso, today_iso
 
 SEEDS_PATH = OUTREACH_DIR / "seeds_hb_mssp.txt"
 PROMPT_PATH = PROMPTS_DIR / "hailbytes_opener.md"
-DEFAULT_PER_QUERY = 10
-DEFAULT_MAX_STAGE = 25
-
-# Title priority specific to HailBytes prospects. Earlier index wins.
-HB_ROLE_TIERS: list[tuple[str, list[str]]] = [
-    ("ciso", ["ciso", "chief information security officer", "chief security officer"]),
-    ("cto", ["cto", "chief technology officer"]),
-    ("offensive", ["offensive security", "red team", "head of red team", "principal consultant"]),
-    ("security_analyst", ["security analyst", "security engineer", "security operations"]),
-    ("systems_analyst", ["systems analyst", "systems engineer", "infrastructure engineer"]),
-    ("director", ["director of services", "director of consulting", "director of security"]),
-    ("founder", ["founder", "co-founder", "ceo", "principal", "owner"]),
-]
-GENERIC_INBOXES = {
-    "info",
-    "sales",
-    "contact",
-    "hello",
-    "support",
-    "help",
-    "team",
-    "admin",
-    "marketing",
-    "press",
-}
-
-# Brave returns these alongside real company domains. Hunter can't enrich
-# them and we don't want to send to them either. Suffix matches handle
-# blogspot.com / *.medium.com style multi-tenant hosts.
-_SKIP_DOMAINS = {
-    "linkedin.com",
-    "twitter.com",
-    "x.com",
-    "facebook.com",
-    "instagram.com",
-    "youtube.com",
-    "github.com",
-    "stackoverflow.com",
-    "reddit.com",
-    "medium.com",
-    "wikipedia.org",
-    "g2.com",
-    "capterra.com",
-    "gartner.com",
-    "clutch.co",
-    "trustpilot.com",
-    "glassdoor.com",
-    "indeed.com",
-    "crunchbase.com",
-    "youtube.com",
-    "google.com",
-    "bing.com",
-}
-_SKIP_DOMAIN_SUFFIXES = (".blogspot.com", ".medium.com", ".substack.com")
-
-
-def _is_skipped_domain(domain: str) -> bool:
-    if not domain:
-        return True
-    if domain in _SKIP_DOMAINS:
-        return True
-    return domain.endswith(_SKIP_DOMAIN_SUFFIXES)
+DEFAULT_LIMIT_SEEDS = 3
+DEFAULT_MAX_PROFILES = 5
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(prog="outreach.run_hailbytes")
-    p.add_argument("--max-stage", type=int, default=DEFAULT_MAX_STAGE)
-    p.add_argument("--per-query", type=int, default=DEFAULT_PER_QUERY)
+    p.add_argument(
+        "--max-profiles",
+        type=int,
+        default=DEFAULT_MAX_PROFILES,
+        help="Max enriched contacts per seed. Each one costs ~2 API email credits.",
+    )
+    p.add_argument(
+        "--limit-seeds",
+        type=int,
+        default=DEFAULT_LIMIT_SEEDS,
+        help="How many seeds to run this invocation (rotated daily).",
+    )
+    p.add_argument(
+        "--enrichment-level",
+        choices=["none", "partial", "full"],
+        default="partial",
+    )
     p.add_argument(
         "--product",
         choices=["sat", "asm", "rotate"],
         default="rotate",
         help="Which HailBytes product the opener should set up. 'rotate' alternates daily.",
     )
-    p.add_argument("--limit-seeds", type=int, default=10, help="Max seed queries per run.")
+    p.add_argument(
+        "--preview-only",
+        action="store_true",
+        help="Hit /prospects/search (free) and log match counts; do not "
+        "create a prospect list.",
+    )
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--model", default=DEFAULT_MODEL, choices=["haiku", "sonnet", "opus"])
+    p.add_argument(
+        "--no-verify",
+        action="store_true",
+        help="Skip the post-Wiza email verifier.",
+    )
     return p.parse_args(argv)
 
 
@@ -133,80 +104,12 @@ def _load_seeds(path: Path, *, limit: int) -> list[str]:
         if not line or line.startswith("#"):
             continue
         seeds.append(line)
-    # Daily rotation: deterministic shuffle by day-of-year so we don't
-    # always hit the same first N queries.
     import hashlib
     from datetime import datetime
 
     day = datetime.utcnow().date().toordinal()
     seeds.sort(key=lambda s: hashlib.md5(f"{day}|{s}".encode()).hexdigest())
     return seeds[:limit]
-
-
-def _hb_tier(person: dict[str, Any]) -> int:
-    haystack = " ".join(
-        [
-            (person.get("position") or "").lower(),
-            (person.get("department") or "").lower(),
-            (person.get("seniority") or "").lower(),
-        ]
-    )
-    for idx, (_, keywords) in enumerate(HB_ROLE_TIERS):
-        if any(k in haystack for k in keywords):
-            return idx
-    return len(HB_ROLE_TIERS)
-
-
-def _is_generic(email: str) -> bool:
-    local = (email or "").split("@", 1)[0].lower()
-    return local in GENERIC_INBOXES
-
-
-def _hunter_with_hb_priority(domain: str, *, api_key: str) -> dict[str, Any] | None:
-    """Same as enrich_hunter.lookup but ranks people by HailBytes-specific
-    title tiers and skips generic info@/sales@ inboxes.
-    """
-    import urllib.error
-    import urllib.parse
-
-    from .cache import JsonCache
-    from .config import HUNTER_CACHE, HUNTER_TTL_DAYS
-    from .enrich_hunter import _call
-
-    cache = JsonCache(HUNTER_CACHE, ttl_days=HUNTER_TTL_DAYS)
-    cache_key = f"hb|{domain}"
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return cached or None
-
-    try:
-        json_resp = _call(
-            "/domain-search",
-            {"domain": domain, "api_key": api_key, "limit": "10"},
-        )
-    except urllib.error.HTTPError as e:
-        if e.code == 404:
-            cache.set(cache_key, {})
-            return None
-        raise
-
-    emails = ((json_resp.get("data") or {}).get("emails")) or []
-    candidates = [e for e in emails if e.get("value") and not _is_generic(e["value"])]
-    if not candidates:
-        cache.set(cache_key, {})
-        return None
-
-    candidates.sort(key=lambda p: (_hb_tier(p), -int(p.get("confidence") or 0)))
-    pick = candidates[0]
-    result = {
-        "editor_first_name": pick.get("first_name") or "",
-        "editor_last_name": pick.get("last_name") or "",
-        "editor_email": pick.get("value"),
-        "editor_title": pick.get("position") or "",
-        "hunter_confidence": int(pick.get("confidence") or 0),
-    }
-    cache.set(cache_key, result)
-    return result
 
 
 def _render_prompt(template: str, **fields: str) -> str:
@@ -257,7 +160,6 @@ def _personalize_hailbytes(
 def _pick_product(arg: str) -> str:
     if arg in {"sat", "asm"}:
         return arg
-    # Daily rotation: alternate by ordinal day.
     from datetime import datetime
 
     return "sat" if datetime.utcnow().date().toordinal() % 2 == 0 else "asm"
@@ -270,10 +172,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if not cfg.dry_run:
         missing = []
-        if not cfg.brave_key:
-            missing.append("BRAVE_SEARCH_API_KEY")
-        if not cfg.hunter_key:
-            missing.append("HUNTER_API_KEY")
+        if not cfg.wiza_key:
+            missing.append("WIZA_API_KEY")
         if not cfg.anthropic_key:
             missing.append("ANTHROPIC_API_KEY")
         if missing:
@@ -284,91 +184,120 @@ def main(argv: list[str] | None = None) -> int:
     seeds = _load_seeds(SEEDS_PATH, limit=args.limit_seeds)
     log(
         f"== hailbytes outreach @ {today_iso()}  product={product}  "
-        f"seeds={len(seeds)}  max_stage={args.max_stage}  dry_run={args.dry_run} =="
+        f"seeds={len(seeds)}  max_profiles={args.max_profiles}  "
+        f"enrichment={args.enrichment_level}  preview_only={args.preview_only}  "
+        f"dry_run={args.dry_run} =="
     )
 
-    # Discovery: Brave web search per seed. Skip social / aggregator
-    # domains client-side — Hunter can't enrich them and they bias the
-    # downstream dedup set against legitimate company domains.
-    raw: list[dict[str, Any]] = []
-    seen_domains: set[str] = set()
+    # Step 1: translate seeds to Wiza filter objects (cached 7d).
+    seed_filters: list[tuple[str, dict[str, Any]]] = []
     for seed in seeds:
         if cfg.dry_run:
-            log(f"  [dry] {seed}")
+            log(f"  [dry] translate: {seed}")
+            seed_filters.append((seed, {}))
+            continue
+        filters = translate_filters.translate(
+            lane="hb",
+            seed=seed,
+            api_key=cfg.anthropic_key or "",
+            model=args.model,
+        )
+        if not filters:
+            log(f"  ! filter translation failed for: {seed[:70]}")
+            continue
+        log(f"  filter [{seed[:50]}]: {json.dumps(filters)[:160]}")
+        seed_filters.append((seed, filters))
+
+    # Step 2: preview (free).
+    previews: dict[str, int] = {}
+    if not cfg.dry_run:
+        for seed, filters in seed_filters:
+            try:
+                pv = discover_wiza.preview(
+                    api_key=cfg.wiza_key or "",
+                    filters=filters,
+                    size=5,
+                )
+            except Exception as e:  # noqa: BLE001
+                log(f"  preview error on {seed[:50]}: {e}")
+                continue
+            previews[seed] = pv["total"]
+            log(f"  preview [{seed[:50]}]: {pv['total']} matches")
+
+    if args.preview_only or cfg.dry_run:
+        total = sum(previews.values())
+        log(f"\npreview totals: {total} matches across {len(previews)} seeds")
+        return 0
+
+    # Step 3: create prospect list per seed and wait for enrichment.
+    raw_contacts: list[dict[str, Any]] = []
+    for seed, filters in seed_filters:
+        if previews.get(seed, 0) == 0:
+            log(f"  skipping (0 preview matches): {seed[:60]}")
             continue
         try:
-            items = discover_brave.search(
-                api_key=cfg.brave_key or "",
-                seed=seed,
-                num_results=args.per_query,
+            created = discover_wiza.create_list(
+                api_key=cfg.wiza_key or "",
+                name=f"HB-{product.upper()} — {seed[:80]}",
+                filters=filters,
+                max_profiles=args.max_profiles,
+                enrichment_level=args.enrichment_level,
             )
         except Exception as e:  # noqa: BLE001
-            log(f"  brave error on {seed[:60]}: {e}")
+            log(f"  create_list error on {seed[:50]}: {e}")
             continue
-        kept = 0
-        for it in items:
-            domain = it.get("domain") or host_of(it.get("url") or "")
-            if not domain or domain in seen_domains:
-                continue
-            if _is_skipped_domain(domain):
-                continue
-            seen_domains.add(domain)
-            it["seed_used"] = seed
-            it["bucket"] = "HB"
-            it["discovered_at"] = now_iso()
-            it["source"] = "brave-company"
-            it["company"] = it.get("title") or domain
-            raw.append(it)
-            kept += 1
-        log(f"  + [{kept}/{len(items)}]  {seed[:70]}")
+        list_data = created.get("data") or {}
+        list_id = list_data.get("id") or list_data.get("uuid")
+        if not list_id:
+            log(f"  no list_id returned for {seed[:50]}: {created}")
+            continue
+        log(f"  list created id={list_id} for {seed[:50]}; polling...")
 
-    log(f"\ndiscovery: {len(raw)} unique domains")
+        status = discover_wiza.wait_for_list(api_key=cfg.wiza_key or "", list_id=list_id)
+        if status not in discover_wiza.FINISHED_STATUSES:
+            log(f"  list {list_id} ended in status={status}; skipping")
+            continue
 
-    # Enrich: Hunter (HailBytes title priority) → verify → Claude.
+        contacts = discover_wiza.get_contacts(
+            api_key=cfg.wiza_key or "",
+            list_id=list_id,
+            segment="valid",
+        )
+        log(f"  list {list_id}: {len(contacts)} valid contacts")
+        for c in contacts:
+            cand = discover_wiza.to_candidate(c, bucket="HB", source=f"wiza-{product}")
+            cand["seed_used"] = seed
+            cand["discovered_at"] = now_iso()
+            raw_contacts.append(cand)
+
+    log(f"\ndiscovery: {len(raw_contacts)} enriched contacts across {len(seed_filters)} seeds")
+
+    # Step 4: optional verify, then personalize.
     enriched: list[dict[str, Any]] = []
-    dropped = {"no_decision_maker": 0, "bad_email": 0, "manual_review": 0, "personalization": 0}
-    for cand in raw:
-        if len(enriched) >= args.max_stage:
-            break
-        domain = cand["domain"]
-        if cfg.dry_run:
-            cand.update(
-                {
-                    "editor_first_name": "Demo",
-                    "editor_last_name": "Lead",
-                    "editor_email": f"demo@{domain}",
-                    "editor_title": "CTO",
-                    "hunter_confidence": 90,
-                    "email_status": "valid",
-                    "personalized_opener": f"[dry-run opener for {domain} — product {product}]",
-                    "lead_score": 70,
-                }
-            )
-            enriched.append(cand)
+    dropped = {"no_email": 0, "bad_email": 0, "manual_review": 0, "personalization": 0}
+    for cand in raw_contacts:
+        if not cand.get("editor_email"):
+            dropped["no_email"] += 1
             continue
-        contact = _hunter_with_hb_priority(domain, api_key=cfg.hunter_key or "")
-        if not contact:
-            dropped["no_decision_maker"] += 1
-            continue
-        try:
-            verdict = email_verify(
-                contact["editor_email"],
-                hunter_key=cfg.hunter_key,
-                neverbounce_key=cfg.neverbounce_key,
-                zerobounce_key=cfg.zerobounce_key,
-            )
-        except Exception as e:  # noqa: BLE001
-            log(f"  verify error for {contact['editor_email']}: {e}")
-            dropped["bad_email"] += 1
-            continue
-        if verdict == "invalid":
-            dropped["bad_email"] += 1
-            continue
-        if verdict in {"risky", "unknown"}:
-            dropped["manual_review"] += 1
-            continue
+        if not args.no_verify:
+            try:
+                verdict = email_verify(
+                    cand["editor_email"],
+                    hunter_key=cfg.hunter_key,
+                    neverbounce_key=cfg.neverbounce_key,
+                    zerobounce_key=cfg.zerobounce_key,
+                )
+            except Exception as e:  # noqa: BLE001
+                log(f"  verify error for {cand['editor_email']}: {e}")
+                dropped["bad_email"] += 1
+                continue
+            if verdict == "invalid":
+                dropped["bad_email"] += 1
+                continue
+            if verdict in {"risky", "unknown"}:
+                dropped["manual_review"] += 1
+                continue
 
-        cand.update(contact)
         opener, err = _personalize_hailbytes(
             candidate=cand,
             product=product,
@@ -376,19 +305,20 @@ def main(argv: list[str] | None = None) -> int:
             model=args.model,
         )
         if not opener:
-            log(f"  personalization rejected ({err}) for {domain}")
+            log(f"  personalization rejected ({err}) for {cand.get('editor_email')}")
             dropped["personalization"] += 1
             continue
         cand["personalized_opener"] = opener
-        cand["email_status"] = "valid"
-        cand["lead_score"] = 70  # nominal — qualify gate doesn't apply here
+        cand["lead_score"] = 70
         cand["notes"] = f"hb-{product}"
+        cand["url"] = cand.get("linkedin_url") or cand.get("url", "")
+        cand["description"] = cand.get("description", "")
         enriched.append(cand)
-        log(f"  enriched: {cand['editor_email']}  ({domain}, {product})")
+        log(f"  enriched: {cand['editor_email']}  ({cand.get('domain', '')}, {product})")
 
     appended = stage_to_sheet(cfg, enriched, dry_run=args.dry_run, tab=SHEET_TAB_HAILBYTES)
     log(
-        f"\ndone. raw={len(raw)} enriched={len(enriched)} appended={appended} "
+        f"\ndone. raw={len(raw_contacts)} enriched={len(enriched)} appended={appended} "
         f"dropped={json.dumps(dropped)}"
     )
     return 0

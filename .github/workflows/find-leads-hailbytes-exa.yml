@@ -6,13 +6,14 @@ name: Find leads — HailBytes (Exa)
 # HAILBYTES_LEADS_SHEET_ID). Prereq: share the sheet with the service
 # account used by vars.GCP_SERVICE_ACCOUNT (Editor access).
 
+# DEPRECATED 2026-04-27: superseded by the Wiza-direct cold-email lanes
+# (hailbytes-outreach.yml). Cron disabled. Also, the underlying Exa
+# integration is hitting persistent 403s — manual backfill via this
+# workflow will likely fail until the Exa account issue is resolved.
+
 on:
-  schedule:
-    # Weekly: Monday 14:00 UTC = 07:00 PT. One hour after the Ultra Zoom
-    # daily Exa run (13:00 UTC) to avoid piling onto the Exa API. Relies
-    # on --rotate daily so each week's run covers a different slice of
-    # docs/outreach-hailbytes/exa-queries.md.
-    - cron: "0 14 * * 1"
+  # schedule:
+  #   - cron: "0 14 * * 1"  # disabled — see header
   workflow_dispatch:
     inputs:
       mode:

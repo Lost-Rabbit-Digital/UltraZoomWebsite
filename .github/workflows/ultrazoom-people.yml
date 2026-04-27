@@ -4,19 +4,20 @@ name: Ultra Zoom power-user outreach
 # 8:06 AM MDT (14:06 UTC) every morning, six minutes after the
 # HailBytes lane so MailMeteor reads from the two tabs don't collide.
 #
-# Pipeline shape:
-#   Brave web search (seed + site:linkedin.com/in/)
-#     → Wiza individual reveal (LinkedIn URL → email)
-#     → email verify
+# Pipeline shape (Wiza-direct):
+#   plain-English seed
+#     → Claude translates to Wiza filter object (cached 7 days)
+#     → Wiza /prospects/search preview (free)
+#     → Wiza /prospects/create_prospect_list (charges credits)
+#     → poll until finished, fetch enriched contacts
+#     → optional Hunter/NeverBounce/ZeroBounce verify fallback
 #     → Claude 2-sentence opener
 #     → append to "UltraZoom" tab of the source Sheet
 #
 # Required GitHub Secrets:
-#   BRAVE_SEARCH_KEY               (Brave Web Search API; mapped to
-#                                   BRAVE_SEARCH_API_KEY for the pipeline)
-#   WIZA_API_KEY                   (LinkedIn URL → email enrichment)
-#   ANTHROPIC_API_KEY              (Claude personalized opener)
-#   HUNTER_API_KEY                 (used here only for email verification)
+#   WIZA_API_KEY                   (prospect search + email enrichment)
+#   ANTHROPIC_API_KEY              (filter translation + Claude opener)
+#   HUNTER_API_KEY                 (optional — verifier fallback)
 #   NEVERBOUNCE_API_KEY            (optional verifier override)
 #   ZEROBOUNCE_API_KEY             (optional verifier override)
 # Required GitHub Variables:
@@ -28,22 +29,43 @@ name: Ultra Zoom power-user outreach
 # matching outreach.config.SHEET_COLUMNS. The recent_post_url column
 # stores the LinkedIn profile URL for that prospect.
 #
-# Brave Search API reference:
-#   https://api-dashboard.search.brave.com/app/documentation/web-search
+# Wiza API references:
+#   https://docs.wiza.co/api-reference/prospect/prospect-search
+#   https://docs.wiza.co/api-reference/prospect-lists/create-prospect-list
+#   https://docs.wiza.co/api-reference/lists/get-list-contacts
 
 on:
   schedule:
     - cron: '6 14 * * *'  # 8:06 AM MDT daily
   workflow_dispatch:
     inputs:
-      max_stage:
-        description: 'Max enriched rows to stage'
+      max_profiles:
+        description: 'Max enriched contacts per seed (each ~2 email credits)'
         required: false
-        default: '25'
+        default: '5'
       limit_seeds:
-        description: 'Max seed queries to run'
+        description: 'Seeds to run this invocation (rotated daily)'
         required: false
-        default: '8'
+        default: '3'
+      enrichment_level:
+        description: 'Wiza enrichment level'
+        required: false
+        type: choice
+        options:
+          - none
+          - partial
+          - full
+        default: partial
+      preview_only:
+        description: 'Preview match counts only — do not spend credits'
+        required: false
+        type: boolean
+        default: false
+      no_verify:
+        description: 'Skip post-Wiza email verifier fallback'
+        required: false
+        type: boolean
+        default: false
       dry_run:
         description: 'Dry run (no API calls, no Sheet writes)'
         required: false
@@ -75,7 +97,6 @@ jobs:
       - name: Sanity-check secrets and variables
         if: ${{ inputs.dry_run != true }}
         env:
-          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_KEY }}
           WIZA_API_KEY: ${{ secrets.WIZA_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
@@ -84,7 +105,6 @@ jobs:
         run: |
           set -euo pipefail
           missing=()
-          [ -z "${BRAVE_SEARCH_API_KEY:-}" ] && missing+=("BRAVE_SEARCH_KEY")
           [ -z "${WIZA_API_KEY:-}" ] && missing+=("WIZA_API_KEY")
           [ -z "${ANTHROPIC_API_KEY:-}" ] && missing+=("ANTHROPIC_API_KEY")
           [ -z "${GCP_WORKLOAD_IDENTITY_PROVIDER:-}" ] && missing+=("GCP_WORKLOAD_IDENTITY_PROVIDER")
@@ -104,7 +124,6 @@ jobs:
 
       - name: Run Ultra Zoom power-user pipeline
         env:
-          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_KEY }}
           WIZA_API_KEY: ${{ secrets.WIZA_API_KEY }}
           HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
           NEVERBOUNCE_API_KEY: ${{ secrets.NEVERBOUNCE_API_KEY }}
@@ -113,7 +132,17 @@ jobs:
           GOOGLE_SHEET_ID: ${{ vars.GOOGLE_SHEET_ID }}
         run: |
           set -euo pipefail
-          ARGS=(--max-stage "${{ inputs.max_stage || '25' }}" --limit-seeds "${{ inputs.limit_seeds || '8' }}")
+          ARGS=(
+            --max-profiles "${{ inputs.max_profiles || '5' }}"
+            --limit-seeds "${{ inputs.limit_seeds || '3' }}"
+            --enrichment-level "${{ inputs.enrichment_level || 'partial' }}"
+          )
+          if [ "${{ inputs.preview_only }}" = "true" ]; then
+            ARGS+=(--preview-only)
+          fi
+          if [ "${{ inputs.no_verify }}" = "true" ]; then
+            ARGS+=(--no-verify)
+          fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             ARGS+=(--dry-run)
           fi
