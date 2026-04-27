@@ -1,158 +1,160 @@
-# Ultra Zoom outreach pipeline
+# Ultra Zoom + HailBytes outreach pipelines
 
-A self-contained discover → qualify → enrich → stage workflow that drops
-cold-email candidates into a Google Sheet that MailMeteor reads as a
-mail-merge source.
+Two consolidated cold-email lanes that share one Python codebase, one
+Google Sheet, and one MailMeteor sender. Both are dispatch-only — no
+crons. Re-enable a schedule per workflow once steady-state quality is
+verified.
 
 ```
-discover (Brave + Exa + RSS)
-  → qualify (hard filters + 0–100 score, dedupe vs. state files)
-  → enrich (Hunter editor lookup, email verification, Claude opener)
-  → stage  (append rows to MailMeteor source sheet)
+                              ┌─ content (Brave/Exa/RSS → Hunter editor) ─┐
+   Ultra Zoom outreach ──────►│                                            ├─► UltraZoom tab
+                              └─ prospects (Wiza filter → list → enrich) ─┘
+                                                                            │
+   HailBytes outreach ─────────► prospects (Wiza filter → list → enrich) ──┴─► HailBytes tab
+                                                                            │
+                                                                MailMeteor reads
+                                                                from each tab
+                                                                independently.
 ```
 
-This pipeline does **not** send email, schedule sends, manage follow-ups,
-or detect replies. MailMeteor handles all of that off-cluster.
+Neither pipeline sends email. MailMeteor handles sending, throttling,
+opens/clicks, follow-ups, and reply detection from each tab.
 
 ## Repo layout
 
 ```
 outreach/
-  config.py                  env loading, paths, thresholds, sheet schema
-  seeds.py                   seed-keyword buckets + rotation state
+  config.py                  env loading, paths, sheet schema, tunable thresholds
+  cache.py                   TTL'd JSON file cache for external API calls
+  state.py                   persistent dedupe (seen_urls.json, seen_domains.json)
+  seeds.py                   content-mode bucket rotation (A–F)
+  seeds_uz_companies.txt     prospects-mode UZ seeds (genealogy-flavored B2B)
+  seeds_hb_mssp.txt          prospects-mode HB seeds (MSSP + pen-test)
+  rss_feeds.txt              curated RSS feed list for content discovery
+  excluded_domains.txt       hard-block list (qualify.py reads this)
+
+  discover.py                content discovery orchestrator
   discover_brave.py          Brave Search client
   discover_exa.py            Exa.ai search + findSimilar client
-  discover_rss.py            RSS feed parser (stdlib only)
-  discover.py                orchestrator that fans out across all sources
-  qualify.py                 hard filters + 0–100 lead_score
+  discover_rss.py            stdlib RSS feed parser
+  discover_wiza.py           Wiza prospect-search + prospect-list client
+  qualify.py                 hard filters + 0–100 lead_score (content path)
+  translate_filters.py       Claude: plain-English seed → Wiza filter object
+
   enrich_hunter.py           Hunter.io editor lookup
-  enrich_verify.py           NeverBounce / ZeroBounce verifier
-  enrich_personalize.py      Claude opener with validation + 1 retry
-  stage_sheet.py             Sheets append (service-account JWT, stdlib auth)
-  run_pipeline.py            CLI orchestrator
+  enrich_verify.py           email verifier (Hunter / NeverBounce / ZeroBounce)
+  enrich_personalize.py      Claude personalized opener with validation
+
+  stage_sheet.py             append rows to per-campaign Sheet tab
+  run_ultrazoom.py           CLI: Ultra Zoom outreach (--mode content|prospects|both)
+  run_hailbytes.py           CLI: HailBytes outreach (Wiza-direct only)
+
+  sync_wiza_lists.py         utility: pull finished Wiza lists by ID (free re-fetch)
+  import_wiza_csv.py         utility: parse Wiza CSV email exports (fallback)
+
+  prompts/                   Claude opener templates (per bucket / per campaign)
   state/                     dedupe + rotation state (committed back from CI)
   cache/                     per-API JSON caches
   dropped/                   drop logs by reason; retry queue
-  prompts/personalization.md Claude prompt template
-  excluded_domains.txt       hard-block domains
-  rss_feeds.txt              curated RSS feed list
+
+.github/workflows/
+  outreach-ultrazoom.yml     workflow_dispatch — calls run_ultrazoom
+  outreach-hailbytes.yml     workflow_dispatch — calls run_hailbytes
+  sync-wiza-lists.yml        workflow_dispatch — calls sync_wiza_lists
+  import-wiza-csv.yml        workflow_dispatch — calls import_wiza_csv
 ```
 
 ## Setup
-
-Install dependencies:
 
 ```bash
 pip install -r outreach/requirements.txt
 ```
 
-Set env vars (or GitHub Secrets for the cron):
+Required env vars (or GitHub Secrets):
 
 ```
-BRAVE_SEARCH_API_KEY
-EXA_API_KEY
-HUNTER_API_KEY                 # used for editor lookup AND email verification
-ANTHROPIC_API_KEY
+WIZA_API_KEY                    # both pipelines, prospects path
+ANTHROPIC_API_KEY               # both pipelines (filter translation + opener)
+HUNTER_API_KEY                  # UZ content path: editor lookup + verifier
+BRAVE_SEARCH_API_KEY            # UZ content path: discovery (one of these two)
+EXA_API_KEY                     # UZ content path: discovery
 ```
 
 Optional:
+
 ```
-GOOGLE_SHEET_ID                # override the default MailMeteor sheet
-NEVERBOUNCE_API_KEY            # overrides Hunter's verifier when set
-ZEROBOUNCE_API_KEY             # overrides Hunter's verifier when set
-SERPAPI_KEY                    # SERP fallback (not yet used by default)
-RSS_FEED_LIST_PATH             # override the curated feed list
+NEVERBOUNCE_API_KEY             # overrides Hunter as the verifier
+ZEROBOUNCE_API_KEY              # overrides Hunter as the verifier
+GOOGLE_SHEET_ID                 # overrides the default MailMeteor source sheet
 ```
 
-**Email verification**: Hunter's `/v2/email-verifier` is the default — same
-key as the editor lookup, no second vendor needed. NeverBounce or
-ZeroBounce are optional secondary checks; when one is set it takes
-priority over Hunter (slightly better at catch-all detection at higher
-volumes).
-
-**Google Sheets auth**: uses Application Default Credentials. In CI,
+Google Sheets auth uses Application Default Credentials. In CI,
 `google-github-actions/auth@v2` exchanges the workflow's OIDC token for
-a short-lived service-account credential — no JSON key needed. Repo
-variables `GCP_WORKLOAD_IDENTITY_PROVIDER` and `GCP_SERVICE_ACCOUNT`
-must be set (shared with the find-leads workflow; see
-`docs/outreach/sheets-setup.md`). Locally, run `gcloud auth
-application-default login` once. Either way, the service account must
-have **Editor** access on the target sheet — share the sheet directly
-with the SA's email.
+a short-lived service-account credential — no JSON key. Set repo
+variables `GCP_WORKLOAD_IDENTITY_PROVIDER` and `GCP_SERVICE_ACCOUNT`,
+and share the target sheet with the SA's email as Editor. See
+`docs/outreach/sheets-setup.md`. Locally, `gcloud auth application-default
+login` once.
 
 ## Running locally
 
 ```bash
-# Full pipeline, default budget (15 staged rows max).
-python -m outreach.run_pipeline
+# Ultra Zoom — both lanes (default), genealogy bucket, ~25 content + ~125 prospects
+python -m outreach.run_ultrazoom
 
-# Dry run — log every action, write nothing external. Skips reachability
-# probes if you're offline.
-python -m outreach.run_pipeline --dry-run --no-reachability
+# Ultra Zoom — content only (genealogy editors via Brave/Exa/RSS)
+python -m outreach.run_ultrazoom --mode content
 
-# Discovery only — populate state, skip enrich and stage.
-python -m outreach.run_pipeline --discover-only
+# Ultra Zoom — prospects only (B2B genealogy contacts via Wiza)
+python -m outreach.run_ultrazoom --mode prospects --preview-only  # dry-check match counts first
 
-# Override the seed bucket rotation.
-python -m outreach.run_pipeline --bucket A
+# HailBytes — MSSP + pen-test, default scale knobs
+python -m outreach.run_hailbytes --preview-only  # spend zero credits, just preview
 
-# Re-run personalization for previously failed candidates.
-python -m outreach.run_pipeline --retry-failed
-
-# Use Sonnet instead of Haiku for personalization (higher cost, sharper output).
-python -m outreach.run_pipeline --model sonnet
+# Dry runs (no external writes, no API spend)
+python -m outreach.run_ultrazoom --dry-run --no-reachability
+python -m outreach.run_hailbytes --dry-run
 ```
+
+Defaults are tuned for scale-up runs:
+
+| Pipeline | Lane | Default knobs | Approx output | Wiza credits |
+|---|---|---|---|---|
+| Ultra Zoom | content | bucket=E, max_stage=25 | up to 25 staged | 0 |
+| Ultra Zoom | prospects | seeds=5, profiles=25 | up to 125 staged | ~250 |
+| HailBytes | prospects | seeds=5, profiles=25 | up to 125 staged | ~250 |
+
+Drop both numbers (e.g. `--prospects-limit-seeds 1 --prospects-max-profiles 5`)
+for a single-row smoke test before you trust a new opener template.
 
 ## Sheet schema
 
-The pipeline owns these columns in the `Leads` tab. MailMeteor adds its
-own columns (Merge status, Date sent, Opens, Clicks, Replied, Bounced)
-to the right when you launch a campaign — the pipeline never touches
-those.
+Pipelines own these columns on their per-campaign tab. MailMeteor adds
+its own (Merge status, Date sent, Opens, Clicks, Replied, Bounced) to
+the right when you launch a campaign — pipelines never touch those.
 
 | Column | Source | Used by MailMeteor as |
 | --- | --- | --- |
 | `discovered_at` | discovery | reference |
-| `source` | brave / exa / exa-similar / rss | reference |
-| `seed_used` | the seed that surfaced it | reference |
+| `source` | brave / exa / rss / wiza-prospect | reference |
+| `seed_used` | seed that surfaced it | reference |
 | `domain` | discovery | reference |
-| `recent_post_url` | discovery | `{{recent_post_url}}` |
-| `recent_post_title` | discovery | `{{recent_post_title}}` |
+| `recent_post_url` | content: article URL · prospects: LinkedIn URL | `{{recent_post_url}}` |
+| `recent_post_title` | content: article title · prospects: job title | `{{recent_post_title}}` |
 | `recent_post_description` | discovery | reference |
 | `published_date` | discovery | reference |
 | `lead_score` | qualification | sort/filter |
-| `editor_first_name` | Hunter | `{{editor_first_name}}` |
-| `editor_last_name` | Hunter | `{{editor_last_name}}` |
-| `editor_email` | Hunter | **To: address** |
-| `hunter_confidence` | Hunter | reference |
-| `email_status` | Hunter (or NeverBounce/ZeroBounce) | always `valid` for staged rows |
+| `editor_first_name` | Hunter / Wiza | `{{editor_first_name}}` |
+| `editor_last_name` | Hunter / Wiza | `{{editor_last_name}}` |
+| `editor_email` | Hunter / Wiza | **To: address** |
+| `hunter_confidence` | Hunter / Wiza | reference |
+| `email_status` | verifier (always `valid` for staged rows) | filter |
 | `personalized_opener` | Claude | `{{personalized_opener}}` |
-| `status` | pipeline | always `ready_to_send` |
+| `status` | pipeline | `ready_to_send` |
 | `enriched_at` | pipeline | reference |
 | `notes` | freeform | manual overrides |
 
-## MailMeteor campaign template
-
-In MailMeteor, create a campaign reading from the same sheet. Use the
-following template — every `{{name}}` matches a column header above
-exactly:
-
-```
-Subject: Quick note about {{recent_post_title}}
-
-Hi {{editor_first_name}},
-
-{{personalized_opener}}
-
-[Boden writes the body here — Ultra Zoom pitch + ask for inclusion.]
-
-Thanks,
-Boden McHale
-Lost Rabbit Digital
-https://ultrazoom.app
-```
-
-Recommended send settings:
+## MailMeteor send settings
 
 - **Filter**: `status = ready_to_send` AND `email_status = valid`
 - **Daily quota**: 25/day (target middle of 20–30 range)
@@ -161,67 +163,45 @@ Recommended send settings:
 - **Tracking**: opens + clicks
 - **Follow-up**: one auto-follow-up at +5 days, only when no reply
 
-## Seed buckets
+## Recovering Wiza-paid contacts into the Sheet
 
-Seeds rotate across four buckets so each run pulls from a different
-angle. State persists in `state/seed_rotation_state.json` — the cron
-commits it back so the rotation does not loop on restart.
+Wiza occasionally delivers prospect-list results as CSV email
+attachments instead of returning contacts on the API path. Two
+recovery paths, ordered by preference:
 
-| Bucket | Angle |
-| --- | --- |
-| A | Listicle hunting (browser/extension roundups) |
-| B | Use-case roundups (where Ultra Zoom solves a pain) |
-| C | Adjacent communities (designers, accessibility, e-commerce) |
-| D | Resource directories |
+### Preferred: API list sync (free re-fetch)
 
-`[year]` in seeds is templated to the current year and the previous year
-at runtime.
+`outreach/sync_wiza_lists.py` calls `GET /api/lists/{id}/contacts?segment=valid`
+for each list_id. **Re-fetching a finished list spends no credits** —
+the charge happened at enrichment time. Tab routing comes from the list
+name (`UZ —` → UltraZoom, `HB-` → HailBytes).
 
-## Qualification scoring
+The list_id is the trailing number in every Wiza email's CSV filename:
+`WIZA_*_ID4964965.csv` → list_id `4964965`.
 
-Hard filters: `seen_urls` / `seen_domains` dedupe, `excluded_domains.txt`,
-recency (≤24 months when a date is present), English language, HTTP
-reachability, non-empty title + description.
+```bash
+python -m outreach.sync_wiza_lists 4964965 4964953 4964954 --personalize
+python -m outreach.sync_wiza_lists --from-filenames ~/Downloads/WIZA_*.csv
+python -m outreach.sync_wiza_lists --auto      # backfill everything finished
+```
 
-Score (0–100, threshold 50 to advance):
+In CI: trigger `Sync Wiza prospect lists` via `workflow_dispatch` and
+paste list IDs into the input.
 
-| Signal | Δ |
-| --- | --- |
-| listicle terms in title (`best`, `top`, `essential`) | +20 |
-| year / "updated" in title | +10 |
-| roundup / directory / toolbox terms | +15 |
-| extension + browser terms in body | +15 |
-| designer / UX terms | +10 |
-| accessibility terms | +10 |
-| productivity terms | +5 |
-| privacy terms | +10 |
-| source = RSS | +10 |
-| source = exa-similar from a known-good target | +15 |
-| spam terms (sponsored / paid) | −20 |
-| domain on soft watch list (medium, dev.to, etc.) | −15 |
+### Fallback: CSV import
 
-## Drop behaviour
+`outreach/import_wiza_csv.py` parses the actual CSV contents — useful
+only when the list_id is gone (Wiza purged it, account access lost, etc).
+The API sync above is strictly better when it's available.
 
-Candidates that pass hard filters but fail enrichment are logged to
-`outreach/dropped/dropped.jsonl` with one of these statuses:
-
-| Status | Meaning |
-| --- | --- |
-| `no_editor_found` | Hunter returned no usable contact |
-| `bad_email` | Verifier returned `invalid` |
-| `manual_review` | Verifier returned `risky` or `unknown` |
-| `verify_error` | Transient verifier failure |
-| `personalization_failed` | Claude couldn't produce a valid opener |
-| `below_threshold` | (in qualifier stats only) score < 50 |
-
-`personalization_failed` candidates are also appended to
-`outreach/dropped/personalization_failures.jsonl` so `--retry-failed`
-can re-run only that subset.
+```bash
+python -m outreach.import_wiza_csv ~/Downloads/WIZA_*.csv --personalize
+```
 
 ## Personalization rules
 
-The Claude prompt enforces, and `validate()` in
-`enrich_personalize.py` re-checks:
+The Claude prompt enforces, and `validate()` in `enrich_personalize.py`
+re-checks:
 
 - ≤25 words (hard cap 30, retry if over 25)
 - No em dashes (standing Lost Rabbit Digital preference)
@@ -231,47 +211,21 @@ The Claude prompt enforces, and `validate()` in
 - No quotes, no preamble — just the sentence
 
 If the first call fails validation, the pipeline retries once with a
-stricter prompt. Two failures drop the candidate.
-
-## Cost expectations (monthly, ~25 sends/day)
-
-| Service | Estimate |
-| --- | --- |
-| Brave Search API | ~$5 (free tier covers most use) |
-| Exa.ai | $10–20 |
-| Hunter.io Starter | $49 (covers editor lookup + email verification) |
-| Anthropic API (Haiku) | $3–5 |
-| MailMeteor Premium | $10 |
-| **Total** | **~$77–95/month** |
-
-NeverBounce/ZeroBounce add ~$5/mo if you want a dedicated verifier on top.
+stricter prompt. Two failures drop the candidate. Content-mode
+candidates land in `dropped/personalization_failures.jsonl` for
+`--retry-failed` reruns.
 
 ## Audit checklist
 
 - [x] All API keys via env vars / GitHub Secrets, never hardcoded
 - [x] All discovery + enrichment responses cached locally
 - [x] State files prevent duplicate outreach across runs
-- [x] One-domain-one-outreach rule enforced at qualification
-- [x] Excluded domains list respected
+- [x] One-domain-one-outreach rule enforced at qualification (content path)
+- [x] Excluded domains list respected (`outreach/excluded_domains.txt`)
 - [x] Email verification mandatory before staging
-- [x] Pipeline never writes to MailMeteor-managed columns
-- [x] Pipeline appends only, never overwrites or deletes
+- [x] Pipelines never write to MailMeteor-managed columns
+- [x] Pipelines append only, never overwrite or delete
 - [x] Personalization output validated for em dashes before staging
 - [x] `--dry-run` works end-to-end without external writes
 - [x] Service account scoped to one sheet ID
-- [x] Seed bucket rotation produces variety
-- [x] README documents MailMeteor template setup with exact merge field names
-- [ ] Cost-per-run logging (TODO: emit to GITHUB_STEP_SUMMARY)
-
-## Manual end-to-end first run
-
-1. Configure all GitHub Secrets above.
-2. Trigger `Outreach pipeline` workflow with `dry_run = true` to confirm
-   discovery and qualification work without writes.
-3. Re-trigger with `dry_run = false` and `max_stage = 1` to stage a
-   single row.
-4. Open the sheet, confirm the row's columns look right, then build the
-   MailMeteor campaign with the template above.
-5. Send the row to a test inbox you control. Confirm all merge fields
-   render.
-6. Bump `max_stage` back to 15 and let the cron handle steady-state.
+- [x] No active crons — manual dispatch only until quality is verified

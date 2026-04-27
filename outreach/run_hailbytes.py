@@ -52,8 +52,11 @@ from .util import log, now_iso, today_iso
 
 SEEDS_PATH = OUTREACH_DIR / "seeds_hb_mssp.txt"
 PROMPT_PATH = PROMPTS_DIR / "hailbytes_opener.md"
-DEFAULT_LIMIT_SEEDS = 3
-DEFAULT_MAX_PROFILES = 5
+# Defaults tuned for scale-up runs after the daily-cron pause. Override
+# via workflow_dispatch inputs for smoke tests / first verification runs.
+# 5 seeds × 25 profiles ≈ 125 contacts/run ≈ 250 Wiza email credits.
+DEFAULT_LIMIT_SEEDS = 5
+DEFAULT_MAX_PROFILES = 25
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:

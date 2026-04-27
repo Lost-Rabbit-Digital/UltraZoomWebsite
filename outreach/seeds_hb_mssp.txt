@@ -1,32 +1,32 @@
-# HailBytes (SAT + ASM) seed queries.
+# HailBytes (SAT + ASM) seed queries — MSSP + pen-test focus.
 #
 # Used by outreach/run_hailbytes.py. Each non-blank, non-comment line is
-# fed to Exa with category="company". Mix vertical (federal, healthcare,
-# fintech) with service shape (offensive security, MSSP, vCISO) so the
-# pipeline rotates through 30+ angles instead of repeatedly hitting the
-# same boutique consultancies.
+# a plain-English description Claude translates to a Wiza prospect-search
+# filter (cached 7 days, see translate_filters.py + prompts/hb_filters.md).
 #
-# Tone: describe the *kind* of company we want to find. Exa's neural
-# search rewards specific descriptions over keyword stuffing.
+# Targets here are decision-makers AT MSSP, pen-test, and offensive-security
+# firms — they buy ASM platforms (reNgine Cloud) and SAT for their own
+# staff plus their clients. Avoided: SAT competitors (awareness-training
+# vendors), pure-GRC firms, and vCISO solo practitioners — different
+# buying profiles.
 
 penetration testing companies serving federal contractors in the United States
 managed security service providers focused on small and mid-market businesses
 red team consultancies that offer adversary simulation engagements
 offensive security firms specializing in cloud and Kubernetes assessments
 boutique cybersecurity consultancies offering vulnerability assessments
-attack surface management and external recon vendors for SMB
+attack surface management and external recon vendors serving SMB
 MSSP companies offering 24x7 SOC services to regulated industries
-virtual CISO and fractional security leadership firms
-cybersecurity firms providing FedRAMP and CMMC compliance support
 managed detection and response companies for healthcare organizations
 application security testing firms for fintech and payments
 incident response retainers and digital forensics consultancies
 cloud security posture management services for AWS-native SMBs
-security awareness training providers for community banks and credit unions
-phishing simulation companies for K-12 and higher-education clients
-governance risk and compliance consultancies for SOC 2 readiness
-cybersecurity reseller partners and value-added resellers in North America
 DevSecOps consultancies that embed pen testers in client engineering teams
 managed XDR providers serving manufacturing and industrial control system clients
 ransomware readiness and tabletop exercise consultancies
-zero trust architecture implementation partners for federal civilian agencies
+penetration testing firms specializing in web application and API security
+red team and purple team consultancies for financial services
+external attack surface monitoring vendors for healthcare and life sciences
+penetration testing companies certified for PCI DSS scope assessments
+offensive security boutiques offering wireless and physical pen testing
+managed security service providers offering co-managed SIEM for mid-market
