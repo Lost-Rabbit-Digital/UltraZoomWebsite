@@ -1,0 +1,16 @@
+# Curated RSS feeds for low-cost discovery. Add high-signal sources that
+# regularly publish browser/extension/designer/accessibility content.
+# One feed URL per line. Comments with `#` are ignored.
+
+# Browser & tech news that runs extension roundups.
+https://www.howtogeek.com/feed/
+https://www.makeuseof.com/feed/
+https://www.ghacks.net/feed/
+
+# Design and UX publications.
+https://www.smashingmagazine.com/feed/
+https://alistapart.com/main/feed/
+https://css-tricks.com/feed/
+
+# Accessibility-focused.
+https://webaim.org/blog/feed/

@@ -1,0 +1,7 @@
+# Outreach pipeline dependencies. The pipeline is intentionally light on
+# external libraries — most HTTP and JSON parsing uses stdlib. The single
+# hard dependency is `cryptography`, which we use to sign the JWT for the
+# Google Sheets service-account token exchange. Everything else (Brave,
+# Exa, Hunter, NeverBounce/ZeroBounce, Anthropic) is plain HTTPS via
+# urllib.
+cryptography>=42.0.0
