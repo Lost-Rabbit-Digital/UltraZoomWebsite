@@ -102,7 +102,7 @@ class Config:
             neverbounce_key=os.environ.get("NEVERBOUNCE_API_KEY"),
             zerobounce_key=os.environ.get("ZEROBOUNCE_API_KEY"),
             anthropic_key=os.environ.get("ANTHROPIC_API_KEY"),
-            sheet_id=os.environ.get("GOOGLE_SHEET_ID", DEFAULT_SHEET_ID),
+            sheet_id=os.environ.get("GOOGLE_SHEET_ID") or DEFAULT_SHEET_ID,
             serpapi_key=os.environ.get("SERPAPI_KEY"),
             rss_feed_list_path=Path(os.environ.get("RSS_FEED_LIST_PATH", str(RSS_FEEDS_PATH))),
             dry_run=dry_run,
