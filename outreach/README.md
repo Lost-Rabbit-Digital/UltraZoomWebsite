@@ -263,6 +263,36 @@ NeverBounce/ZeroBounce add ~$5/mo if you want a dedicated verifier on top.
 - [x] README documents MailMeteor template setup with exact merge field names
 - [ ] Cost-per-run logging (TODO: emit to GITHUB_STEP_SUMMARY)
 
+## Importing Wiza CSV exports (email lane)
+
+Wiza occasionally delivers prospect-list results as CSV email attachments
+(e.g. when a list was kicked off in the Wiza UI rather than via the API,
+or when the API path failed mid-poll). Those credits already burned, so
+`outreach/import_wiza_csv.py` ingests the CSVs and lands the rows in the
+same per-campaign tabs the API path writes to.
+
+```bash
+# Local: download the CSVs from the Wiza email, then point the importer
+# at them. Filename prefix decides the tab — WIZA_uz_* → UltraZoom,
+# WIZA_hb_* → HailBytes (override with --tab).
+python -m outreach.import_wiza_csv ~/Downloads/WIZA_*.csv --personalize
+
+# CI: paste the email's download URLs (one per line) into the
+# `Import Wiza CSV exports` workflow_dispatch input. The workflow
+# downloads each URL, then runs the importer with the same flags.
+```
+
+Flags worth knowing:
+
+- `--include-no-email` — also append rows where Wiza couldn't find an
+  email (`status = manual_review` so MailMeteor's `ready_to_send` filter
+  excludes them). Deduped against the tab's existing `recent_post_url`
+  column, so re-runs are idempotent.
+- `--no-personalize` — skip Claude opener generation (e.g. when you
+  want to bulk-stage and personalize manually later).
+- `--limit N` — cap rows per CSV; useful for a smoke test before
+  unloading the full file.
+
 ## Manual end-to-end first run
 
 1. Configure all GitHub Secrets above.

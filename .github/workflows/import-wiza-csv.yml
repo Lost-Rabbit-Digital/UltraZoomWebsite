@@ -1,0 +1,151 @@
+name: Import Wiza CSV exports
+
+# Manual lane for the Wiza CSV exports that arrive by email instead of
+# coming back over the API. Paste the download URLs from the Wiza email
+# (one per line) into the workflow_dispatch input; this workflow downloads
+# them and runs `outreach.import_wiza_csv`, which appends each row into
+# the matching tab of the MailMeteor source Sheet:
+#
+#   WIZA_uz_*.csv  → "UltraZoom" tab
+#   WIZA_hb_*.csv  → "HailBytes" tab
+#   (override via the `tab` input)
+#
+# Required GitHub Secrets:
+#   ANTHROPIC_API_KEY              (only needed when personalize=true)
+# Required GitHub Variables:
+#   GCP_WORKLOAD_IDENTITY_PROVIDER
+#   GCP_SERVICE_ACCOUNT
+#   GOOGLE_SHEET_ID
+
+on:
+  workflow_dispatch:
+    inputs:
+      csv_urls:
+        description: 'Wiza CSV download URLs, one per line (from the export email)'
+        required: true
+        type: string
+      tab:
+        description: 'Force destination tab (default: auto-detect from filename)'
+        required: false
+        type: choice
+        options:
+          - auto
+          - UltraZoom
+          - HailBytes
+        default: auto
+      include_no_email:
+        description: 'Also import rows where Wiza could not find an email (status=manual_review)'
+        required: false
+        type: boolean
+        default: false
+      personalize:
+        description: 'Generate Claude openers for valid-email rows'
+        required: false
+        type: boolean
+        default: true
+      model:
+        description: 'Anthropic model for the opener'
+        required: false
+        type: choice
+        options:
+          - haiku
+          - sonnet
+          - opus
+        default: haiku
+      limit:
+        description: 'Cap rows per CSV (blank = no cap; useful for smoke tests)'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Parse and log only — no Sheet writes, no Anthropic calls'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: import-wiza-csv
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r outreach/requirements.txt
+
+      - name: Sanity-check secrets and variables
+        if: ${{ inputs.dry_run != true }}
+        env:
+          GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          GOOGLE_SHEET_ID: ${{ vars.GOOGLE_SHEET_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -euo pipefail
+          missing=()
+          [ -z "${GCP_WORKLOAD_IDENTITY_PROVIDER:-}" ] && missing+=("GCP_WORKLOAD_IDENTITY_PROVIDER")
+          [ -z "${GCP_SERVICE_ACCOUNT:-}" ] && missing+=("GCP_SERVICE_ACCOUNT")
+          [ -z "${GOOGLE_SHEET_ID:-}" ] && missing+=("GOOGLE_SHEET_ID")
+          if [ "${{ inputs.personalize }}" = "true" ] && [ -z "${ANTHROPIC_API_KEY:-}" ]; then
+            missing+=("ANTHROPIC_API_KEY (personalize=true)")
+          fi
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::missing secrets/vars: ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Authenticate to Google Cloud
+        if: ${{ inputs.dry_run != true }}
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Run Wiza CSV import
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_SHEET_ID: ${{ vars.GOOGLE_SHEET_ID }}
+          CSV_URLS: ${{ inputs.csv_urls }}
+        run: |
+          set -euo pipefail
+          # Stash the multiline input so the shell never tries to glob it.
+          echo "$CSV_URLS" > /tmp/wiza-csv-urls.txt
+          mapfile -t URLS < <(grep -E '^[[:space:]]*https?://' /tmp/wiza-csv-urls.txt | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')
+          if [ ${#URLS[@]} -eq 0 ]; then
+            echo "::error::no http(s) URLs found in csv_urls input"
+            exit 1
+          fi
+          echo "received ${#URLS[@]} URLs"
+
+          ARGS=("${URLS[@]}")
+          if [ "${{ inputs.tab }}" != "auto" ] && [ -n "${{ inputs.tab }}" ]; then
+            ARGS+=(--tab "${{ inputs.tab }}")
+          fi
+          if [ "${{ inputs.include_no_email }}" = "true" ]; then
+            ARGS+=(--include-no-email)
+          fi
+          if [ "${{ inputs.personalize }}" = "true" ]; then
+            ARGS+=(--personalize)
+          else
+            ARGS+=(--no-personalize)
+          fi
+          ARGS+=(--model "${{ inputs.model || 'haiku' }}")
+          if [ -n "${{ inputs.limit }}" ]; then
+            ARGS+=(--limit "${{ inputs.limit }}")
+          fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS+=(--dry-run)
+          fi
+
+          python -m outreach.import_wiza_csv "${ARGS[@]}"
