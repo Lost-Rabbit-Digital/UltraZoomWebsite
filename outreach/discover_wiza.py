@@ -247,6 +247,44 @@ def get_contacts(
     return contacts
 
 
+def list_lists(
+    *,
+    api_key: str,
+    page: int = 1,
+    per_page: int = 100,
+) -> list[dict[str, Any]]:
+    """Enumerate the account's prospect lists. Returns the raw list of
+    ``{id, name, status, ...}`` records. Used by sync_wiza_lists' --auto
+    mode to backfill contacts the API path missed.
+
+    Wiza's docs are silent on the listing endpoint; ``GET /lists`` is
+    the conventional REST shape and matches what the dashboard fetches.
+    On 404/403 we surface an empty list so the caller can fall back to
+    explicit list IDs without crashing.
+    """
+    try:
+        resp = _http(
+            "GET",
+            f"/lists?page={page}&per_page={per_page}",
+            api_key=api_key,
+        )
+    except urllib.error.HTTPError as e:
+        if e.code in {403, 404}:
+            log(f"  wiza GET /lists not available (HTTP {e.code}); supply list IDs explicitly")
+            return []
+        raise
+    data = resp.get("data") if isinstance(resp, dict) else resp
+    if isinstance(data, dict):
+        # Some shapes wrap the array under "lists" or "items".
+        for key in ("lists", "items", "results"):
+            if isinstance(data.get(key), list):
+                return data[key]
+        return []
+    if isinstance(data, list):
+        return data
+    return []
+
+
 def to_candidate(contact: dict[str, Any], *, bucket: str, source: str) -> dict[str, Any]:
     """Project a Wiza contact dict into the shape stage_sheet expects.
     Mirrors fields from enrich_hunter / enrich_wiza so downstream code

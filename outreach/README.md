@@ -263,23 +263,42 @@ NeverBounce/ZeroBounce add ~$5/mo if you want a dedicated verifier on top.
 - [x] README documents MailMeteor template setup with exact merge field names
 - [ ] Cost-per-run logging (TODO: emit to GITHUB_STEP_SUMMARY)
 
-## Importing Wiza CSV exports (email lane)
+## Recovering Wiza-paid contacts into the Sheet
 
 Wiza occasionally delivers prospect-list results as CSV email attachments
-(e.g. when a list was kicked off in the Wiza UI rather than via the API,
-or when the API path failed mid-poll). Those credits already burned, so
-`outreach/import_wiza_csv.py` ingests the CSVs and lands the rows in the
-same per-campaign tabs the API path writes to.
+instead of returning contacts on the API workflow run, so a stack of
+already-paid-for lists never reaches the Sheet. Two recovery paths,
+ordered by preference:
+
+### Preferred: API list sync (free re-fetch)
+
+`outreach/sync_wiza_lists.py` calls `GET /api/lists/{id}/contacts?segment=valid`
+for each list_id. **Re-fetching a finished list spends no credits** —
+the charge happened at enrichment time. Tab routing comes from the list
+name (`UZ —` → UltraZoom, `HB-` → HailBytes).
+
+The list_id is the trailing number in every Wiza email's CSV filename:
+`WIZA_*_ID4964965.csv` → list_id `4964965`.
 
 ```bash
-# Local: download the CSVs from the Wiza email, then point the importer
-# at them. Filename prefix decides the tab — WIZA_uz_* → UltraZoom,
-# WIZA_hb_* → HailBytes (override with --tab).
-python -m outreach.import_wiza_csv ~/Downloads/WIZA_*.csv --personalize
+# Local: explicit IDs, or extracted from the filenames Wiza emails.
+python -m outreach.sync_wiza_lists 4964965 4964953 4964954 --personalize
+python -m outreach.sync_wiza_lists --from-filenames ~/Downloads/WIZA_*.csv
 
-# CI: paste the email's download URLs (one per line) into the
-# `Import Wiza CSV exports` workflow_dispatch input. The workflow
-# downloads each URL, then runs the importer with the same flags.
+# Backfill everything finished on the account in one shot.
+python -m outreach.sync_wiza_lists --auto
+
+# CI: trigger `Sync Wiza prospect lists` via workflow_dispatch.
+```
+
+### Fallback: CSV import
+
+`outreach/import_wiza_csv.py` parses the actual CSV contents — useful
+only when the list_id is gone (Wiza purged it, account access lost,
+etc.). The API sync above is strictly better when it's available.
+
+```bash
+python -m outreach.import_wiza_csv ~/Downloads/WIZA_*.csv --personalize
 ```
 
 Flags worth knowing:
