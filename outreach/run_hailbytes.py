@@ -3,7 +3,7 @@
 Independent from the listicle pipeline (run_pipeline.py) so the two
 lanes can run on separate schedules without sharing state. Flow:
 
-    Exa /search (category="company")
+    Brave web search (seed → company URLs)
       → Hunter domain search (decision-maker title priority)
       → email verify (Hunter / NeverBounce / ZeroBounce)
       → Claude personalized opener (2 sentences in David's voice)
@@ -16,7 +16,7 @@ pitch + signature; the pipeline's job is to land a verified address +
 two strong personalized sentences.
 
 Required env vars (set as repo Secrets / Variables):
-  EXA_API_KEY, HUNTER_API_KEY, ANTHROPIC_API_KEY, WIZA_API_KEY (optional fallback)
+  BRAVE_SEARCH_API_KEY, HUNTER_API_KEY, ANTHROPIC_API_KEY
   GOOGLE_SHEET_ID + Workload Identity Federation for Sheets access
 """
 
@@ -29,7 +29,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from . import discover_exa
+from . import discover_brave
 from .config import (
     DEFAULT_MODEL,
     OUTREACH_DIR,
@@ -71,6 +71,43 @@ GENERIC_INBOXES = {
     "marketing",
     "press",
 }
+
+# Brave returns these alongside real company domains. Hunter can't enrich
+# them and we don't want to send to them either. Suffix matches handle
+# blogspot.com / *.medium.com style multi-tenant hosts.
+_SKIP_DOMAINS = {
+    "linkedin.com",
+    "twitter.com",
+    "x.com",
+    "facebook.com",
+    "instagram.com",
+    "youtube.com",
+    "github.com",
+    "stackoverflow.com",
+    "reddit.com",
+    "medium.com",
+    "wikipedia.org",
+    "g2.com",
+    "capterra.com",
+    "gartner.com",
+    "clutch.co",
+    "trustpilot.com",
+    "glassdoor.com",
+    "indeed.com",
+    "crunchbase.com",
+    "youtube.com",
+    "google.com",
+    "bing.com",
+}
+_SKIP_DOMAIN_SUFFIXES = (".blogspot.com", ".medium.com", ".substack.com")
+
+
+def _is_skipped_domain(domain: str) -> bool:
+    if not domain:
+        return True
+    if domain in _SKIP_DOMAINS:
+        return True
+    return domain.endswith(_SKIP_DOMAIN_SUFFIXES)
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
@@ -233,8 +270,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if not cfg.dry_run:
         missing = []
-        if not cfg.exa_key:
-            missing.append("EXA_API_KEY")
+        if not cfg.brave_key:
+            missing.append("BRAVE_SEARCH_API_KEY")
         if not cfg.hunter_key:
             missing.append("HUNTER_API_KEY")
         if not cfg.anthropic_key:
@@ -250,7 +287,9 @@ def main(argv: list[str] | None = None) -> int:
         f"seeds={len(seeds)}  max_stage={args.max_stage}  dry_run={args.dry_run} =="
     )
 
-    # Discovery: Exa company search per seed.
+    # Discovery: Brave web search per seed. Skip social / aggregator
+    # domains client-side — Hunter can't enrich them and they bias the
+    # downstream dedup set against legitimate company domains.
     raw: list[dict[str, Any]] = []
     seen_domains: set[str] = set()
     for seed in seeds:
@@ -258,24 +297,26 @@ def main(argv: list[str] | None = None) -> int:
             log(f"  [dry] {seed}")
             continue
         try:
-            items = discover_exa.search(
-                api_key=cfg.exa_key or "",
-                query=seed,
+            items = discover_brave.search(
+                api_key=cfg.brave_key or "",
+                seed=seed,
                 num_results=args.per_query,
             )
         except Exception as e:  # noqa: BLE001
-            log(f"  exa error on {seed[:60]}: {e}")
+            log(f"  brave error on {seed[:60]}: {e}")
             continue
         kept = 0
         for it in items:
             domain = it.get("domain") or host_of(it.get("url") or "")
             if not domain or domain in seen_domains:
                 continue
+            if _is_skipped_domain(domain):
+                continue
             seen_domains.add(domain)
             it["seed_used"] = seed
             it["bucket"] = "HB"
             it["discovered_at"] = now_iso()
-            it["source"] = "exa-company"
+            it["source"] = "brave-company"
             it["company"] = it.get("title") or domain
             raw.append(it)
             kept += 1

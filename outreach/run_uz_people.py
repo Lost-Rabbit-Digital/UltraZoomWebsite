@@ -2,7 +2,7 @@
 
 Independent from run_pipeline.py and run_hailbytes.py. Flow:
 
-    Exa /search (category="people", LinkedIn-only)
+    Brave web search (seed + site:linkedin.com/in/)
       → Wiza individual reveal (LinkedIn URL → email + name + title)
       → email verify (Hunter / NeverBounce / ZeroBounce)
       → Claude personalized 2-sentence opener
@@ -15,8 +15,8 @@ Ultra Zoom solves, and a 100-user feedback cohort from this pool is
 worth more than a thousand newsletter sign-ups.
 
 Required env vars:
-  EXA_API_KEY, WIZA_API_KEY, ANTHROPIC_API_KEY (HUNTER_API_KEY optional
-  for verification fallback), GOOGLE_SHEET_ID + WIF for Sheets.
+  BRAVE_SEARCH_API_KEY, WIZA_API_KEY, ANTHROPIC_API_KEY (HUNTER_API_KEY
+  optional for verification fallback), GOOGLE_SHEET_ID + WIF for Sheets.
 """
 
 from __future__ import annotations
@@ -78,47 +78,52 @@ def _load_seeds(path: Path, *, limit: int) -> list[str]:
     return seeds[:limit]
 
 
-def _exa_people_search(
+def _brave_people_search(
     *,
     api_key: str,
     query: str,
     num_results: int,
 ) -> list[dict[str, Any]]:
-    """Exa /search with category=people. The category restricts results
-    to LinkedIn profiles. excludeDomains is not allowed alongside
-    category=people, so we don't pass it here.
+    """Brave web search restricted to LinkedIn profile pages via the
+    site: operator. Brave doesn't have an Exa-style category=people
+    mode, so we shape the query and filter the results.
+
+    Asks for 2× num_results since site: queries leak in /posts/ and
+    /pulse/ pages we'll discard before hitting the per-seed cap.
     """
     import urllib.error
 
-    from . import discover_exa
+    from . import discover_brave
 
-    body = {
-        "query": query,
-        "numResults": min(num_results, 10),
-        "type": "neural",
-        "category": "people",
-        "contents": {"text": {"maxCharacters": 800}},
-    }
+    shaped = f"{query} site:linkedin.com/in/"
     try:
-        resp = discover_exa._call("/search", body, api_key)
+        items = discover_brave.search(
+            api_key=api_key,
+            seed=shaped,
+            num_results=min(20, num_results * 2),
+        )
     except urllib.error.HTTPError as e:
-        log(f"  exa people error on {query[:60]}: HTTP {e.code}")
+        log(f"  brave people error on {query[:60]}: HTTP {e.code}")
         return []
     out: list[dict[str, Any]] = []
-    for r in resp.get("results", []) or []:
-        url = r.get("url") or ""
+    for it in items:
+        url = it.get("url") or ""
+        # Brave's site: operator doesn't constrain to /in/ alone, so
+        # filter out company pages, posts, pulse articles, jobs, etc.
         if "linkedin.com/in/" not in url:
             continue
-        text = r.get("text") or r.get("summary") or ""
+        text = it.get("description") or ""
         out.append(
             {
                 "linkedin_url": url,
-                "title": (r.get("title") or "").strip(),
+                "title": (it.get("title") or "").strip(),
                 "summary": " ".join(text.split()).strip()[:600],
                 "domain": host_of(url),
-                "exa_score": r.get("score"),
+                "exa_score": None,
             }
         )
+        if len(out) >= num_results:
+            break
     return out
 
 
@@ -173,8 +178,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if not cfg.dry_run:
         missing = []
-        if not cfg.exa_key:
-            missing.append("EXA_API_KEY")
+        if not cfg.brave_key:
+            missing.append("BRAVE_SEARCH_API_KEY")
         if not cfg.wiza_key:
             missing.append("WIZA_API_KEY")
         if not cfg.anthropic_key:
@@ -195,8 +200,8 @@ def main(argv: list[str] | None = None) -> int:
         if cfg.dry_run:
             log(f"  [dry] {seed}")
             continue
-        items = _exa_people_search(
-            api_key=cfg.exa_key or "",
+        items = _brave_people_search(
+            api_key=cfg.brave_key or "",
             query=seed,
             num_results=args.per_query,
         )
@@ -209,7 +214,7 @@ def main(argv: list[str] | None = None) -> int:
             it["seed_used"] = seed
             it["bucket"] = "UZ"
             it["discovered_at"] = now_iso()
-            it["source"] = "exa-people"
+            it["source"] = "brave-people"
             raw.append(it)
             kept += 1
         log(f"  + [{kept}/{len(items)}]  {seed[:70]}")

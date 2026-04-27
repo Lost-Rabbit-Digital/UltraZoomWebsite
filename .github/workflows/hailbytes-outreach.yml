@@ -6,7 +6,8 @@ name: HailBytes outreach
 # don't collide.
 #
 # Required GitHub Secrets:
-#   EXA_API_KEY
+#   BRAVE_SEARCH_KEY               (Brave Web Search API; mapped to
+#                                   BRAVE_SEARCH_API_KEY for the pipeline)
 #   HUNTER_API_KEY                 (decision-maker domain search)
 #   ANTHROPIC_API_KEY              (Claude personalized opener)
 #   NEVERBOUNCE_API_KEY            (optional — overrides Hunter verify)
@@ -20,9 +21,8 @@ name: HailBytes outreach
 # matching outreach.config.SHEET_COLUMNS. Pipeline appends only — never
 # overwrites — and dedupes per-email against existing rows in that tab.
 #
-# Exa API references:
-#   https://exa.ai/docs/reference/search
-#   https://exa.ai/docs/reference/search-api-guide-for-coding-agents
+# Brave Search API reference:
+#   https://api-dashboard.search.brave.com/app/documentation/web-search
 
 on:
   schedule:
@@ -68,7 +68,7 @@ jobs:
       - name: Sanity-check secrets and variables
         if: ${{ inputs.dry_run != true }}
         env:
-          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_KEY }}
           HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
@@ -77,7 +77,7 @@ jobs:
         run: |
           set -euo pipefail
           missing=()
-          [ -z "${EXA_API_KEY:-}" ] && missing+=("EXA_API_KEY")
+          [ -z "${BRAVE_SEARCH_API_KEY:-}" ] && missing+=("BRAVE_SEARCH_KEY")
           [ -z "${HUNTER_API_KEY:-}" ] && missing+=("HUNTER_API_KEY")
           [ -z "${ANTHROPIC_API_KEY:-}" ] && missing+=("ANTHROPIC_API_KEY")
           [ -z "${GCP_WORKLOAD_IDENTITY_PROVIDER:-}" ] && missing+=("GCP_WORKLOAD_IDENTITY_PROVIDER")
@@ -97,7 +97,7 @@ jobs:
 
       - name: Run HailBytes pipeline
         env:
-          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_KEY }}
           HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
           NEVERBOUNCE_API_KEY: ${{ secrets.NEVERBOUNCE_API_KEY }}
           ZEROBOUNCE_API_KEY: ${{ secrets.ZEROBOUNCE_API_KEY }}
