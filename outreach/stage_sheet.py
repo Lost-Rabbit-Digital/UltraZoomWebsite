@@ -79,8 +79,9 @@ def _http(method: str, url: str, token: str, body: dict[str, Any] | None = None)
 
 
 class SheetClient:
-    def __init__(self, *, sheet_id: str) -> None:
+    def __init__(self, *, sheet_id: str, tab: str = SHEET_TAB) -> None:
         self._sheet_id = sheet_id
+        self._tab = tab
         self._credentials = None
         self._auth_request = None
 
@@ -108,7 +109,7 @@ class SheetClient:
 
     def ensure_header(self) -> None:
         last_col = _column_letter(len(SHEET_COLUMNS) - 1)
-        range_ = f"{SHEET_TAB}!A1:{last_col}1"
+        range_ = f"{self._tab}!A1:{last_col}1"
         url = f"{SHEETS_BASE}/{self._sheet_id}/values/{urllib.parse.quote(range_)}"
         resp = _http("GET", url, self._auth())
         first = (resp.get("values") or [[]])[0]
@@ -128,7 +129,7 @@ class SheetClient:
         before append.
         """
         col = _column_letter(SHEET_COLUMNS.index("editor_email"))
-        range_ = f"{SHEET_TAB}!{col}2:{col}"
+        range_ = f"{self._tab}!{col}2:{col}"
         url = f"{SHEETS_BASE}/{self._sheet_id}/values/{urllib.parse.quote(range_)}"
         resp = _http("GET", url, self._auth())
         out: set[str] = set()
@@ -140,7 +141,7 @@ class SheetClient:
     def append_rows(self, rows: list[list[str]]) -> int:
         if not rows:
             return 0
-        range_ = f"{SHEET_TAB}!A1"
+        range_ = f"{self._tab}!A1"
         url = (
             f"{SHEETS_BASE}/{self._sheet_id}/values/{urllib.parse.quote(range_)}:append"
             "?valueInputOption=RAW&insertDataOption=INSERT_ROWS"
@@ -180,19 +181,21 @@ def stage(
     candidates: Iterable[dict[str, Any]],
     *,
     dry_run: bool = False,
+    tab: str = SHEET_TAB,
 ) -> int:
     """Append qualifying enriched candidates. Returns the count actually
-    appended after the final dedupe gate.
+    appended after the final dedupe gate. ``tab`` selects which Sheet tab
+    to write to so each campaign can keep a clean MailMeteor source.
     """
     candidate_list = list(candidates)
     if not candidate_list:
         return 0
 
     if dry_run:
-        log(f"[dry-run] would append {len(candidate_list)} rows to sheet {cfg.sheet_id}")
+        log(f"[dry-run] would append {len(candidate_list)} rows to sheet {cfg.sheet_id} tab '{tab}'")
         return 0
 
-    client = SheetClient(sheet_id=cfg.sheet_id)
+    client = SheetClient(sheet_id=cfg.sheet_id, tab=tab)
     client.ensure_header()
     existing = client.existing_emails()
 

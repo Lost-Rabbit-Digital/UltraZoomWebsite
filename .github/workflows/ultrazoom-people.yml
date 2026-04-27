@@ -1,0 +1,120 @@
+name: Ultra Zoom power-user outreach
+
+# Daily LinkedIn power-user cold-email lane for Ultra Zoom. Runs at
+# 8:06 AM MDT (14:06 UTC) every morning, six minutes after the
+# HailBytes lane so MailMeteor reads from the two tabs don't collide.
+#
+# Pipeline shape:
+#   Exa /search (category="people")
+#     → Wiza individual reveal (LinkedIn URL → email)
+#     → email verify
+#     → Claude 2-sentence opener
+#     → append to "UltraZoom" tab of the source Sheet
+#
+# Required GitHub Secrets:
+#   EXA_API_KEY
+#   WIZA_API_KEY                   (LinkedIn URL → email enrichment)
+#   ANTHROPIC_API_KEY              (Claude personalized opener)
+#   HUNTER_API_KEY                 (used here only for email verification)
+#   NEVERBOUNCE_API_KEY            (optional verifier override)
+#   ZEROBOUNCE_API_KEY             (optional verifier override)
+# Required GitHub Variables:
+#   GCP_WORKLOAD_IDENTITY_PROVIDER
+#   GCP_SERVICE_ACCOUNT
+#   GOOGLE_SHEET_ID
+#
+# Sheet expectation: a tab named "UltraZoom" must exist with headers
+# matching outreach.config.SHEET_COLUMNS. The recent_post_url column
+# stores the LinkedIn profile URL for that prospect.
+#
+# Exa API references:
+#   https://exa.ai/docs/reference/search
+#   https://exa.ai/docs/reference/search-api-guide-for-coding-agents
+
+on:
+  schedule:
+    - cron: '6 14 * * *'  # 8:06 AM MDT daily
+  workflow_dispatch:
+    inputs:
+      max_stage:
+        description: 'Max enriched rows to stage'
+        required: false
+        default: '25'
+      limit_seeds:
+        description: 'Max seed queries to run'
+        required: false
+        default: '8'
+      dry_run:
+        description: 'Dry run (no API calls, no Sheet writes)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: ultrazoom-people
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r outreach/requirements.txt
+
+      - name: Sanity-check secrets and variables
+        if: ${{ inputs.dry_run != true }}
+        env:
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          WIZA_API_KEY: ${{ secrets.WIZA_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          GOOGLE_SHEET_ID: ${{ vars.GOOGLE_SHEET_ID }}
+        run: |
+          set -euo pipefail
+          missing=()
+          [ -z "${EXA_API_KEY:-}" ] && missing+=("EXA_API_KEY")
+          [ -z "${WIZA_API_KEY:-}" ] && missing+=("WIZA_API_KEY")
+          [ -z "${ANTHROPIC_API_KEY:-}" ] && missing+=("ANTHROPIC_API_KEY")
+          [ -z "${GCP_WORKLOAD_IDENTITY_PROVIDER:-}" ] && missing+=("GCP_WORKLOAD_IDENTITY_PROVIDER")
+          [ -z "${GCP_SERVICE_ACCOUNT:-}" ] && missing+=("GCP_SERVICE_ACCOUNT")
+          [ -z "${GOOGLE_SHEET_ID:-}" ] && missing+=("GOOGLE_SHEET_ID")
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::missing secrets/vars: ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Authenticate to Google Cloud
+        if: ${{ inputs.dry_run != true }}
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Run Ultra Zoom power-user pipeline
+        env:
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          WIZA_API_KEY: ${{ secrets.WIZA_API_KEY }}
+          HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
+          NEVERBOUNCE_API_KEY: ${{ secrets.NEVERBOUNCE_API_KEY }}
+          ZEROBOUNCE_API_KEY: ${{ secrets.ZEROBOUNCE_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_SHEET_ID: ${{ vars.GOOGLE_SHEET_ID }}
+        run: |
+          set -euo pipefail
+          ARGS=(--max-stage "${{ inputs.max_stage || '25' }}" --limit-seeds "${{ inputs.limit_seeds || '8' }}")
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS+=(--dry-run)
+          fi
+          python -m outreach.run_uz_people "${ARGS[@]}"
