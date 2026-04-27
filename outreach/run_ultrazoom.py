@@ -7,11 +7,13 @@ One CLI for two complementary cold-email lanes that both write to the
                     Targets editors of roundup articles, accessibility
                     blogs, genealogy publications. Best at finding the
                     person who *writes about* image-heavy tools.
-  --mode prospects  Wiza filter → list → enrich → verify → Claude opener
-                    Targets decision-makers AT B2B companies in the
-                    genealogy/archives/digitization ecosystem (where
-                    Wiza actually finds work emails — see commit history
-                    for why the original sole-proprietor seeds failed).
+  --mode prospects  Apollo people-search → verify → Claude opener
+                    Targets B2B power-users at companies whose staff
+                    routinely review lots of detailed photos / scans /
+                    screenshots in a browser (radiology, insurance
+                    claims, real-estate appraisal, manufacturing QA,
+                    auction houses, GIS, genealogy, etc. — see
+                    seeds_uz_companies.txt).
   --mode both       (default) content first, then prospects.
 
 Default seed bucket for content is **E (genealogy)** — Ultra Zoom's
@@ -21,7 +23,7 @@ on faded census records and scanned newspapers. Override with --bucket.
 Required env vars (live runs):
   Content path:  BRAVE_SEARCH_API_KEY or EXA_API_KEY, HUNTER_API_KEY,
                  ANTHROPIC_API_KEY
-  Prospects:     WIZA_API_KEY, ANTHROPIC_API_KEY
+  Prospects:     APOLLO_API_KEY, ANTHROPIC_API_KEY
   Both:          GOOGLE_SHEET_ID + Google Sheets ADC/WIF auth
 
 Optional verifiers: NEVERBOUNCE_API_KEY, ZEROBOUNCE_API_KEY (override
@@ -39,7 +41,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from . import discover_wiza, translate_filters
+from . import discover_apollo, translate_filters
 from .config import (
     DEFAULT_MAX_STAGE,
     DEFAULT_MODEL,
@@ -294,6 +296,7 @@ def _personalize_prospects(
         .replace("{title}", candidate.get("editor_title", "") or candidate.get("title", ""))
         .replace("{niche}", candidate.get("seed_used", ""))
         .replace("{summary}", candidate.get("summary", ""))
+        .replace("{company}", candidate.get("company") or candidate.get("domain", ""))
     )
     raw = _call_anthropic(api_key, MODEL_IDS.get(model, MODEL_IDS["haiku"]), prompt, max_tokens=300)
     text = raw.strip().strip('"').strip("'")
@@ -304,14 +307,14 @@ def _personalize_prospects(
 
 
 def _run_prospects(cfg: Config, args: argparse.Namespace) -> int:
-    """Wiza filter → preview → create_list → poll → get_contacts → verify
-    → personalize → stage to UltraZoom tab.
+    """Apollo filter → preview → collect → verify → personalize → stage to
+    UltraZoom tab.
     """
     seeds = _load_prospects_seeds(UZ_COMPANY_SEEDS, limit=args.prospects_limit_seeds)
     log(f"  seeds={len(seeds)}  max_profiles={args.prospects_max_profiles}  "
-        f"enrichment={args.enrichment_level}  preview_only={args.preview_only}")
+        f"preview_only={args.preview_only}")
 
-    # Step 1: translate seeds to Wiza filter objects (cached 7d).
+    # Step 1: translate seeds to Apollo filter objects (cached 7d).
     seed_filters: list[tuple[str, dict[str, Any]]] = []
     for seed in seeds:
         if cfg.dry_run:
@@ -330,12 +333,12 @@ def _run_prospects(cfg: Config, args: argparse.Namespace) -> int:
         log(f"  filter [{seed[:50]}]: {json.dumps(filters)[:160]}")
         seed_filters.append((seed, filters))
 
-    # Step 2: preview (free) — sanity-check match counts before spending.
+    # Step 2: preview (free) — sanity-check match counts before pulling more.
     previews: dict[str, int] = {}
     if not cfg.dry_run:
         for seed, filters in seed_filters:
             try:
-                pv = discover_wiza.preview(api_key=cfg.wiza_key or "", filters=filters, size=5)
+                pv = discover_apollo.preview(api_key=cfg.apollo_key or "", filters=filters)
             except Exception as e:  # noqa: BLE001
                 log(f"  preview error on {seed[:50]}: {e}")
                 continue
@@ -347,41 +350,24 @@ def _run_prospects(cfg: Config, args: argparse.Namespace) -> int:
         log(f"\nprospects preview: {total} matches across {len(previews)} seeds")
         return 0
 
-    # Step 3: create per-seed prospect list and wait for enrichment.
+    # Step 3: collect contacts per seed.
     raw_contacts: list[dict[str, Any]] = []
     for seed, filters in seed_filters:
         if previews.get(seed, 0) == 0:
             log(f"  skipping (0 preview): {seed[:60]}")
             continue
         try:
-            created = discover_wiza.create_list(
-                api_key=cfg.wiza_key or "",
-                name=f"UZ — {seed[:80]}",
+            people = discover_apollo.collect(
+                api_key=cfg.apollo_key or "",
                 filters=filters,
-                max_profiles=args.prospects_max_profiles,
-                enrichment_level=args.enrichment_level,
+                max_results=args.prospects_max_profiles,
             )
         except Exception as e:  # noqa: BLE001
-            log(f"  create_list error on {seed[:50]}: {e}")
+            log(f"  collect error on {seed[:50]}: {e}")
             continue
-        list_data = created.get("data") or {}
-        list_id = list_data.get("id") or list_data.get("uuid")
-        if not list_id:
-            log(f"  no list_id for {seed[:50]}: {created}")
-            continue
-        log(f"  list created id={list_id} for {seed[:50]}; polling...")
-
-        status = discover_wiza.wait_for_list(api_key=cfg.wiza_key or "", list_id=list_id)
-        if status not in discover_wiza.FINISHED_STATUSES:
-            log(f"  list {list_id} ended status={status}; skipping")
-            continue
-
-        contacts = discover_wiza.get_contacts(
-            api_key=cfg.wiza_key or "", list_id=list_id, segment="valid"
-        )
-        log(f"  list {list_id}: {len(contacts)} valid contacts")
-        for c in contacts:
-            cand = discover_wiza.to_candidate(c, bucket="UZ", source="wiza-prospect")
+        log(f"  collected {len(people)} for {seed[:60]}")
+        for p in people:
+            cand = discover_apollo.to_candidate(p, bucket="UZ", source="apollo-prospect")
             cand["seed_used"] = seed
             cand["discovered_at"] = now_iso()
             raw_contacts.append(cand)
@@ -455,8 +441,8 @@ def _check_keys(cfg: Config, *, mode: str) -> list[str]:
         if not cfg.anthropic_key:
             needed.append("ANTHROPIC_API_KEY")
     if mode in {"prospects", "both"}:
-        if not cfg.wiza_key:
-            needed.append("WIZA_API_KEY")
+        if not cfg.apollo_key:
+            needed.append("APOLLO_API_KEY")
         if not cfg.anthropic_key and "ANTHROPIC_API_KEY" not in needed:
             needed.append("ANTHROPIC_API_KEY")
     return needed
@@ -468,7 +454,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "--mode",
         choices=["content", "prospects", "both"],
         default="both",
-        help="content = Brave/Exa/RSS → Hunter editor; prospects = Wiza "
+        help="content = Brave/Exa/RSS → Hunter editor; prospects = Apollo "
         "B2B people; both = run content then prospects.",
     )
     p.add_argument("--dry-run", action="store_true")
@@ -512,23 +498,18 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "--prospects-max-profiles",
         type=int,
         default=DEFAULT_PROSPECTS_MAX_PROFILES,
-        help="Max enriched contacts per seed. Each ~2 Wiza email credits. "
+        help="Max enriched contacts per seed pulled from Apollo. "
         f"Default: {DEFAULT_PROSPECTS_MAX_PROFILES}.",
-    )
-    p.add_argument(
-        "--enrichment-level",
-        choices=["none", "partial", "full"],
-        default="partial",
     )
     p.add_argument(
         "--preview-only",
         action="store_true",
-        help="Prospects mode: hit /prospects/search (free) and stop.",
+        help="Prospects mode: hit Apollo /mixed_people/search at page 1 and stop.",
     )
     p.add_argument(
         "--no-verify",
         action="store_true",
-        help="Prospects mode: skip the post-Wiza verifier fallback.",
+        help="Prospects mode: skip the post-Apollo verifier fallback.",
     )
 
     return p.parse_args(argv)

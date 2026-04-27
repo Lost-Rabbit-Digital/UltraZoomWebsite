@@ -28,17 +28,13 @@ wrangler.jsonc         Cloudflare Workers config (static assets from dist/)
 astro.config.mjs       Astro configuration
 outreach/                Cold-email pipelines (Python). See outreach/README.md.
   run_ultrazoom.py       UZ pipeline (--mode content|prospects|both)
-  run_hailbytes.py       HailBytes pipeline (Wiza-direct)
-  sync_wiza_lists.py     Recover finished Wiza lists by ID (free re-fetch)
-  import_wiza_csv.py     Fallback: parse Wiza CSV email exports
+  run_hailbytes.py       HailBytes pipeline (Apollo-direct)
 .github/
   workflows/
     static.yml                 CI pipeline
     record-scroll.yml          Promotional video recording (Playwright)
     outreach-ultrazoom.yml     UZ outreach (workflow_dispatch only)
     outreach-hailbytes.yml     HailBytes outreach (workflow_dispatch only)
-    sync-wiza-lists.yml        Wiza list-sync utility lane
-    import-wiza-csv.yml        Wiza CSV-import utility lane
   lighthouse/
     lighthouserc.json  Lighthouse CI config
 docs/

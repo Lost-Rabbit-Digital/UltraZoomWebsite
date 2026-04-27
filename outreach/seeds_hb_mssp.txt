@@ -1,14 +1,14 @@
 # HailBytes (SAT + ASM) seed queries — MSSP + pen-test focus.
 #
 # Used by outreach/run_hailbytes.py. Each non-blank, non-comment line is
-# a plain-English description Claude translates to a Wiza prospect-search
+# a plain-English description Claude translates to an Apollo people-search
 # filter (cached 7 days, see translate_filters.py + prompts/hb_filters.md).
 #
 # Targets here are decision-makers AT MSSP, pen-test, and offensive-security
-# firms — they buy ASM platforms (reNgine Cloud) and SAT for their own
-# staff plus their clients. Avoided: SAT competitors (awareness-training
-# vendors), pure-GRC firms, and vCISO solo practitioners — different
-# buying profiles.
+# firms — they buy ASM (https://hailbytes.com/asm — reNgine Cloud) and
+# SAT (https://hailbytes.com/sat) for their own staff plus their clients.
+# Avoided: SAT competitors (awareness-training vendors), pure-GRC firms,
+# and vCISO solo practitioners — different buying profiles.
 
 penetration testing companies serving federal contractors in the United States
 managed security service providers focused on small and mid-market businesses
