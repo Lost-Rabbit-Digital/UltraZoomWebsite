@@ -6,7 +6,7 @@ name: Outreach pipeline
 # are committed back so dedupe and seed rotation persist across runs.
 #
 # Required GitHub Secrets:
-#   BRAVE_SEARCH_API_KEY
+#   BRAVE_SEARCH_KEY
 #   EXA_API_KEY
 #   HUNTER_API_KEY                 (also acts as the default email verifier)
 #   ANTHROPIC_API_KEY
@@ -65,7 +65,7 @@ jobs:
       - name: Sanity-check secrets and variables
         if: ${{ inputs.dry_run != true }}
         env:
-          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_API_KEY }}
+          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_KEY }}
           EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
           HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -94,7 +94,7 @@ jobs:
 
       - name: Run pipeline
         env:
-          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_API_KEY }}
+          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_KEY }}
           EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
           HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
           NEVERBOUNCE_API_KEY: ${{ secrets.NEVERBOUNCE_API_KEY }}

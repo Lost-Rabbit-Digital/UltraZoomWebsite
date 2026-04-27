@@ -114,8 +114,7 @@ def search(
     body = {
         "query": query,
         "numResults": num_results,
-        "type": "neural",
-        "useAutoprompt": True,
+        "type": "auto",
         "excludeDomains": EXCLUDE_DOMAINS,
         "contents": {"text": {"maxCharacters": 400}},
     }

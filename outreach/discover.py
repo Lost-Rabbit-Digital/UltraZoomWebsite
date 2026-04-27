@@ -59,11 +59,14 @@ def run(
         log("brave: no BRAVE_SEARCH_API_KEY, skipping")
 
     if cfg.exa_key:
+        # Exa pay-as-you-go pricing: $7/1k for 1-10 results, +$1 per result
+        # beyond 10 — cap here to stay in the cheapest tier.
+        exa_results = min(per_query, 10)
         log(f"\n== exa search (bucket {selection.bucket}, {len(selection.seeds)} seeds) ==")
         for seed in selection.seeds:
             try:
                 items = discover_exa.search(
-                    api_key=cfg.exa_key, query=seed, num_results=per_query
+                    api_key=cfg.exa_key, query=seed, num_results=exa_results
                 )
             except Exception as e:  # noqa: BLE001
                 log(f"  exa error on {seed!r}: {e}")
@@ -77,7 +80,7 @@ def run(
             for url in targets:
                 try:
                     items = discover_exa.find_similar(
-                        api_key=cfg.exa_key, url=url, num_results=per_query
+                        api_key=cfg.exa_key, url=url, num_results=exa_results
                     )
                 except Exception as e:  # noqa: BLE001
                     log(f"  exa similar error on {url}: {e}")
