@@ -88,7 +88,6 @@ class Config:
     neverbounce_key: str | None = None
     zerobounce_key: str | None = None
     anthropic_key: str | None = None
-    google_service_account_json: str | None = None
     sheet_id: str = DEFAULT_SHEET_ID
     serpapi_key: str | None = None
     rss_feed_list_path: Path = field(default_factory=lambda: RSS_FEEDS_PATH)
@@ -103,7 +102,6 @@ class Config:
             neverbounce_key=os.environ.get("NEVERBOUNCE_API_KEY"),
             zerobounce_key=os.environ.get("ZEROBOUNCE_API_KEY"),
             anthropic_key=os.environ.get("ANTHROPIC_API_KEY"),
-            google_service_account_json=os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON"),
             sheet_id=os.environ.get("GOOGLE_SHEET_ID", DEFAULT_SHEET_ID),
             serpapi_key=os.environ.get("SERPAPI_KEY"),
             rss_feed_list_path=Path(os.environ.get("RSS_FEED_LIST_PATH", str(RSS_FEEDS_PATH))),
@@ -120,7 +118,6 @@ class Config:
             "hunter": self.hunter_key,
             "verify": self.hunter_key or self.neverbounce_key or self.zerobounce_key,
             "anthropic": self.anthropic_key,
-            "google": self.google_service_account_json,
         }
         return [n for n in names if not mapping.get(n)]
 

@@ -1,7 +1,10 @@
 # Outreach pipeline dependencies. The pipeline is intentionally light on
-# external libraries — most HTTP and JSON parsing uses stdlib. The single
-# hard dependency is `cryptography`, which we use to sign the JWT for the
-# Google Sheets service-account token exchange. Everything else (Brave,
-# Exa, Hunter, NeverBounce/ZeroBounce, Anthropic) is plain HTTPS via
-# urllib.
-cryptography>=42.0.0
+# external libraries — most HTTP and JSON parsing uses stdlib.
+#
+# `google-auth` provides Application Default Credentials so the pipeline
+# can authenticate to Google Sheets via Workload Identity Federation in
+# CI (google-github-actions/auth@v2) and via `gcloud auth application-
+# default login` locally. `requests` is the transport google-auth uses
+# to refresh tokens.
+google-auth>=2.27.0
+requests>=2.31.0

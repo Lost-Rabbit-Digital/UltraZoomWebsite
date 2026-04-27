@@ -53,12 +53,11 @@ BRAVE_SEARCH_API_KEY
 EXA_API_KEY
 HUNTER_API_KEY                 # used for editor lookup AND email verification
 ANTHROPIC_API_KEY
-GOOGLE_SERVICE_ACCOUNT_JSON    # full JSON blob, not a path
-GOOGLE_SHEET_ID                # defaults to the production sheet
 ```
 
 Optional:
 ```
+GOOGLE_SHEET_ID                # override the default MailMeteor sheet
 NEVERBOUNCE_API_KEY            # overrides Hunter's verifier when set
 ZEROBOUNCE_API_KEY             # overrides Hunter's verifier when set
 SERPAPI_KEY                    # SERP fallback (not yet used by default)
@@ -71,9 +70,15 @@ ZeroBounce are optional secondary checks; when one is set it takes
 priority over Hunter (slightly better at catch-all detection at higher
 volumes).
 
-The Google service account must have **Editor** access on the target
-sheet only — share the sheet directly with the service account's
-`client_email`. Do not grant broader scopes.
+**Google Sheets auth**: uses Application Default Credentials. In CI,
+`google-github-actions/auth@v2` exchanges the workflow's OIDC token for
+a short-lived service-account credential — no JSON key needed. Repo
+variables `GCP_WORKLOAD_IDENTITY_PROVIDER` and `GCP_SERVICE_ACCOUNT`
+must be set (shared with the find-leads workflow; see
+`docs/outreach/sheets-setup.md`). Locally, run `gcloud auth
+application-default login` once. Either way, the service account must
+have **Editor** access on the target sheet — share the sheet directly
+with the SA's email.
 
 ## Running locally
 
