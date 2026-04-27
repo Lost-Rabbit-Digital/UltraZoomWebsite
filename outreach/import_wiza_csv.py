@@ -252,11 +252,11 @@ def _personalize(
             log(f"  personalize error ({cand.get('editor_email')}): {e}")
             return ""
 
-    # UltraZoom path — same prompt template as run_uz_people.
-    from .run_uz_people import PROMPT_PATH, _validate_opener
+    # UltraZoom path — same prompt template as run_ultrazoom prospects.
+    from .run_ultrazoom import UZ_PEOPLE_OPENER, _validate_opener
 
     try:
-        prompt = PROMPT_PATH.read_text()
+        prompt = UZ_PEOPLE_OPENER.read_text()
     except FileNotFoundError:
         return ""
     rendered = (

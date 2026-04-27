@@ -106,10 +106,10 @@ def _personalize_for_tab(
             return ""
 
     from .enrich_personalize import MODEL_IDS, _call_anthropic
-    from .run_uz_people import PROMPT_PATH, _validate_opener
+    from .run_ultrazoom import UZ_PEOPLE_OPENER, _validate_opener
 
     try:
-        prompt_template = PROMPT_PATH.read_text()
+        prompt_template = UZ_PEOPLE_OPENER.read_text()
     except FileNotFoundError:
         return ""
     rendered = (

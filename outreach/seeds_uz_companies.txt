@@ -1,0 +1,35 @@
+# Ultra Zoom B2B prospect-list seeds (Wiza prospects path).
+#
+# Used by outreach/run_ultrazoom.py with --mode prospects. Each line is
+# a plain-English description Claude translates to a Wiza prospect-search
+# filter (cached 7 days, see translate_filters.py + prompts/uz_filters.md).
+#
+# Targets here are decision-makers AT companies/orgs in the genealogy
+# and family-history ecosystem — Wiza nails B2B work emails, so we lean
+# into people whose corporate email is discoverable, not the individual
+# genealogist hobbyist (which is what seeds_uz_people.txt failed at).
+#
+# Pitch fit: every seed describes a person who routinely squints at
+# scanned census records, old newspapers, faded photographs, or
+# handwritten ledgers — the exact pain Ultra Zoom solves.
+
+marketing or content leads at genealogy SaaS and family-tree research platforms
+product managers at consumer DNA testing and ancestry analysis companies
+directors of digital archives at state and county historical societies in the United States
+heads of digitization at university research libraries with manuscript collections
+content directors at family history magazines and genealogy publications
+product leads at AI photo restoration and colorization services for old family photos
+marketing managers at online auction houses for historical documents and manuscripts
+heads of preservation at municipal historical societies and city archives
+product managers at family-tree builder and genealogy software companies
+marketing leads at heritage tourism and ancestry travel services
+directors of digital initiatives at public libraries with significant local-history collections
+content marketing leads at online vital-records and genealogy-research services
+product managers at online repositories of digitized newspapers and periodicals
+marketing managers at vintage photograph restoration and digitization services
+heads of digital products at online museum collections and digital archive platforms
+directors of operations at professional genealogist associations and certification bodies
+marketing leads at adoption-search and genetic-genealogy support services
+product leads at DNA-match analysis and chromosome-mapping tools
+content directors at obituary and memorial-record aggregator services
+heads of digital programs at religious archives and family-history libraries

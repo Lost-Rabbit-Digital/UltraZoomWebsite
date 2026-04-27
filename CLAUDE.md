@@ -26,23 +26,25 @@ public/
   images/              Icons and assets
 wrangler.jsonc         Cloudflare Workers config (static assets from dist/)
 astro.config.mjs       Astro configuration
-scripts/
-  find-leads.mjs       Exa-powered lead discovery (search + findSimilar → Google Sheet)
-  lib/
-    exa.mjs            Exa API client (/search, /findSimilar)
-    sheets.mjs         Google Sheets append client (service-account JWT)
+outreach/                Cold-email pipelines (Python). See outreach/README.md.
+  run_ultrazoom.py       UZ pipeline (--mode content|prospects|both)
+  run_hailbytes.py       HailBytes pipeline (Wiza-direct)
+  sync_wiza_lists.py     Recover finished Wiza lists by ID (free re-fetch)
+  import_wiza_csv.py     Fallback: parse Wiza CSV email exports
 .github/
   workflows/
-    static.yml         CI pipeline
-    record-scroll.yml  Promotional video recording (Playwright)
-    find-leads.yml     Daily cron that runs find-leads.mjs
+    static.yml                 CI pipeline
+    record-scroll.yml          Promotional video recording (Playwright)
+    outreach-ultrazoom.yml     UZ outreach (workflow_dispatch only)
+    outreach-hailbytes.yml     HailBytes outreach (workflow_dispatch only)
+    sync-wiza-lists.yml        Wiza list-sync utility lane
+    import-wiza-csv.yml        Wiza CSV-import utility lane
   lighthouse/
     lighthouserc.json  Lighthouse CI config
-  scripts/             Automation scripts
 docs/
   diagrams/            Mermaid diagram source files
   growth/              Growth plan notes
-  outreach/            Outreach leads, drafts, prompts, contact-form templates
+  outreach/sheets-setup.md   Google Sheets WIF auth setup
 ```
 
 ## Technology Stack

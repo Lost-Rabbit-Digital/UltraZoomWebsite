@@ -1,0 +1,216 @@
+name: Ultra Zoom outreach
+
+# Consolidated Ultra Zoom cold-email pipeline. One entry point for two
+# complementary lanes that both write to the "UltraZoom" tab MailMeteor
+# reads from:
+#
+#   mode=content    Brave/Exa/RSS → Hunter editor → verify → Claude opener.
+#                   Default seed bucket is E (genealogy) — UZ's strongest
+#                   customer-pain fit.
+#   mode=prospects  Wiza filter (seeds_uz_companies.txt) → list → enrich
+#                   → verify → Claude opener. Targets B2B decision-makers
+#                   in genealogy/archives/digitization where Wiza actually
+#                   finds work emails.
+#   mode=both       (default) content first, then prospects.
+#
+# No cron — dispatch only. Re-enable a schedule once steady-state quality
+# is verified.
+#
+# Required GitHub Secrets:
+#   BRAVE_SEARCH_KEY or EXA_API_KEY  (one of, for content mode)
+#   HUNTER_API_KEY                    (content mode editor lookup + verify)
+#   WIZA_API_KEY                      (prospects mode)
+#   ANTHROPIC_API_KEY                 (filter translation + opener)
+# Optional Secrets (verifier overrides):
+#   NEVERBOUNCE_API_KEY
+#   ZEROBOUNCE_API_KEY
+# Required GitHub Variables:
+#   GCP_WORKLOAD_IDENTITY_PROVIDER
+#   GCP_SERVICE_ACCOUNT
+#   GOOGLE_SHEET_ID
+#
+# Sheet expectation: a tab named "UltraZoom" with headers matching
+# outreach.config.SHEET_COLUMNS. Pipeline appends only — never overwrites.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Which lane(s) to run'
+        required: false
+        type: choice
+        options:
+          - both
+          - content
+          - prospects
+        default: both
+      bucket:
+        description: 'Seed bucket for content mode (E = genealogy default)'
+        required: false
+        type: choice
+        options:
+          - E
+          - F
+          - A
+          - B
+          - C
+          - D
+        default: E
+      content_max_stage:
+        description: 'Max content-path rows to stage'
+        required: false
+        default: '25'
+      prospects_limit_seeds:
+        description: 'Seeds to run from seeds_uz_companies.txt'
+        required: false
+        default: '5'
+      prospects_max_profiles:
+        description: 'Max enriched contacts per Wiza seed (~2 credits each)'
+        required: false
+        default: '25'
+      enrichment_level:
+        description: 'Wiza enrichment level (prospects mode)'
+        required: false
+        type: choice
+        options:
+          - partial
+          - full
+          - none
+        default: partial
+      preview_only:
+        description: 'Prospects mode: preview Wiza match counts only'
+        required: false
+        type: boolean
+        default: false
+      no_verify:
+        description: 'Skip post-enrichment verifier fallback'
+        required: false
+        type: boolean
+        default: false
+      model:
+        description: 'Anthropic model'
+        required: false
+        type: choice
+        options:
+          - haiku
+          - sonnet
+          - opus
+        default: haiku
+      dry_run:
+        description: 'Dry run (no external writes)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write  # for state-file commit on content path
+  id-token: write  # for Workload Identity Federation
+
+concurrency:
+  group: outreach-ultrazoom
+  cancel-in-progress: false
+
+jobs:
+  outreach:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r outreach/requirements.txt
+
+      - name: Sanity-check secrets and variables
+        if: ${{ inputs.dry_run != true }}
+        env:
+          MODE: ${{ inputs.mode || 'both' }}
+          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_KEY }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
+          WIZA_API_KEY: ${{ secrets.WIZA_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          GOOGLE_SHEET_ID: ${{ vars.GOOGLE_SHEET_ID }}
+        run: |
+          set -euo pipefail
+          missing=()
+          if [ "$MODE" = "content" ] || [ "$MODE" = "both" ]; then
+            [ -z "${BRAVE_SEARCH_API_KEY:-}${EXA_API_KEY:-}" ] && missing+=("BRAVE_SEARCH_KEY or EXA_API_KEY")
+            [ -z "${HUNTER_API_KEY:-}" ] && missing+=("HUNTER_API_KEY")
+          fi
+          if [ "$MODE" = "prospects" ] || [ "$MODE" = "both" ]; then
+            [ -z "${WIZA_API_KEY:-}" ] && missing+=("WIZA_API_KEY")
+          fi
+          [ -z "${ANTHROPIC_API_KEY:-}" ] && missing+=("ANTHROPIC_API_KEY")
+          [ -z "${GCP_WORKLOAD_IDENTITY_PROVIDER:-}" ] && missing+=("GCP_WORKLOAD_IDENTITY_PROVIDER")
+          [ -z "${GCP_SERVICE_ACCOUNT:-}" ] && missing+=("GCP_SERVICE_ACCOUNT")
+          [ -z "${GOOGLE_SHEET_ID:-}" ] && missing+=("GOOGLE_SHEET_ID")
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::missing secrets/vars: ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Authenticate to Google Cloud
+        if: ${{ inputs.dry_run != true }}
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Run Ultra Zoom outreach
+        env:
+          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_KEY }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
+          NEVERBOUNCE_API_KEY: ${{ secrets.NEVERBOUNCE_API_KEY }}
+          ZEROBOUNCE_API_KEY: ${{ secrets.ZEROBOUNCE_API_KEY }}
+          WIZA_API_KEY: ${{ secrets.WIZA_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_SHEET_ID: ${{ vars.GOOGLE_SHEET_ID }}
+        run: |
+          set -euo pipefail
+          ARGS=(
+            --mode "${{ inputs.mode || 'both' }}"
+            --bucket "${{ inputs.bucket || 'E' }}"
+            --content-max-stage "${{ inputs.content_max_stage || '25' }}"
+            --prospects-limit-seeds "${{ inputs.prospects_limit_seeds || '5' }}"
+            --prospects-max-profiles "${{ inputs.prospects_max_profiles || '25' }}"
+            --enrichment-level "${{ inputs.enrichment_level || 'partial' }}"
+            --model "${{ inputs.model || 'haiku' }}"
+          )
+          if [ "${{ inputs.preview_only }}" = "true" ]; then
+            ARGS+=(--preview-only)
+          fi
+          if [ "${{ inputs.no_verify }}" = "true" ]; then
+            ARGS+=(--no-verify)
+          fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS+=(--dry-run)
+          fi
+          python -m outreach.run_ultrazoom "${ARGS[@]}"
+
+      - name: Commit content-mode state files
+        if: ${{ inputs.dry_run != true && (inputs.mode == 'content' || inputs.mode == 'both' || inputs.mode == '') }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add outreach/state/ outreach/dropped/ || true
+          if git diff --cached --quiet; then
+            echo "No state changes to commit"
+          else
+            git commit -m "Update Ultra Zoom outreach state [skip ci]"
+            for i in 1 2 3 4; do
+              if git push; then
+                exit 0
+              fi
+              echo "push failed, retry ${i}"
+              sleep $((2 ** i))
+            done
+            echo "push failed after 4 attempts"
+            exit 1
+          fi
