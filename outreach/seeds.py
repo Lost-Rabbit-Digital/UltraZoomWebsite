@@ -60,9 +60,45 @@ BUCKETS: dict[str, list[str]] = {
         "directory of browser tools for creatives",
         "curated list of accessibility resources",
     ],
+    # Bucket E targets the genealogy / family-history community. The
+    # daily pain is squinting at low-res scanned census records, faded
+    # newspapers, and handwritten ledgers on Ancestry/FamilySearch — Ultra
+    # Zoom is a clean fit, and the audience already pays for adjacent SaaS.
+    "E": [
+        "best chrome extensions for genealogy researchers",
+        "browser tools for reading scanned newspapers",
+        "tools for examining historical documents online",
+        "browser zoom for genealogy research",
+        "tools for reading old census records online",
+        "extensions for FamilySearch users",
+        "best browser extensions for family history [year]",
+        "tools for examining handwritten documents online",
+        "extensions for Ancestry.com researchers",
+        "browser tools for digitized newspaper archives",
+        "tools for reading scanned wills and probate records",
+        "online genealogy research toolkit [year]",
+    ],
+    # Bucket F targets the low-vision / accessibility community. Zoom is
+    # the assistive feature, so product fit is the strongest of any
+    # bucket. The editorial surface is smaller but on-mission — pitch
+    # tone matters: lead with utility, never with pity.
+    "F": [
+        "best chrome extensions for low vision users",
+        "accessibility browser extensions [year]",
+        "browser tools for visually impaired users",
+        "tools for low vision web browsing",
+        "screen magnification extensions for chrome",
+        "browser tools for reading small text",
+        "low vision software roundup [year]",
+        "best assistive technology browser tools",
+        "extensions for screen magnification",
+        "vision-friendly chrome extensions",
+        "browser accessibility tools for older adults",
+        "tools for users with macular degeneration",
+    ],
 }
 
-BUCKET_ORDER = ["A", "B", "C", "D"]
+BUCKET_ORDER = ["A", "B", "C", "D", "E", "F"]
 
 
 @dataclass

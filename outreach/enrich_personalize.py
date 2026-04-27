@@ -48,8 +48,20 @@ SYCOPHANCY_RE = re.compile("|".join(SYCOPHANTIC_PATTERNS), re.IGNORECASE)
 BANNED_WORDS_RE = re.compile(r"\b(stumbled|amazing)\b", re.IGNORECASE)
 
 
-def _load_prompt() -> str:
-    return (PROMPTS_DIR / "personalization.md").read_text()
+# Buckets with their own tuned personalization prompt. Buckets not listed
+# here fall back to ``personalization.md``.
+BUCKET_PROMPTS: dict[str, str] = {
+    "E": "personalization-genealogy.md",
+    "F": "personalization-a11y.md",
+}
+
+
+def _load_prompt(bucket: str | None = None) -> str:
+    filename = BUCKET_PROMPTS.get(bucket or "", "personalization.md")
+    path = PROMPTS_DIR / filename
+    if not path.exists():
+        path = PROMPTS_DIR / "personalization.md"
+    return path.read_text()
 
 
 def _render(template: str, *, title: str, description: str, domain: str) -> str:
@@ -144,7 +156,7 @@ def personalize(
     """Return ``(opener, error)``. ``error`` is empty on success."""
     model_id = MODEL_IDS.get(model, MODEL_IDS["haiku"])
     base_prompt = _render(
-        _load_prompt(),
+        _load_prompt(candidate.get("bucket")),
         title=candidate.get("title", ""),
         description=candidate.get("description", ""),
         domain=candidate.get("domain", ""),

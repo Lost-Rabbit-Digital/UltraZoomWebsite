@@ -3,7 +3,7 @@
 Single entry point. Common flags:
 
     --max-stage <n>    cap how many qualified candidates get enriched and staged
-    --bucket <A|B|C|D> override the seed-bucket rotation
+    --bucket <A|B|C|D|E|F> override the seed-bucket rotation
     --discover-only    fill state files, skip enrich and stage
     --retry-failed     re-run personalization for previously failed candidates
     --dry-run          log every action, write nothing external
@@ -45,7 +45,7 @@ RETRY_QUEUE = DROPPED_DIR / "personalization_failures.jsonl"
 def _parse_args(argv: list[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(prog="outreach.run_pipeline")
     p.add_argument("--max-stage", type=int, default=DEFAULT_MAX_STAGE)
-    p.add_argument("--bucket", choices=["A", "B", "C", "D"], default=None)
+    p.add_argument("--bucket", choices=["A", "B", "C", "D", "E", "F"], default=None)
     p.add_argument("--per-query", type=int, default=DEFAULT_PER_QUERY)
     p.add_argument("--discover-only", action="store_true")
     p.add_argument("--retry-failed", action="store_true")
