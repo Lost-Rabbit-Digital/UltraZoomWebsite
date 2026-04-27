@@ -5,14 +5,15 @@ name: Ultra Zoom power-user outreach
 # HailBytes lane so MailMeteor reads from the two tabs don't collide.
 #
 # Pipeline shape:
-#   Exa /search (category="people")
+#   Brave web search (seed + site:linkedin.com/in/)
 #     → Wiza individual reveal (LinkedIn URL → email)
 #     → email verify
 #     → Claude 2-sentence opener
 #     → append to "UltraZoom" tab of the source Sheet
 #
 # Required GitHub Secrets:
-#   EXA_API_KEY
+#   BRAVE_SEARCH_KEY               (Brave Web Search API; mapped to
+#                                   BRAVE_SEARCH_API_KEY for the pipeline)
 #   WIZA_API_KEY                   (LinkedIn URL → email enrichment)
 #   ANTHROPIC_API_KEY              (Claude personalized opener)
 #   HUNTER_API_KEY                 (used here only for email verification)
@@ -27,9 +28,8 @@ name: Ultra Zoom power-user outreach
 # matching outreach.config.SHEET_COLUMNS. The recent_post_url column
 # stores the LinkedIn profile URL for that prospect.
 #
-# Exa API references:
-#   https://exa.ai/docs/reference/search
-#   https://exa.ai/docs/reference/search-api-guide-for-coding-agents
+# Brave Search API reference:
+#   https://api-dashboard.search.brave.com/app/documentation/web-search
 
 on:
   schedule:
@@ -75,7 +75,7 @@ jobs:
       - name: Sanity-check secrets and variables
         if: ${{ inputs.dry_run != true }}
         env:
-          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_KEY }}
           WIZA_API_KEY: ${{ secrets.WIZA_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
@@ -84,7 +84,7 @@ jobs:
         run: |
           set -euo pipefail
           missing=()
-          [ -z "${EXA_API_KEY:-}" ] && missing+=("EXA_API_KEY")
+          [ -z "${BRAVE_SEARCH_API_KEY:-}" ] && missing+=("BRAVE_SEARCH_KEY")
           [ -z "${WIZA_API_KEY:-}" ] && missing+=("WIZA_API_KEY")
           [ -z "${ANTHROPIC_API_KEY:-}" ] && missing+=("ANTHROPIC_API_KEY")
           [ -z "${GCP_WORKLOAD_IDENTITY_PROVIDER:-}" ] && missing+=("GCP_WORKLOAD_IDENTITY_PROVIDER")
@@ -104,7 +104,7 @@ jobs:
 
       - name: Run Ultra Zoom power-user pipeline
         env:
-          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_KEY }}
           WIZA_API_KEY: ${{ secrets.WIZA_API_KEY }}
           HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
           NEVERBOUNCE_API_KEY: ${{ secrets.NEVERBOUNCE_API_KEY }}
