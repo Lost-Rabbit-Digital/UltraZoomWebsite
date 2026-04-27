@@ -4,19 +4,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout
   title="Supported Sites | Ultra Zoom"
-  description="Every major site Ultra Zoom hover-zooms out of the box: Google Images, Pinterest, Reddit, Amazon, Instagram, ArtStation, Wikimedia, Unsplash, Pexels, Bilibili, and 60+ more."
+  description="Categorized list of sites Ultra Zoom hover-zooms out of the box, including image search, social, shopping, photography, and news sites."
   currentPage="sites"
   og={{
     url: 'https://ultrazoom.app/sites',
     title: 'Sites Ultra Zoom Supports',
-    description: 'A categorized list of every site Ultra Zoom hover-zooms out of the box.',
+    description: 'A categorized list of sites Ultra Zoom hover-zooms out of the box.',
     image: 'https://ultrazoom.app/images/icon-128.png',
   }}
 >
     <main class="main page-content" id="main-content">
         <h1>Sites Ultra Zoom Supports</h1>
 
-        <p class="pricing-intro">Ultra Zoom ships with optimized plugins for 70+ websites. Every plugin is included in the free version &mdash; nothing here is locked behind Pro. Don&rsquo;t see a site? Enable <em>All sites</em> mode in the popup for generic hover-zoom, or <a href="/contact">request a plugin</a>.</p>
+        <p class="pricing-intro">Ultra Zoom ships with optimized plugins for image-heavy pages across the open web, organized below by category. Most plugins are included in the free tier. A handful of sites that need special handling are <a href="/pricing">Ultra Zoom Pro</a> features and are marked <strong>(Pro)</strong> below. Beyond the bundled plugins, a community-maintained URL-rules pack auto-updates weekly to extend coverage to additional hosts without requiring an extension update. Don&rsquo;t see a site? Enable <em>All sites</em> mode in the popup for generic hover-zoom, or <a href="/contact">request a plugin</a>.</p>
 
         <section class="help-section" id="search">
             <h2>Search &amp; image discovery</h2>
@@ -33,8 +33,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <ul class="help-list">
                 <li><strong>Reddit</strong> &mdash; preview gallery posts and image submissions without opening each one.</li>
                 <li><strong>Twitter / X</strong> &mdash; full-resolution images from any timeline or quote.</li>
-                <li><strong>Instagram</strong> &mdash; works on feed, profile, and explore views.</li>
-                <li><strong>Facebook</strong> &mdash; preview photos in posts, comments, and album thumbnails.</li>
+                <li><strong>Instagram</strong> <span class="badge-pro">(Pro)</span> &mdash; works on feed, profile, and explore views.</li>
+                <li><strong>Facebook</strong> <span class="badge-pro">(Pro)</span> &mdash; preview photos in posts, comments, and album thumbnails.</li>
                 <li><strong>Tumblr</strong> &mdash; great for art and photography blogs.</li>
                 <li><strong>9GAG</strong> &mdash; faster scrolling on a meme-heavy feed.</li>
             </ul>
@@ -44,7 +44,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <h2>Photography &amp; stock</h2>
             <ul class="help-list">
                 <li><strong>Pinterest</strong> &mdash; pulls the largest source image, ideal for moodboards.</li>
-                <li><strong>Flickr</strong> &mdash; full-size previews from photostreams and groups.</li>
+                <li><strong>Flickr</strong> <span class="badge-pro">(Pro)</span> &mdash; full-size previews from photostreams and groups.</li>
                 <li><strong>Imgur</strong> &mdash; native CDN handling for albums and direct links.</li>
                 <li><strong>Unsplash</strong> &mdash; free stock photography, full-res preview.</li>
                 <li><strong>Pexels</strong> &mdash; another free stock library with hover-zoom support.</li>
@@ -57,11 +57,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <section class="help-section" id="art">
             <h2>Art &amp; design</h2>
             <ul class="help-list">
-                <li><strong>DeviantArt</strong> &mdash; original-resolution previews where the artist allows it.</li>
+                <li><strong>DeviantArt</strong> <span class="badge-pro">(Pro)</span> &mdash; original-resolution previews where the artist allows it.</li>
                 <li><strong>ArtStation</strong> &mdash; portfolio thumbs to full-size in one hover.</li>
-                <li><strong>Pixiv</strong> &mdash; multi-page illustration sets, sequenced via gallery navigation.</li>
-                <li><strong>Behance</strong> &mdash; project covers and individual asset previews.</li>
-                <li><strong>Dribbble</strong> &mdash; full-size shots from any feed.</li>
+                <li><strong>Pixiv</strong> <span class="badge-pro">(Pro)</span> &mdash; multi-page illustration sets, sequenced via gallery navigation.</li>
+                <li><strong>Behance</strong> &mdash; project covers and individual asset previews via the community URL-rules pack.</li>
+                <li><strong>Dribbble</strong> &mdash; full-size shots from any feed via the community URL-rules pack.</li>
             </ul>
         </section>
 
@@ -69,8 +69,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <h2>Shopping</h2>
             <ul class="help-list">
                 <li><strong>Amazon</strong> &mdash; inspect product photos at full resolution before clicking through.</li>
-                <li><strong>eBay</strong> &mdash; vital for triaging listings by photo.</li>
-                <li><strong>Etsy</strong> &mdash; preview every product image without paginating the listing.</li>
+                <li><strong>eBay</strong> <span class="badge-pro">(Pro)</span> &mdash; vital for triaging listings by photo.</li>
+                <li><strong>Etsy</strong> &mdash; preview product images via the community URL-rules pack.</li>
                 <li><strong>AliExpress</strong> &mdash; useful for product-listing screenshots and detail shots.</li>
                 <li><strong>Avito</strong> &mdash; classified-ad photos at full size.</li>
             </ul>
@@ -79,16 +79,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <section class="help-section" id="auctions">
             <h2>Auctions &amp; collectibles</h2>
             <ul class="help-list">
-                <li><strong>Catawiki</strong> &mdash; lot photos at full resolution before placing a bid.</li>
-                <li><strong>Heritage Auctions</strong> &mdash; same, for art and numismatics catalogues.</li>
+                <li><strong>Catawiki</strong> &mdash; lot photos via the community URL-rules pack.</li>
+                <li><strong>Heritage Auctions</strong> &mdash; same, for art and numismatics catalogues, via the community URL-rules pack.</li>
             </ul>
         </section>
 
         <section class="help-section" id="video">
             <h2>Video</h2>
             <ul class="help-list">
-                <li><strong>YouTube</strong> &mdash; preview thumbnails and (with Pro) play videos in place.</li>
-                <li><strong>Vimeo</strong> &mdash; same, for higher-quality creative work.</li>
+                <li><strong>YouTube</strong> <span class="badge-pro">(Pro)</span> &mdash; preview thumbnails and play videos in place.</li>
+                <li><strong>Twitch</strong> <span class="badge-pro">(Pro)</span> &mdash; clip and stream-thumbnail previews.</li>
+                <li><strong>Vimeo</strong> &mdash; thumbnail previews via the community URL-rules pack.</li>
                 <li><strong>Bilibili</strong> &mdash; Chinese video platform with full thumbnail support.</li>
             </ul>
         </section>
@@ -107,22 +108,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <ul class="help-list">
                 <li><strong>Weibo</strong> &mdash; full-resolution previews on China&rsquo;s biggest social network.</li>
                 <li><strong>Bilibili</strong> &mdash; covered above, also strong on photo posts.</li>
-                <li><strong>Pixiv</strong> &mdash; multi-page sets navigated with arrow keys.</li>
+                <li><strong>Pixiv</strong> <span class="badge-pro">(Pro)</span> &mdash; multi-page sets navigated with arrow keys.</li>
             </ul>
         </section>
 
         <section class="help-section" id="dev-and-gaming">
             <h2>Code, gaming, and the rest</h2>
             <ul class="help-list">
-                <li><strong>GitHub</strong> &mdash; preview attachments, screenshots, and avatars.</li>
-                <li><strong>Steam</strong> &mdash; full-size promo art and screenshots from any store page.</li>
+                <li><strong>GitHub</strong> &mdash; preview attachments, screenshots, and avatars via the community URL-rules pack.</li>
+                <li><strong>Steam</strong> <span class="badge-pro">(Pro)</span> &mdash; full-size promo art and screenshots from any store page.</li>
+                <li><strong>LinkedIn</strong> <span class="badge-pro">(Pro)</span> &mdash; profile and post imagery at full size.</li>
+                <li><strong>VK</strong> <span class="badge-pro">(Pro)</span> &mdash; photo posts and album previews.</li>
+                <li><strong>TikTok</strong> <span class="badge-pro">(Pro)</span> &mdash; thumbnail and avatar zoom on profile and feed pages.</li>
             </ul>
         </section>
 
         <section class="help-section" id="more-sites">
-            <h2>Plus 30+ more</h2>
-            <p>The plugin catalogue grows every release, and the community URL-rules pack adds even more without an extension update. The fastest way to see the full current list is in the extension popup itself &mdash; <em>Plugins</em> tab.</p>
-            <p>Need a site that isn&rsquo;t covered? <a href="/contact">Send us the URL</a> and we&rsquo;ll add a plugin in the next release. In the meantime, toggle <em>All sites</em> in the popup to enable generic hover-zoom on any domain.</p>
+            <h2>Even more, via the community URL-rules pack</h2>
+            <p>Beyond the bundled plugins, the extension fetches a community-maintained URL-rules pack from <code>api.ultrazoom.app</code> every 7 days. The pack adds support for additional image hosts and sites without requiring an extension update, and Pro users also receive an extended Pro-only rules pack. The fastest way to see what&rsquo;s currently active is in the extension popup itself &mdash; <em>Plugins</em> tab.</p>
+            <p>Need a site that isn&rsquo;t covered? <a href="/contact">Send us the URL</a> and we&rsquo;ll add a rule on the next pack publish, or a plugin in the next release. In the meantime, toggle <em>All sites</em> in the popup to enable generic hover-zoom on any domain.</p>
         </section>
 
         <p class="pro-cta">
