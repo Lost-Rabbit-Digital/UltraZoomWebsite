@@ -75,8 +75,6 @@ def _check_keys(cfg: Config, *, mode: str) -> None:
             needed.append("HUNTER_API_KEY")
         if not cfg.anthropic_key:
             needed.append("ANTHROPIC_API_KEY")
-        if not cfg.google_service_account_json:
-            needed.append("GOOGLE_SERVICE_ACCOUNT_JSON")
     if needed:
         log("error: missing required env vars:")
         for n in needed:

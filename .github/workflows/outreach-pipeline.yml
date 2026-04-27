@@ -10,11 +10,16 @@ name: Outreach pipeline
 #   EXA_API_KEY
 #   HUNTER_API_KEY                 (also acts as the default email verifier)
 #   ANTHROPIC_API_KEY
-#   GOOGLE_SERVICE_ACCOUNT_JSON    (full JSON blob, not a path)
-#   GOOGLE_SHEET_ID
-# Optional (override Hunter's verifier when set):
-#   NEVERBOUNCE_API_KEY
-#   ZEROBOUNCE_API_KEY
+# Required GitHub Variables (set under Settings → Variables):
+#   GCP_WORKLOAD_IDENTITY_PROVIDER (shared with the find-leads workflow)
+#   GCP_SERVICE_ACCOUNT            (leads-writer@…iam.gserviceaccount.com)
+# Optional:
+#   GOOGLE_SHEET_ID                (override the default MailMeteor sheet)
+#   NEVERBOUNCE_API_KEY            (override Hunter's verifier when set)
+#   ZEROBOUNCE_API_KEY             (override Hunter's verifier when set)
+#
+# Sheet access: share the target sheet with the GCP_SERVICE_ACCOUNT email
+# as Editor. See docs/outreach/sheets-setup.md for the WIF setup.
 
 on:
   schedule:
@@ -37,6 +42,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write  # required for Workload Identity Federation
 
 concurrency:
   group: outreach-pipeline
@@ -56,6 +62,36 @@ jobs:
       - name: Install dependencies
         run: pip install -r outreach/requirements.txt
 
+      - name: Sanity-check secrets and variables
+        if: ${{ inputs.dry_run != true }}
+        env:
+          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_API_KEY }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+        run: |
+          set -euo pipefail
+          missing=()
+          [ -z "${BRAVE_SEARCH_API_KEY:-}${EXA_API_KEY:-}" ] && missing+=("BRAVE_SEARCH_API_KEY or EXA_API_KEY")
+          [ -z "${HUNTER_API_KEY:-}" ] && missing+=("HUNTER_API_KEY")
+          [ -z "${ANTHROPIC_API_KEY:-}" ] && missing+=("ANTHROPIC_API_KEY")
+          [ -z "${GCP_WORKLOAD_IDENTITY_PROVIDER:-}" ] && missing+=("GCP_WORKLOAD_IDENTITY_PROVIDER")
+          [ -z "${GCP_SERVICE_ACCOUNT:-}" ] && missing+=("GCP_SERVICE_ACCOUNT")
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::missing secrets/vars: ${missing[*]}"
+            echo "See docs/outreach/sheets-setup.md"
+            exit 1
+          fi
+
+      - name: Authenticate to Google Cloud
+        if: ${{ inputs.dry_run != true }}
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
       - name: Run pipeline
         env:
           BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_API_KEY }}
@@ -64,8 +100,7 @@ jobs:
           NEVERBOUNCE_API_KEY: ${{ secrets.NEVERBOUNCE_API_KEY }}
           ZEROBOUNCE_API_KEY: ${{ secrets.ZEROBOUNCE_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          GOOGLE_SHEET_ID: ${{ vars.GOOGLE_SHEET_ID }}
         run: |
           set -euo pipefail
           ARGS=(--max-stage "${{ inputs.max_stage || '15' }}")
@@ -78,7 +113,7 @@ jobs:
           python -m outreach.run_pipeline "${ARGS[@]}"
 
       - name: Commit state files
-        if: ${{ inputs.dry_run != 'true' }}
+        if: ${{ inputs.dry_run != true }}
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

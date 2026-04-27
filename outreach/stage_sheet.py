@@ -1,8 +1,12 @@
 """Append enriched rows to the output Google Sheet.
 
-Auth uses a service-account JSON blob from ``GOOGLE_SERVICE_ACCOUNT_JSON``
-(env var) — the JSON is signed into a JWT exchanged for an OAuth access
-token, all via stdlib so the pipeline has zero Google client deps.
+Auth uses Application Default Credentials via ``google-auth``. In CI,
+``google-github-actions/auth@v2`` exchanges the workflow's OIDC token
+for a short-lived service-account credential and points
+``GOOGLE_APPLICATION_CREDENTIALS`` at the credential file. Locally, run
+``gcloud auth application-default login`` once and ADC will pick up
+your user credentials. The same code path also accepts a service-
+account JSON key file via ``GOOGLE_APPLICATION_CREDENTIALS``.
 
 Boundary rules:
 - Append only. Never overwrite, never delete.
@@ -15,7 +19,6 @@ Boundary rules:
 
 from __future__ import annotations
 
-import base64
 import json
 import time
 import urllib.error
@@ -28,7 +31,6 @@ from .util import log, now_iso
 
 SHEETS_BASE = "https://sheets.googleapis.com/v4/spreadsheets"
 SCOPE = "https://www.googleapis.com/auth/spreadsheets"
-TOKEN_URL = "https://oauth2.googleapis.com/token"
 RETRY_STATUSES = {408, 429, 500, 502, 503, 504}
 MAX_ATTEMPTS = 4
 
@@ -41,53 +43,6 @@ def _column_letter(i: int) -> str:
         n = n // 26 - 1
         if n < 0:
             return s
-
-
-def _b64url(data: bytes) -> str:
-    return base64.urlsafe_b64encode(data).rstrip(b"=").decode("ascii")
-
-
-def _sign_jwt(service_account: dict[str, Any], scope: str) -> str:
-    """Build a signed JWT for the OAuth token exchange. Imports
-    ``cryptography`` lazily so the only-run-discovery path doesn't pay
-    the import cost.
-    """
-    from cryptography.hazmat.primitives import hashes, serialization
-    from cryptography.hazmat.primitives.asymmetric import padding
-
-    now = int(time.time())
-    header = {"alg": "RS256", "typ": "JWT"}
-    claims = {
-        "iss": service_account["client_email"],
-        "scope": scope,
-        "aud": TOKEN_URL,
-        "iat": now,
-        "exp": now + 3600,
-    }
-    signing_input = (
-        _b64url(json.dumps(header, separators=(",", ":")).encode("utf-8"))
-        + "."
-        + _b64url(json.dumps(claims, separators=(",", ":")).encode("utf-8"))
-    )
-    pem = service_account["private_key"].encode("utf-8")
-    key = serialization.load_pem_private_key(pem, password=None)
-    signature = key.sign(signing_input.encode("ascii"), padding.PKCS1v15(), hashes.SHA256())
-    return signing_input + "." + _b64url(signature)
-
-
-def _exchange_token(jwt: str) -> str:
-    body = urllib.parse.urlencode(
-        {"grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer", "assertion": jwt}
-    ).encode("ascii")
-    req = urllib.request.Request(
-        TOKEN_URL,
-        method="POST",
-        data=body,
-        headers={"content-type": "application/x-www-form-urlencoded"},
-    )
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        payload = json.loads(resp.read().decode("utf-8"))
-    return payload["access_token"]
 
 
 def _http(method: str, url: str, token: str, body: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -124,26 +79,32 @@ def _http(method: str, url: str, token: str, body: dict[str, Any] | None = None)
 
 
 class SheetClient:
-    def __init__(self, *, service_account_json: str, sheet_id: str) -> None:
-        try:
-            self._sa = json.loads(service_account_json)
-        except json.JSONDecodeError as e:
-            raise RuntimeError(
-                "GOOGLE_SERVICE_ACCOUNT_JSON is not valid JSON. The env var must "
-                "contain the full service-account credentials JSON, not a path."
-            ) from e
+    def __init__(self, *, sheet_id: str) -> None:
         self._sheet_id = sheet_id
-        self._token: str | None = None
-        self._token_at = 0.0
+        self._credentials = None
+        self._auth_request = None
 
     def _auth(self) -> str:
-        # Refresh shortly before expiry — tokens last 1h, refresh at 50m.
-        if self._token and (time.time() - self._token_at) < 3000:
-            return self._token
-        jwt = _sign_jwt(self._sa, SCOPE)
-        self._token = _exchange_token(jwt)
-        self._token_at = time.time()
-        return self._token
+        # Lazy import so dry-run / discover-only paths don't pay the cost.
+        import google.auth
+        import google.auth.exceptions
+        import google.auth.transport.requests
+
+        if self._credentials is None:
+            try:
+                creds, _ = google.auth.default(scopes=[SCOPE])
+            except google.auth.exceptions.DefaultCredentialsError as e:
+                raise RuntimeError(
+                    "no Google credentials found. In CI, confirm the "
+                    "google-github-actions/auth step ran. Locally, run "
+                    "`gcloud auth application-default login`."
+                ) from e
+            self._credentials = creds
+            self._auth_request = google.auth.transport.requests.Request()
+
+        if not self._credentials.valid:
+            self._credentials.refresh(self._auth_request)
+        return self._credentials.token
 
     def ensure_header(self) -> None:
         last_col = _column_letter(len(SHEET_COLUMNS) - 1)
@@ -231,13 +192,7 @@ def stage(
         log(f"[dry-run] would append {len(candidate_list)} rows to sheet {cfg.sheet_id}")
         return 0
 
-    if not cfg.google_service_account_json:
-        raise RuntimeError("GOOGLE_SERVICE_ACCOUNT_JSON is required to stage rows")
-
-    client = SheetClient(
-        service_account_json=cfg.google_service_account_json,
-        sheet_id=cfg.sheet_id,
-    )
+    client = SheetClient(sheet_id=cfg.sheet_id)
     client.ensure_header()
     existing = client.existing_emails()
 
