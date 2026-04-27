@@ -7,10 +7,12 @@ name: Ultra Zoom outreach
 #   mode=content    Brave/Exa/RSS → Hunter editor → verify → Claude opener.
 #                   Default seed bucket is E (genealogy) — UZ's strongest
 #                   customer-pain fit.
-#   mode=prospects  Wiza filter (seeds_uz_companies.txt) → list → enrich
-#                   → verify → Claude opener. Targets B2B decision-makers
-#                   in genealogy/archives/digitization where Wiza actually
-#                   finds work emails.
+#   mode=prospects  Apollo people-search (seeds_uz_companies.txt) → verify
+#                   → Claude opener. Targets B2B power-users at companies
+#                   whose staff routinely review lots of detailed photos /
+#                   scans / screenshots in a browser (radiology, insurance
+#                   claims, real-estate appraisal, manufacturing QA,
+#                   auction houses, GIS, genealogy, etc.).
 #   mode=both       (default) content first, then prospects.
 #
 # No cron — dispatch only. Re-enable a schedule once steady-state quality
@@ -19,7 +21,7 @@ name: Ultra Zoom outreach
 # Required GitHub Secrets:
 #   BRAVE_SEARCH_KEY or EXA_API_KEY  (one of, for content mode)
 #   HUNTER_API_KEY                    (content mode editor lookup + verify)
-#   WIZA_API_KEY                      (prospects mode)
+#   APOLLO_API_KEY                    (prospects mode)
 #   ANTHROPIC_API_KEY                 (filter translation + opener)
 # Optional Secrets (verifier overrides):
 #   NEVERBOUNCE_API_KEY
@@ -65,20 +67,11 @@ on:
         required: false
         default: '5'
       prospects_max_profiles:
-        description: 'Max enriched contacts per Wiza seed (~2 credits each)'
+        description: 'Max contacts pulled from Apollo per seed'
         required: false
         default: '25'
-      enrichment_level:
-        description: 'Wiza enrichment level (prospects mode)'
-        required: false
-        type: choice
-        options:
-          - partial
-          - full
-          - none
-        default: partial
       preview_only:
-        description: 'Prospects mode: preview Wiza match counts only'
+        description: 'Prospects mode: preview Apollo match counts only'
         required: false
         type: boolean
         default: false
@@ -131,7 +124,7 @@ jobs:
           BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_KEY }}
           EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
           HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
-          WIZA_API_KEY: ${{ secrets.WIZA_API_KEY }}
+          APOLLO_API_KEY: ${{ secrets.APOLLO_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
@@ -144,7 +137,7 @@ jobs:
             [ -z "${HUNTER_API_KEY:-}" ] && missing+=("HUNTER_API_KEY")
           fi
           if [ "$MODE" = "prospects" ] || [ "$MODE" = "both" ]; then
-            [ -z "${WIZA_API_KEY:-}" ] && missing+=("WIZA_API_KEY")
+            [ -z "${APOLLO_API_KEY:-}" ] && missing+=("APOLLO_API_KEY")
           fi
           [ -z "${ANTHROPIC_API_KEY:-}" ] && missing+=("ANTHROPIC_API_KEY")
           [ -z "${GCP_WORKLOAD_IDENTITY_PROVIDER:-}" ] && missing+=("GCP_WORKLOAD_IDENTITY_PROVIDER")
@@ -169,7 +162,7 @@ jobs:
           HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
           NEVERBOUNCE_API_KEY: ${{ secrets.NEVERBOUNCE_API_KEY }}
           ZEROBOUNCE_API_KEY: ${{ secrets.ZEROBOUNCE_API_KEY }}
-          WIZA_API_KEY: ${{ secrets.WIZA_API_KEY }}
+          APOLLO_API_KEY: ${{ secrets.APOLLO_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GOOGLE_SHEET_ID: ${{ vars.GOOGLE_SHEET_ID }}
         run: |
@@ -180,7 +173,6 @@ jobs:
             --content-max-stage "${{ inputs.content_max_stage || '25' }}"
             --prospects-limit-seeds "${{ inputs.prospects_limit_seeds || '5' }}"
             --prospects-max-profiles "${{ inputs.prospects_max_profiles || '25' }}"
-            --enrichment-level "${{ inputs.enrichment_level || 'partial' }}"
             --model "${{ inputs.model || 'haiku' }}"
           )
           if [ "${{ inputs.preview_only }}" = "true" ]; then

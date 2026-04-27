@@ -90,7 +90,7 @@ class Config:
     brave_key: str | None = None
     exa_key: str | None = None
     hunter_key: str | None = None
-    wiza_key: str | None = None
+    apollo_key: str | None = None
     neverbounce_key: str | None = None
     zerobounce_key: str | None = None
     anthropic_key: str | None = None
@@ -105,7 +105,7 @@ class Config:
             brave_key=os.environ.get("BRAVE_SEARCH_API_KEY"),
             exa_key=os.environ.get("EXA_API_KEY"),
             hunter_key=os.environ.get("HUNTER_API_KEY"),
-            wiza_key=os.environ.get("WIZA_API_KEY"),
+            apollo_key=os.environ.get("APOLLO_API_KEY"),
             neverbounce_key=os.environ.get("NEVERBOUNCE_API_KEY"),
             zerobounce_key=os.environ.get("ZEROBOUNCE_API_KEY"),
             anthropic_key=os.environ.get("ANTHROPIC_API_KEY"),
@@ -123,6 +123,7 @@ class Config:
             # Hunter doubles as the default email verifier, so a single
             # Hunter key satisfies both ``hunter`` and ``verify``.
             "hunter": self.hunter_key,
+            "apollo": self.apollo_key,
             "verify": self.hunter_key or self.neverbounce_key or self.zerobounce_key,
             "anthropic": self.anthropic_key,
         }

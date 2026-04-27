@@ -1,25 +1,25 @@
 name: HailBytes outreach
 
-# Consolidated HailBytes (SAT + ASM) cold-email pipeline. Wiza-direct:
+# Consolidated HailBytes (SAT + ASM) cold-email pipeline. Apollo-direct:
 #
-#   plain-English seed (seeds_hb_mssp.txt — MSSP + pen-test focus)
-#     → Claude translates to Wiza filter (cached 7d)
-#     → Wiza /prospects/search preview (free)
-#     → Wiza /prospects/create_prospect_list (charges credits)
-#     → poll until finished, fetch valid contacts
-#     → optional verifier fallback
-#     → Claude opener anchored to SAT or ASM (rotates daily by default)
+#   plain-English seed (seeds_hb_mssp.txt — pen-test + MSSP focus)
+#     → Claude translates to Apollo people-search filter (cached 7d)
+#     → Apollo /mixed_people/search preview (free)
+#     → Apollo paged search → verified-email contacts
+#     → optional verifier fallback (Hunter / NeverBounce / ZeroBounce)
+#     → Claude opener anchored to SAT (https://hailbytes.com/sat) or
+#       ASM (https://hailbytes.com/asm); rotates daily by default
 #     → append to "HailBytes" tab of the source Sheet
 #
 # No cron — dispatch only. Re-enable a schedule once steady-state quality
 # is verified.
 #
 # Defaults are tuned for scale-up runs:
-#   limit_seeds=5  max_profiles=25  ⇒ ~125 contacts/run, ~250 credits.
+#   limit_seeds=5  max_profiles=25  ⇒ ~125 contacts/run.
 # Drop both back to small numbers for a smoke test on a new template.
 #
 # Required GitHub Secrets:
-#   WIZA_API_KEY                   (prospect search + email enrichment)
+#   APOLLO_API_KEY                 (people search + email reveal)
 #   ANTHROPIC_API_KEY              (filter translation + opener)
 #   HUNTER_API_KEY                 (optional — verifier fallback)
 #   NEVERBOUNCE_API_KEY            (optional verifier override)
@@ -37,22 +37,13 @@ on:
   workflow_dispatch:
     inputs:
       max_profiles:
-        description: 'Max enriched contacts per Wiza seed (~2 credits each)'
+        description: 'Max contacts pulled from Apollo per seed'
         required: false
         default: '25'
       limit_seeds:
         description: 'Seeds to run from seeds_hb_mssp.txt'
         required: false
         default: '5'
-      enrichment_level:
-        description: 'Wiza enrichment level'
-        required: false
-        type: choice
-        options:
-          - partial
-          - full
-          - none
-        default: partial
       product:
         description: 'Which HailBytes product the opener anchors'
         required: false
@@ -63,12 +54,12 @@ on:
           - asm
         default: rotate
       preview_only:
-        description: 'Preview Wiza match counts only — do not spend credits'
+        description: 'Preview Apollo match counts only — do not page through results'
         required: false
         type: boolean
         default: false
       no_verify:
-        description: 'Skip post-Wiza email verifier fallback'
+        description: 'Skip post-Apollo email verifier fallback'
         required: false
         type: boolean
         default: false
@@ -112,7 +103,7 @@ jobs:
       - name: Sanity-check secrets and variables
         if: ${{ inputs.dry_run != true }}
         env:
-          WIZA_API_KEY: ${{ secrets.WIZA_API_KEY }}
+          APOLLO_API_KEY: ${{ secrets.APOLLO_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
@@ -120,7 +111,7 @@ jobs:
         run: |
           set -euo pipefail
           missing=()
-          [ -z "${WIZA_API_KEY:-}" ] && missing+=("WIZA_API_KEY")
+          [ -z "${APOLLO_API_KEY:-}" ] && missing+=("APOLLO_API_KEY")
           [ -z "${ANTHROPIC_API_KEY:-}" ] && missing+=("ANTHROPIC_API_KEY")
           [ -z "${GCP_WORKLOAD_IDENTITY_PROVIDER:-}" ] && missing+=("GCP_WORKLOAD_IDENTITY_PROVIDER")
           [ -z "${GCP_SERVICE_ACCOUNT:-}" ] && missing+=("GCP_SERVICE_ACCOUNT")
@@ -139,7 +130,7 @@ jobs:
 
       - name: Run HailBytes outreach
         env:
-          WIZA_API_KEY: ${{ secrets.WIZA_API_KEY }}
+          APOLLO_API_KEY: ${{ secrets.APOLLO_API_KEY }}
           HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
           NEVERBOUNCE_API_KEY: ${{ secrets.NEVERBOUNCE_API_KEY }}
           ZEROBOUNCE_API_KEY: ${{ secrets.ZEROBOUNCE_API_KEY }}
@@ -150,7 +141,6 @@ jobs:
           ARGS=(
             --max-profiles "${{ inputs.max_profiles || '25' }}"
             --limit-seeds "${{ inputs.limit_seeds || '5' }}"
-            --enrichment-level "${{ inputs.enrichment_level || 'partial' }}"
             --product "${{ inputs.product || 'rotate' }}"
             --model "${{ inputs.model || 'haiku' }}"
           )

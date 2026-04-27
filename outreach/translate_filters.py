@@ -1,19 +1,24 @@
-"""Plain-English seed → Wiza filter object via Claude Haiku.
+"""Plain-English seed → Apollo.io People Search filter object via Claude.
 
-Wiza's Smart Search (the UI feature that translates a sentence into a
-filter object) is not exposed via API, so we do that translation
-ourselves. Claude Haiku is cheap and deterministic enough that the
-filter-cache hit rate dominates the cost: each unique seed maps to a
-single ~150-token request that we cache for 7 days.
+Apollo's UI offers a guided filter builder; the API accepts the same
+shape directly but expects the caller to know which array names map to
+which concept (``person_titles``, ``person_seniorities``,
+``q_organization_keyword_tags``, etc.). Claude Haiku does that mapping
+for us so the seed file can stay in plain English.
 
-Two prompts ship under outreach/prompts/:
-  uz_filters.md  — power-user discovery (people in image-heavy niches)
-  hb_filters.md  — security decision-maker discovery (MSSPs, pentest, etc.)
+Two prompts ship under ``outreach/prompts/``:
+  uz_filters.md  — image-heavy B2B power-users (workers reviewing lots
+                   of detailed photos in a browser as part of their day).
+  hb_filters.md  — pen-test + MSSP decision-makers.
 
 The prompt instructs Claude to return only a JSON object. We strip
-common decorations (markdown fences, leading "json", surrounding quotes)
-and json.loads it. Parse failures are surfaced — they nearly always
-mean the prompt itself needs adjustment, not the seed.
+common decorations (markdown fences, leading "json", surrounding
+quotes), parse the JSON, and whitelist the keys before passing them to
+Apollo so a prompt mis-fire can't smuggle in unsupported parameters.
+
+Filter cache key: ``(lane, seed)`` for 7 days. Each unique seed maps to
+a single ~150-token request, so the filter-cache hit rate dominates the
+cost of running the same seed across multiple workflow_dispatch runs.
 """
 
 from __future__ import annotations
@@ -27,43 +32,46 @@ from .config import CACHE_DIR, PROMPTS_DIR
 from .enrich_personalize import MODEL_IDS, _call_anthropic
 from .util import log
 
-FILTER_CACHE = CACHE_DIR / "wiza_filter_cache.json"
+FILTER_CACHE = CACHE_DIR / "apollo_filter_cache.json"
 FILTER_TTL_DAYS = 7
 
-# Whitelist of filter keys we accept from Claude. Extra keys are stripped
-# before sending to Wiza so a prompt mis-fire can't smuggle in something
-# weird that wastes credits on a broken filter.
+# Whitelist of filter keys we forward to Apollo. Anything else is
+# stripped silently so a prompt drift doesn't waste credits on a
+# malformed filter.
 ALLOWED_FILTER_KEYS = {
-    "first_name",
-    "last_name",
-    "job_title",
-    "job_title_level",
-    "job_role",
-    "job_sub_role",
-    "location",
-    "skill",
-    "school",
-    "major",
-    "linkedin_slug",
-    "job_company",
-    "past_company",
-    "company_location",
-    "company_industry",
-    "company_size",
-    "company_annual_growth",
-    "department_size",
-    "company_type",
-    "company_summary",
-    "year_founded_start",
-    "year_founded_end",
-    "funding_date",
-    "funding_min",
-    "funding_max",
-    "last_funding_min",
-    "last_funding_max",
-    "funding_stage",
-    "funding_type",
+    "person_titles",
+    "person_not_titles",
+    "person_seniorities",
+    "person_locations",
+    "person_not_locations",
+    "person_past_titles",
+    "q_keywords",
+    "organization_locations",
+    "organization_not_locations",
+    "organization_num_employees_ranges",
+    "organization_industry_tag_ids",
+    "q_organization_keyword_tags",
+    "q_organization_name",
+    "contact_email_status",
 }
+
+# Apollo accepts a small enum for seniorities. Anything else gets dropped
+# instead of risking an API rejection that would tank the run.
+ALLOWED_SENIORITIES = {
+    "owner",
+    "founder",
+    "c_suite",
+    "partner",
+    "vp",
+    "head",
+    "director",
+    "manager",
+    "senior",
+    "entry",
+    "intern",
+}
+
+ALLOWED_EMAIL_STATUSES = {"verified", "likely_to_engage", "unverified", "unavailable"}
 
 PROMPT_FILES = {
     "uz": "uz_filters.md",
@@ -79,17 +87,12 @@ def _load_prompt(lane: str) -> str:
 
 
 def _extract_json(text: str) -> str:
-    """Strip markdown fences and leading 'json' label that Claude
-    sometimes adds despite the prompt's instructions. Falls back to the
-    first balanced ``{...}`` block.
-    """
     s = text.strip()
     fence = re.match(r"^```(?:json)?\s*(.*?)\s*```$", s, re.DOTALL)
     if fence:
         return fence.group(1).strip()
     if s.startswith("{") and s.endswith("}"):
         return s
-    # Last-resort: pull the first balanced object out of arbitrary text.
     start = s.find("{")
     if start < 0:
         return s
@@ -105,7 +108,25 @@ def _extract_json(text: str) -> str:
 
 
 def _sanitize(filters: dict[str, Any]) -> dict[str, Any]:
-    return {k: v for k, v in filters.items() if k in ALLOWED_FILTER_KEYS}
+    """Drop unknown keys, normalize enum-valued fields, and force the
+    ``contact_email_status`` floor of ``verified`` so we never spend on
+    rows whose emails Apollo couldn't confirm.
+    """
+    clean: dict[str, Any] = {}
+    for key, value in filters.items():
+        if key not in ALLOWED_FILTER_KEYS:
+            continue
+        if key == "person_seniorities" and isinstance(value, list):
+            value = [v for v in value if isinstance(v, str) and v.lower() in ALLOWED_SENIORITIES]
+            if not value:
+                continue
+        if key == "contact_email_status" and isinstance(value, list):
+            value = [v for v in value if isinstance(v, str) and v.lower() in ALLOWED_EMAIL_STATUSES]
+            if not value:
+                continue
+        clean[key] = value
+    clean.setdefault("contact_email_status", ["verified"])
+    return clean
 
 
 def translate(
@@ -116,7 +137,7 @@ def translate(
     model: str = "haiku",
     cache: JsonCache | None = None,
 ) -> dict[str, Any] | None:
-    """Return a Wiza filter dict for ``seed``, or ``None`` on parse failure.
+    """Return an Apollo filter dict for ``seed``, or ``None`` on parse failure.
 
     ``lane`` selects the prompt file (``uz`` or ``hb``).
     Cached for ``FILTER_TTL_DAYS`` keyed by ``(lane, seed)``.
@@ -145,8 +166,8 @@ def translate(
         return None
 
     filters = _sanitize(parsed)
-    if not filters:
-        log(f"  filter parse: no recognized keys in {list(parsed)!r}")
+    if not filters or not any(k for k in filters if k != "contact_email_status"):
+        log(f"  filter parse: no recognized targeting keys in {list(parsed)!r}")
         cache.set(cache_key, {})
         return None
 

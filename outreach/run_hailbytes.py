@@ -1,15 +1,15 @@
-"""HailBytes MSSP/pentest outreach pipeline.
+"""HailBytes MSSP/pen-test outreach pipeline.
 
-Wiza-direct cold-email lane. Flow:
+Apollo-direct cold-email lane. Flow:
 
     plain-English seed (kind of security firm)
-      → Claude translates to Wiza filter object (decision-maker titles
-        + security industry; cached 7 days)
-      → Wiza prospect_search preview (free; logs match count)
-      → Wiza create_prospect_list (charges credits; max_profiles cap)
-      → poll list until finished, fetch enriched contacts
-      → optional verify fallback
-      → Claude personalized opener anchored to SAT or ASM (rotates daily)
+      → Claude translates to Apollo people-search filter
+        (decision-maker titles + security-services keywords; cached 7d)
+      → Apollo /mixed_people/search preview (free; logs match count)
+      → Apollo paged search to ``max_profiles``, keeping verified emails
+      → optional verifier fallback (Hunter / NeverBounce / ZeroBounce)
+      → Claude personalized opener anchored to SAT or ASM (rotates daily;
+        prompt links the recipient to hailbytes.com/sat or hailbytes.com/asm)
       → append to "HailBytes" tab of the source Sheet
 
 Dedupe is per-email against the HailBytes tab — domains aren't reused
@@ -18,11 +18,8 @@ SAT and ASM outreach. The MailMeteor template fills in the product
 pitch + signature; the pipeline's job is to land a verified address +
 two strong personalized sentences.
 
-Credit cost (partial enrichment): ~2 API email credits per returned
-profile. Default max_profiles=5 keeps a single run under 10 credits.
-
 Required env vars:
-  WIZA_API_KEY, ANTHROPIC_API_KEY, GOOGLE_SHEET_ID + WIF for Sheets.
+  APOLLO_API_KEY, ANTHROPIC_API_KEY, GOOGLE_SHEET_ID + WIF for Sheets.
   Optional verifier keys: HUNTER_API_KEY / NEVERBOUNCE_API_KEY /
   ZEROBOUNCE_API_KEY.
 """
@@ -36,7 +33,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from . import discover_wiza, translate_filters
+from . import discover_apollo, translate_filters
 from .config import (
     DEFAULT_MODEL,
     OUTREACH_DIR,
@@ -52,11 +49,13 @@ from .util import log, now_iso, today_iso
 
 SEEDS_PATH = OUTREACH_DIR / "seeds_hb_mssp.txt"
 PROMPT_PATH = PROMPTS_DIR / "hailbytes_opener.md"
-# Defaults tuned for scale-up runs after the daily-cron pause. Override
-# via workflow_dispatch inputs for smoke tests / first verification runs.
-# 5 seeds × 25 profiles ≈ 125 contacts/run ≈ 250 Wiza email credits.
 DEFAULT_LIMIT_SEEDS = 5
 DEFAULT_MAX_PROFILES = 25
+
+PRODUCT_URLS = {
+    "sat": "https://hailbytes.com/sat",
+    "asm": "https://hailbytes.com/asm",
+}
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
@@ -65,18 +64,13 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "--max-profiles",
         type=int,
         default=DEFAULT_MAX_PROFILES,
-        help="Max enriched contacts per seed. Each one costs ~2 API email credits.",
+        help="Max contacts pulled per seed from Apollo.",
     )
     p.add_argument(
         "--limit-seeds",
         type=int,
         default=DEFAULT_LIMIT_SEEDS,
         help="How many seeds to run this invocation (rotated daily).",
-    )
-    p.add_argument(
-        "--enrichment-level",
-        choices=["none", "partial", "full"],
-        default="partial",
     )
     p.add_argument(
         "--product",
@@ -87,15 +81,15 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument(
         "--preview-only",
         action="store_true",
-        help="Hit /prospects/search (free) and log match counts; do not "
-        "create a prospect list.",
+        help="Hit Apollo /mixed_people/search at page 1 and log match counts; "
+        "do not collect more pages.",
     )
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--model", default=DEFAULT_MODEL, choices=["haiku", "sonnet", "opus"])
     p.add_argument(
         "--no-verify",
         action="store_true",
-        help="Skip the post-Wiza email verifier.",
+        help="Skip the post-Apollo email verifier.",
     )
     return p.parse_args(argv)
 
@@ -151,6 +145,7 @@ def _personalize_hailbytes(
         description=candidate.get("description", ""),
         title=candidate.get("editor_title", ""),
         product="HailBytes SAT" if product == "sat" else "HailBytes ASM (reNgine Cloud)",
+        product_url=PRODUCT_URLS[product],
     )
     raw = _call_anthropic(api_key, MODEL_IDS.get(model, MODEL_IDS["haiku"]), prompt, max_tokens=300)
     text = raw.strip().strip('"').strip("'")
@@ -175,8 +170,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if not cfg.dry_run:
         missing = []
-        if not cfg.wiza_key:
-            missing.append("WIZA_API_KEY")
+        if not cfg.apollo_key:
+            missing.append("APOLLO_API_KEY")
         if not cfg.anthropic_key:
             missing.append("ANTHROPIC_API_KEY")
         if missing:
@@ -187,12 +182,12 @@ def main(argv: list[str] | None = None) -> int:
     seeds = _load_seeds(SEEDS_PATH, limit=args.limit_seeds)
     log(
         f"== hailbytes outreach @ {today_iso()}  product={product}  "
-        f"seeds={len(seeds)}  max_profiles={args.max_profiles}  "
-        f"enrichment={args.enrichment_level}  preview_only={args.preview_only}  "
+        f"product_url={PRODUCT_URLS[product]}  seeds={len(seeds)}  "
+        f"max_profiles={args.max_profiles}  preview_only={args.preview_only}  "
         f"dry_run={args.dry_run} =="
     )
 
-    # Step 1: translate seeds to Wiza filter objects (cached 7d).
+    # Step 1: translate seeds to Apollo filter objects (cached 7d).
     seed_filters: list[tuple[str, dict[str, Any]]] = []
     for seed in seeds:
         if cfg.dry_run:
@@ -216,11 +211,7 @@ def main(argv: list[str] | None = None) -> int:
     if not cfg.dry_run:
         for seed, filters in seed_filters:
             try:
-                pv = discover_wiza.preview(
-                    api_key=cfg.wiza_key or "",
-                    filters=filters,
-                    size=5,
-                )
+                pv = discover_apollo.preview(api_key=cfg.apollo_key or "", filters=filters)
             except Exception as e:  # noqa: BLE001
                 log(f"  preview error on {seed[:50]}: {e}")
                 continue
@@ -232,48 +223,29 @@ def main(argv: list[str] | None = None) -> int:
         log(f"\npreview totals: {total} matches across {len(previews)} seeds")
         return 0
 
-    # Step 3: create prospect list per seed and wait for enrichment.
+    # Step 3: collect contacts per seed.
     raw_contacts: list[dict[str, Any]] = []
     for seed, filters in seed_filters:
         if previews.get(seed, 0) == 0:
             log(f"  skipping (0 preview matches): {seed[:60]}")
             continue
         try:
-            created = discover_wiza.create_list(
-                api_key=cfg.wiza_key or "",
-                name=f"HB-{product.upper()} — {seed[:80]}",
+            people = discover_apollo.collect(
+                api_key=cfg.apollo_key or "",
                 filters=filters,
-                max_profiles=args.max_profiles,
-                enrichment_level=args.enrichment_level,
+                max_results=args.max_profiles,
             )
         except Exception as e:  # noqa: BLE001
-            log(f"  create_list error on {seed[:50]}: {e}")
+            log(f"  collect error on {seed[:50]}: {e}")
             continue
-        list_data = created.get("data") or {}
-        list_id = list_data.get("id") or list_data.get("uuid")
-        if not list_id:
-            log(f"  no list_id returned for {seed[:50]}: {created}")
-            continue
-        log(f"  list created id={list_id} for {seed[:50]}; polling...")
-
-        status = discover_wiza.wait_for_list(api_key=cfg.wiza_key or "", list_id=list_id)
-        if status not in discover_wiza.FINISHED_STATUSES:
-            log(f"  list {list_id} ended in status={status}; skipping")
-            continue
-
-        contacts = discover_wiza.get_contacts(
-            api_key=cfg.wiza_key or "",
-            list_id=list_id,
-            segment="valid",
-        )
-        log(f"  list {list_id}: {len(contacts)} valid contacts")
-        for c in contacts:
-            cand = discover_wiza.to_candidate(c, bucket="HB", source=f"wiza-{product}")
+        log(f"  collected {len(people)} for {seed[:50]}")
+        for p in people:
+            cand = discover_apollo.to_candidate(p, bucket="HB", source=f"apollo-{product}")
             cand["seed_used"] = seed
             cand["discovered_at"] = now_iso()
             raw_contacts.append(cand)
 
-    log(f"\ndiscovery: {len(raw_contacts)} enriched contacts across {len(seed_filters)} seeds")
+    log(f"\ndiscovery: {len(raw_contacts)} contacts across {len(seed_filters)} seeds")
 
     # Step 4: optional verify, then personalize.
     enriched: list[dict[str, Any]] = []
@@ -313,7 +285,7 @@ def main(argv: list[str] | None = None) -> int:
             continue
         cand["personalized_opener"] = opener
         cand["lead_score"] = 70
-        cand["notes"] = f"hb-{product}"
+        cand["notes"] = f"hb-{product} | {PRODUCT_URLS[product]}"
         cand["url"] = cand.get("linkedin_url") or cand.get("url", "")
         cand["description"] = cand.get("description", "")
         enriched.append(cand)

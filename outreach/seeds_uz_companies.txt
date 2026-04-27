@@ -1,35 +1,82 @@
-# Ultra Zoom B2B prospect-list seeds (Wiza prospects path).
+# Ultra Zoom B2B prospect-list seeds (Apollo prospects path).
 #
 # Used by outreach/run_ultrazoom.py with --mode prospects. Each line is
-# a plain-English description Claude translates to a Wiza prospect-search
+# a plain-English description Claude translates to an Apollo people-search
 # filter (cached 7 days, see translate_filters.py + prompts/uz_filters.md).
 #
-# Targets here are decision-makers AT companies/orgs in the genealogy
-# and family-history ecosystem — Wiza nails B2B work emails, so we lean
-# into people whose corporate email is discoverable, not the individual
-# genealogist hobbyist (which is what seeds_uz_people.txt failed at).
+# Targets here are decision-makers (manager / director / head / owner)
+# at small-to-mid-market companies whose staff routinely review LOTS of
+# detailed photos, scans, screenshots, or imagery in a browser as part
+# of their day-to-day. The pitch: try the pro version free for the
+# team, then $4/mo per seat once it's their daily tool.
 #
-# Pitch fit: every seed describes a person who routinely squints at
-# scanned census records, old newspapers, faded photographs, or
-# handwritten ledgers — the exact pain Ultra Zoom solves.
+# Pitch fit test for each line: would that team open 30+ images per day
+# in a browser tab and benefit from pixel-level zoom that doesn't lose
+# its position? If no, drop the line.
 
-marketing or content leads at genealogy SaaS and family-tree research platforms
-product managers at consumer DNA testing and ancestry analysis companies
+# Insurance / claims (auto, property, health, marine — photo-heavy adjusting)
+claims managers and directors at auto insurance carriers in the United States and Canada
+heads of property claims at homeowner and commercial insurance companies
+managers of claims operations at independent insurance adjusting firms
+directors of medical claims review at health insurance and TPA companies
+heads of claims at marine and cargo insurance providers
+
+# Real estate, appraisal, inspections (photo-driven workflows)
+heads of operations at residential real estate appraisal firms
+directors of inspection services at home and commercial property inspection companies
+managers of valuation services at commercial real estate appraisal firms
+operations leads at drone aerial inspection and roof inspection companies
+directors at title insurance and property survey firms
+
+# Medical imaging, pathology, dermatology, ophthalmology
+operations directors at independent radiology and teleradiology practices
+practice managers at dermatology clinics and dermatopathology labs
+managers of imaging operations at outpatient diagnostic imaging centers
+directors at digital pathology and slide-scanning service companies
+practice managers at ophthalmology clinics with retinal imaging programs
+operations leads at veterinary radiology and teleradiology services
+
+# Manufacturing / industrial QA + inspection
+heads of quality assurance at PCB and electronics contract manufacturers
+quality directors at metal fabrication and precision-machining shops
+operations managers at industrial inspection and NDT service providers
+heads of QA at textile, apparel, and footwear manufacturers
+quality managers at cosmetic and personal-care contract manufacturers
+
+# Auctions, appraisal, antiques, collectibles
+heads of cataloging at online auction houses for art, watches, jewelry, or coins
+directors at antique and collectible appraisal firms
+operations managers at numismatic grading and authentication services
+managers at sports card grading and trading-card authentication services
+directors at fine art and antiquities authentication labs
+
+# E-commerce catalog, product-photo, brand assurance teams
+heads of catalog operations at e-commerce and marketplace companies
+directors of brand protection and IP enforcement at consumer brands
+managers of product photography and image-asset operations at retailers
+operations leads at counterfeit-detection and brand-monitoring services
+
+# Genealogy, archives, digitization (UZ's flagship niche)
 directors of digital archives at state and county historical societies in the United States
 heads of digitization at university research libraries with manuscript collections
 content directors at family history magazines and genealogy publications
-product leads at AI photo restoration and colorization services for old family photos
-marketing managers at online auction houses for historical documents and manuscripts
+product leads at AI photo restoration and colorization services
 heads of preservation at municipal historical societies and city archives
-product managers at family-tree builder and genealogy software companies
-marketing leads at heritage tourism and ancestry travel services
 directors of digital initiatives at public libraries with significant local-history collections
-content marketing leads at online vital-records and genealogy-research services
-product managers at online repositories of digitized newspapers and periodicals
-marketing managers at vintage photograph restoration and digitization services
-heads of digital products at online museum collections and digital archive platforms
-directors of operations at professional genealogist associations and certification bodies
-marketing leads at adoption-search and genetic-genealogy support services
-product leads at DNA-match analysis and chromosome-mapping tools
-content directors at obituary and memorial-record aggregator services
-heads of digital programs at religious archives and family-history libraries
+
+# Forensics, legal, document review
+managers at forensic photography labs and crime-scene reconstruction services
+heads of e-discovery operations at litigation-support and legal-tech companies
+directors at questioned-document examination and authentication firms
+operations leads at intellectual-property and trademark search firms
+
+# Geospatial, GIS, satellite, aerial
+heads of imagery analysis at GIS and geospatial-data companies
+directors of cartography and mapping operations at survey and engineering firms
+managers at satellite imagery analytics and earth-observation companies
+operations leads at agriculture imagery and crop-monitoring services
+
+# Microscopy, scientific imaging
+operations managers at electron-microscopy and contract-microscopy service labs
+directors at histology and tissue-imaging service providers
+heads of imaging at biotech and life-sciences contract research organizations
