@@ -6,13 +6,12 @@ name: Find leads — HailBytes (Brave)
 # var HAILBYTES_LEADS_SHEET_ID). Prereq: share the sheet with the service
 # account used by vars.GCP_SERVICE_ACCOUNT (Editor access).
 
+# DEPRECATED 2026-04-27: superseded by the Wiza-direct cold-email lanes
+# (hailbytes-outreach.yml). Cron disabled; manual backfill still works.
+
 on:
-  schedule:
-    # Weekly: Monday 16:00 UTC = 09:00 PT. Offset 2h from the HailBytes
-    # Exa run to spread API load and leave a buffer between provider
-    # writes to the same sheet. Uses --rotate daily so the dork file
-    # sweeps fully over several weeks.
-    - cron: "0 16 * * 1"
+  # schedule:
+  #   - cron: "0 16 * * 1"  # disabled — see header
   workflow_dispatch:
     inputs:
       limit:

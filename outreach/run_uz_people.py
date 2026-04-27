@@ -1,10 +1,13 @@
 """Ultra Zoom power-user outreach pipeline.
 
-Independent from run_pipeline.py and run_hailbytes.py. Flow:
+Wiza-direct cold-email lane. Flow:
 
-    Brave web search (seed + site:linkedin.com/in/)
-      → Wiza individual reveal (LinkedIn URL → email + name + title)
-      → email verify (Hunter / NeverBounce / ZeroBounce)
+    plain-English seed
+      → Claude translates to Wiza filter object (cached 7 days)
+      → Wiza prospect_search preview (free; logs match count)
+      → Wiza create_prospect_list (charges credits; max_profiles cap)
+      → poll list until finished, fetch enriched contacts
+      → optional Hunter / NeverBounce / ZeroBounce verify fallback
       → Claude personalized 2-sentence opener
       → append to "UltraZoom" tab of the source Sheet
 
@@ -14,9 +17,15 @@ forensic photographers, etc.) — they're the ones who feel the pain
 Ultra Zoom solves, and a 100-user feedback cohort from this pool is
 worth more than a thousand newsletter sign-ups.
 
+Credit cost (partial enrichment): ~2 API email credits per returned
+profile. Default max_profiles=5 keeps a single run under 10 credits;
+crank it up via the workflow input once filter quality is verified.
+
 Required env vars:
-  BRAVE_SEARCH_API_KEY, WIZA_API_KEY, ANTHROPIC_API_KEY (HUNTER_API_KEY
-  optional for verification fallback), GOOGLE_SHEET_ID + WIF for Sheets.
+  WIZA_API_KEY, ANTHROPIC_API_KEY, GOOGLE_SHEET_ID + WIF for Sheets.
+  Optional: HUNTER_API_KEY / NEVERBOUNCE_API_KEY / ZEROBOUNCE_API_KEY
+  for the verification fallback (Wiza already pre-validates emails;
+  these only run on rows segment=valid hasn't already cleared).
 """
 
 from __future__ import annotations
@@ -28,6 +37,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from . import discover_wiza, translate_filters
 from .config import (
     DEFAULT_MODEL,
     OUTREACH_DIR,
@@ -38,27 +48,49 @@ from .config import (
 )
 from .enrich_personalize import MODEL_IDS, _call_anthropic
 from .enrich_verify import verify as email_verify
-from .enrich_wiza import lookup as wiza_lookup
 from .stage_sheet import stage as stage_to_sheet
-from .util import host_of, log, now_iso, today_iso
+from .util import log, now_iso, today_iso
 
 SEEDS_PATH = OUTREACH_DIR / "seeds_uz_people.txt"
 PROMPT_PATH = PROMPTS_DIR / "uz_people_opener.md"
-DEFAULT_PER_QUERY = 10
-DEFAULT_MAX_STAGE = 25
+DEFAULT_LIMIT_SEEDS = 3
+DEFAULT_MAX_PROFILES = 5
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(prog="outreach.run_uz_people")
-    p.add_argument("--max-stage", type=int, default=DEFAULT_MAX_STAGE)
-    p.add_argument("--per-query", type=int, default=DEFAULT_PER_QUERY)
-    p.add_argument("--limit-seeds", type=int, default=8)
+    p.add_argument(
+        "--max-profiles",
+        type=int,
+        default=DEFAULT_MAX_PROFILES,
+        help="Max enriched contacts per seed. Each one costs ~2 API email credits.",
+    )
+    p.add_argument(
+        "--limit-seeds",
+        type=int,
+        default=DEFAULT_LIMIT_SEEDS,
+        help="How many seeds to run this invocation (rotated daily).",
+    )
+    p.add_argument(
+        "--enrichment-level",
+        choices=["none", "partial", "full"],
+        default="partial",
+        help="Wiza enrichment level. 'none' = no email/phone (free).",
+    )
+    p.add_argument(
+        "--preview-only",
+        action="store_true",
+        help="Hit /prospects/search (free) and log match counts; do not "
+        "create a prospect list. Use this to validate filters before "
+        "spending credits.",
+    )
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--model", default=DEFAULT_MODEL, choices=["haiku", "sonnet", "opus"])
     p.add_argument(
         "--no-verify",
         action="store_true",
-        help="Skip email verification (useful when Wiza already returns verified emails).",
+        help="Skip the post-Wiza email verifier. Wiza already returns "
+        "segment=valid; the verifier is a belt-and-suspenders fallback.",
     )
     return p.parse_args(argv)
 
@@ -76,55 +108,6 @@ def _load_seeds(path: Path, *, limit: int) -> list[str]:
     day = datetime.utcnow().date().toordinal()
     seeds.sort(key=lambda s: hashlib.md5(f"{day}|{s}".encode()).hexdigest())
     return seeds[:limit]
-
-
-def _brave_people_search(
-    *,
-    api_key: str,
-    query: str,
-    num_results: int,
-) -> list[dict[str, Any]]:
-    """Brave web search restricted to LinkedIn profile pages via the
-    site: operator. Brave doesn't have an Exa-style category=people
-    mode, so we shape the query and filter the results.
-
-    Asks for 2× num_results since site: queries leak in /posts/ and
-    /pulse/ pages we'll discard before hitting the per-seed cap.
-    """
-    import urllib.error
-
-    from . import discover_brave
-
-    shaped = f"{query} site:linkedin.com/in/"
-    try:
-        items = discover_brave.search(
-            api_key=api_key,
-            seed=shaped,
-            num_results=min(20, num_results * 2),
-        )
-    except urllib.error.HTTPError as e:
-        log(f"  brave people error on {query[:60]}: HTTP {e.code}")
-        return []
-    out: list[dict[str, Any]] = []
-    for it in items:
-        url = it.get("url") or ""
-        # Brave's site: operator doesn't constrain to /in/ alone, so
-        # filter out company pages, posts, pulse articles, jobs, etc.
-        if "linkedin.com/in/" not in url:
-            continue
-        text = it.get("description") or ""
-        out.append(
-            {
-                "linkedin_url": url,
-                "title": (it.get("title") or "").strip(),
-                "summary": " ".join(text.split()).strip()[:600],
-                "domain": host_of(url),
-                "exa_score": None,
-            }
-        )
-        if len(out) >= num_results:
-            break
-    return out
 
 
 def _render_prompt(template: str, **fields: str) -> str:
@@ -178,8 +161,6 @@ def main(argv: list[str] | None = None) -> int:
 
     if not cfg.dry_run:
         missing = []
-        if not cfg.brave_key:
-            missing.append("BRAVE_SEARCH_API_KEY")
         if not cfg.wiza_key:
             missing.append("WIZA_API_KEY")
         if not cfg.anthropic_key:
@@ -191,74 +172,112 @@ def main(argv: list[str] | None = None) -> int:
     seeds = _load_seeds(SEEDS_PATH, limit=args.limit_seeds)
     log(
         f"== ultrazoom people outreach @ {today_iso()}  seeds={len(seeds)}  "
-        f"max_stage={args.max_stage}  dry_run={args.dry_run} =="
+        f"max_profiles={args.max_profiles}  enrichment={args.enrichment_level}  "
+        f"preview_only={args.preview_only}  dry_run={args.dry_run} =="
     )
 
-    raw: list[dict[str, Any]] = []
-    seen_urls: set[str] = set()
+    # Step 1: translate seeds to Wiza filter objects (cached 7d).
+    seed_filters: list[tuple[str, dict[str, Any]]] = []
     for seed in seeds:
         if cfg.dry_run:
-            log(f"  [dry] {seed}")
+            log(f"  [dry] translate: {seed}")
+            seed_filters.append((seed, {}))
             continue
-        items = _brave_people_search(
-            api_key=cfg.brave_key or "",
-            query=seed,
-            num_results=args.per_query,
+        filters = translate_filters.translate(
+            lane="uz",
+            seed=seed,
+            api_key=cfg.anthropic_key or "",
+            model=args.model,
         )
-        kept = 0
-        for it in items:
-            url = it["linkedin_url"]
-            if url in seen_urls:
+        if not filters:
+            log(f"  ! filter translation failed for: {seed[:70]}")
+            continue
+        log(f"  filter [{seed[:50]}]: {json.dumps(filters)[:160]}")
+        seed_filters.append((seed, filters))
+
+    # Step 2: preview (free) — gives us a sanity check on match counts
+    # before we spend any credits. Always runs so the step summary has
+    # something to show.
+    previews: dict[str, int] = {}
+    if not cfg.dry_run:
+        for seed, filters in seed_filters:
+            try:
+                pv = discover_wiza.preview(
+                    api_key=cfg.wiza_key or "",
+                    filters=filters,
+                    size=5,
+                )
+            except Exception as e:  # noqa: BLE001
+                log(f"  preview error on {seed[:50]}: {e}")
                 continue
-            seen_urls.add(url)
-            it["seed_used"] = seed
-            it["bucket"] = "UZ"
-            it["discovered_at"] = now_iso()
-            it["source"] = "brave-people"
-            raw.append(it)
-            kept += 1
-        log(f"  + [{kept}/{len(items)}]  {seed[:70]}")
+            previews[seed] = pv["total"]
+            log(f"  preview [{seed[:50]}]: {pv['total']} matches")
 
-    log(f"\ndiscovery: {len(raw)} unique LinkedIn profiles")
+    if args.preview_only or cfg.dry_run:
+        total = sum(previews.values())
+        log(f"\npreview totals: {total} matches across {len(previews)} seeds")
+        return 0
 
+    # Step 3: create prospect list per seed and wait for enrichment.
+    raw_contacts: list[dict[str, Any]] = []
+    for seed, filters in seed_filters:
+        if previews.get(seed, 0) == 0:
+            log(f"  skipping (0 preview matches): {seed[:60]}")
+            continue
+        try:
+            created = discover_wiza.create_list(
+                api_key=cfg.wiza_key or "",
+                name=f"UZ — {seed[:80]}",
+                filters=filters,
+                max_profiles=args.max_profiles,
+                enrichment_level=args.enrichment_level,
+            )
+        except Exception as e:  # noqa: BLE001
+            log(f"  create_list error on {seed[:50]}: {e}")
+            continue
+        list_data = created.get("data") or {}
+        list_id = list_data.get("id") or list_data.get("uuid")
+        if not list_id:
+            log(f"  no list_id returned for {seed[:50]}: {created}")
+            continue
+        log(f"  list created id={list_id} for {seed[:50]}; polling...")
+
+        status = discover_wiza.wait_for_list(api_key=cfg.wiza_key or "", list_id=list_id)
+        if status not in discover_wiza.FINISHED_STATUSES:
+            log(f"  list {list_id} ended in status={status}; skipping")
+            continue
+
+        contacts = discover_wiza.get_contacts(
+            api_key=cfg.wiza_key or "",
+            list_id=list_id,
+            segment="valid",
+        )
+        log(f"  list {list_id}: {len(contacts)} valid contacts")
+        for c in contacts:
+            cand = discover_wiza.to_candidate(c, bucket="UZ", source="wiza-prospect")
+            cand["seed_used"] = seed
+            cand["discovered_at"] = now_iso()
+            raw_contacts.append(cand)
+
+    log(f"\ndiscovery: {len(raw_contacts)} enriched contacts across {len(seed_filters)} seeds")
+
+    # Step 4: optional verify, then personalize.
     enriched: list[dict[str, Any]] = []
     dropped = {"no_email": 0, "bad_email": 0, "manual_review": 0, "personalization": 0}
-    for cand in raw:
-        if len(enriched) >= args.max_stage:
-            break
-        if cfg.dry_run:
-            cand.update(
-                {
-                    "editor_first_name": "Demo",
-                    "editor_last_name": "User",
-                    "editor_email": "demo@example.com",
-                    "editor_title": cand.get("title", ""),
-                    "hunter_confidence": 90,
-                    "email_status": "valid",
-                    "personalized_opener": f"[dry-run opener for {cand['linkedin_url']}]",
-                    "lead_score": 60,
-                    "domain": "linkedin.com",
-                }
-            )
-            enriched.append(cand)
-            continue
-
-        contact = wiza_lookup(cand["linkedin_url"], api_key=cfg.wiza_key or "")
-        if not contact or not contact.get("editor_email"):
+    for cand in raw_contacts:
+        if not cand.get("editor_email"):
             dropped["no_email"] += 1
             continue
-        cand.update(contact)
-
         if not args.no_verify:
             try:
                 verdict = email_verify(
-                    contact["editor_email"],
+                    cand["editor_email"],
                     hunter_key=cfg.hunter_key,
                     neverbounce_key=cfg.neverbounce_key,
                     zerobounce_key=cfg.zerobounce_key,
                 )
             except Exception as e:  # noqa: BLE001
-                log(f"  verify error for {contact['editor_email']}: {e}")
+                log(f"  verify error for {cand['editor_email']}: {e}")
                 dropped["bad_email"] += 1
                 continue
             if verdict == "invalid":
@@ -275,17 +294,13 @@ def main(argv: list[str] | None = None) -> int:
             model=args.model,
         )
         if not opener:
-            log(f"  personalization rejected ({err}) for {cand['linkedin_url']}")
+            log(f"  personalization rejected ({err}) for {cand.get('editor_email')}")
             dropped["personalization"] += 1
             continue
 
         cand["personalized_opener"] = opener
-        cand["email_status"] = "valid"
         cand["lead_score"] = 60
         cand["notes"] = f"uz-people | {cand['linkedin_url']}"
-        # Stage_sheet expects recent_post_url/title/description; map the
-        # LinkedIn profile into those slots so the row remains useful in
-        # the Sheet.
         cand["url"] = cand["linkedin_url"]
         cand["description"] = cand.get("summary", "")
         enriched.append(cand)
@@ -293,7 +308,7 @@ def main(argv: list[str] | None = None) -> int:
 
     appended = stage_to_sheet(cfg, enriched, dry_run=args.dry_run, tab=SHEET_TAB_UZ_PEOPLE)
     log(
-        f"\ndone. raw={len(raw)} enriched={len(enriched)} appended={appended} "
+        f"\ndone. raw={len(raw_contacts)} enriched={len(enriched)} appended={appended} "
         f"dropped={json.dumps(dropped)}"
     )
     return 0

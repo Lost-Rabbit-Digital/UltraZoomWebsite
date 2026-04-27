@@ -25,9 +25,13 @@ name: Outreach pipeline
 #   https://exa.ai/docs/reference/search
 #   https://exa.ai/docs/reference/search-api-guide-for-coding-agents
 
+# DEPRECATED 2026-04-27: superseded by the Wiza-direct cold-email lanes
+# (ultrazoom-people.yml + hailbytes-outreach.yml). Cron disabled. Manual
+# backfill of the listicle/contact-form sheet still works via dispatch.
+
 on:
-  schedule:
-    - cron: '0 13 * * 1-5'  # 7am Mountain, weekdays
+  # schedule:
+  #   - cron: '0 13 * * 1-5'  # disabled — see header
   workflow_dispatch:
     inputs:
       max_stage:
