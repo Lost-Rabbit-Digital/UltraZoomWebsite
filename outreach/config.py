@@ -37,6 +37,11 @@ VERIFY_CACHE = CACHE_DIR / "verify_cache.json"
 # sheet during template work.
 DEFAULT_SHEET_ID = "1Q-Cr3MdarGttpULJwv6n1eRGoa1GYg7SpB7W5mmYGA0"
 SHEET_TAB = "Leads"
+# Per-campaign tabs. MailMeteor reads from each tab independently so each
+# campaign gets its own template + send schedule. Tabs must already exist
+# in the Sheet — the pipeline does not create them.
+SHEET_TAB_HAILBYTES = "HailBytes"
+SHEET_TAB_UZ_PEOPLE = "UltraZoom"
 
 # Qualification thresholds. ``MIN_LEAD_SCORE`` is the floor for advancing a
 # candidate to enrichment.
@@ -85,6 +90,7 @@ class Config:
     brave_key: str | None = None
     exa_key: str | None = None
     hunter_key: str | None = None
+    wiza_key: str | None = None
     neverbounce_key: str | None = None
     zerobounce_key: str | None = None
     anthropic_key: str | None = None
@@ -99,6 +105,7 @@ class Config:
             brave_key=os.environ.get("BRAVE_SEARCH_API_KEY"),
             exa_key=os.environ.get("EXA_API_KEY"),
             hunter_key=os.environ.get("HUNTER_API_KEY"),
+            wiza_key=os.environ.get("WIZA_API_KEY"),
             neverbounce_key=os.environ.get("NEVERBOUNCE_API_KEY"),
             zerobounce_key=os.environ.get("ZEROBOUNCE_API_KEY"),
             anthropic_key=os.environ.get("ANTHROPIC_API_KEY"),

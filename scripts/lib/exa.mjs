@@ -1,10 +1,25 @@
-// Minimal Exa API client. Docs: https://docs.exa.ai
+// Minimal Exa API client.
+//
+// API references:
+//   https://exa.ai/docs/reference/search
+//   https://exa.ai/docs/reference/search-api-guide-for-coding-agents
 //
 // Two endpoints are used:
 //   - /search         → neural search from a natural-language query
 //   - /findSimilar    → given a seed URL, return similar pages
 //
 // Auth: single API key in the `x-api-key` header.
+//
+// `type` accepts: auto (default), fast, instant, deep-lite, deep,
+// deep-reasoning. We pin to "neural" (legacy but still accepted) since
+// that's what's been running successfully in production.
+//
+// `category` can scope a search to: company, people, research paper,
+// news, personal site, financial report. Note: company/people don't
+// support excludeDomains or date filters, and people limits
+// includeDomains to LinkedIn only — so this listicle-discovery flow
+// can't use them, but they'd suit a separate competitor- or
+// contact-research pass.
 
 import { toIsoDate } from "./util.mjs";
 

@@ -20,6 +20,10 @@ name: Outreach pipeline
 #
 # Sheet access: share the target sheet with the GCP_SERVICE_ACCOUNT email
 # as Editor. See docs/outreach/sheets-setup.md for the WIF setup.
+#
+# Exa API references (used by outreach/discover_exa.py):
+#   https://exa.ai/docs/reference/search
+#   https://exa.ai/docs/reference/search-api-guide-for-coding-agents
 
 on:
   schedule:

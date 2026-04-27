@@ -4,6 +4,21 @@ Two endpoints: ``/search`` for natural-language queries, ``/findSimilar``
 for "more like this" against a known good URL. Exa returns lower volume
 than Brave but higher quality — especially for finding listicles that
 *talk about* a topic without using exact keywords.
+
+API references:
+  https://exa.ai/docs/reference/search
+  https://exa.ai/docs/reference/search-api-guide-for-coding-agents
+
+Notes for future tweaks:
+  - ``type`` accepts: auto (default), fast, instant, deep-lite, deep,
+    deep-reasoning. The legacy ``neural`` value also still works and is
+    what the JS client (scripts/lib/exa.mjs) uses successfully.
+  - ``category`` can scope a search to: company, people, research paper,
+    news, personal site, financial report. The ``company`` and ``people``
+    categories do NOT support ``excludeDomains`` or date filters, and
+    ``people`` only allows LinkedIn in ``includeDomains`` — so this
+    listicle-discovery flow can't use them, but they'd suit a separate
+    competitor- or contact-research pass.
 """
 
 from __future__ import annotations
@@ -114,7 +129,7 @@ def search(
     body = {
         "query": query,
         "numResults": num_results,
-        "type": "auto",
+        "type": "neural",
         "excludeDomains": EXCLUDE_DOMAINS,
         "contents": {"text": {"maxCharacters": 400}},
     }

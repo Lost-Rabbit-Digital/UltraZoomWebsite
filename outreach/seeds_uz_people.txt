@@ -1,0 +1,37 @@
+# Ultra Zoom power-user seed queries.
+#
+# Used by outreach/run_uz_people.py with Exa category="people". Each
+# non-blank, non-comment line should describe a *kind of person* whose
+# day job benefits from precise pixel-level zoom on web images.
+#
+# Format: one short descriptor per line. Exa rewrites these into LinkedIn
+# people-search queries, so phrasing should sound like a profile would
+# describe itself ("forensic photographer", "vintage camera reseller")
+# rather than a Google query.
+
+professional eBay vintage camera reseller in the United States
+small business eBay flipper reselling collectibles and antiques
+professional genealogist tracing historical documents and census records
+forensic photographer analyzing crime scene or insurance evidence images
+art appraiser evaluating paintings and prints from online auction listings
+insurance damage adjuster reviewing photographs of property claims
+numismatic coin grader inspecting high resolution coin photographs
+philatelist examining stamp scans for authentication
+low vision and accessibility specialist reviewing web user interfaces
+UX researcher conducting visual usability tests of e-commerce sites
+freelance journalist verifying details in news photographs
+real estate photographer staging listings for high-end residential market
+vintage watch reseller authenticating dial details from auction photos
+auction house cataloger writing condition reports for online sales
+medical illustrator referencing diagnostic imagery in browser
+fine art photographer printing limited editions for online gallery
+botanical illustrator referencing plant specimens from herbarium scans
+quality assurance inspector for printed packaging and labels
+museum collections registrar managing digital catalog of artifacts
+forensic accountant reviewing scanned receipts and ledgers
+trademark attorney comparing logo designs at fine pixel detail
+product photographer for Amazon and Etsy storefronts
+e-commerce listing specialist for boutique apparel resellers
+sports memorabilia authenticator inspecting signed jerseys and cards
+comic book grader inspecting page edges and printing flaws
+estate liquidator photographing items for online estate sales

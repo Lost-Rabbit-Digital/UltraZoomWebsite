@@ -73,7 +73,7 @@ def _exa_search_reddit(
     body = {
         "query": query,
         "numResults": min(num_results, 10),
-        "type": "auto",
+        "type": "neural",
         "includeDomains": ["reddit.com"],
         "startPublishedDate": start_date,
         "contents": {"text": {"maxCharacters": 600}},
