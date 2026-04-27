@@ -70,6 +70,9 @@ def _http(
     headers = {
         "authorization": f"Bearer {api_key}",
         "accept": "application/json",
+        # Cloudflare in front of Wiza blocks the default `Python-urllib/X.Y`
+        # signature with error 1010 (browser_signature_banned).
+        "user-agent": "UltraZoom-Outreach/1.0 (+https://ultrazoom.app)",
     }
     if body is not None:
         headers["content-type"] = "application/json"
