@@ -51,8 +51,7 @@ Set env vars (or GitHub Secrets for the cron):
 ```
 BRAVE_SEARCH_API_KEY
 EXA_API_KEY
-HUNTER_API_KEY
-NEVERBOUNCE_API_KEY            # or ZEROBOUNCE_API_KEY
+HUNTER_API_KEY                 # used for editor lookup AND email verification
 ANTHROPIC_API_KEY
 GOOGLE_SERVICE_ACCOUNT_JSON    # full JSON blob, not a path
 GOOGLE_SHEET_ID                # defaults to the production sheet
@@ -60,9 +59,17 @@ GOOGLE_SHEET_ID                # defaults to the production sheet
 
 Optional:
 ```
+NEVERBOUNCE_API_KEY            # overrides Hunter's verifier when set
+ZEROBOUNCE_API_KEY             # overrides Hunter's verifier when set
 SERPAPI_KEY                    # SERP fallback (not yet used by default)
 RSS_FEED_LIST_PATH             # override the curated feed list
 ```
+
+**Email verification**: Hunter's `/v2/email-verifier` is the default — same
+key as the editor lookup, no second vendor needed. NeverBounce or
+ZeroBounce are optional secondary checks; when one is set it takes
+priority over Hunter (slightly better at catch-all detection at higher
+volumes).
 
 The Google service account must have **Editor** access on the target
 sheet only — share the sheet directly with the service account's
@@ -113,7 +120,7 @@ those.
 | `editor_last_name` | Hunter | `{{editor_last_name}}` |
 | `editor_email` | Hunter | **To: address** |
 | `hunter_confidence` | Hunter | reference |
-| `email_status` | NeverBounce | always `valid` for staged rows |
+| `email_status` | Hunter (or NeverBounce/ZeroBounce) | always `valid` for staged rows |
 | `personalized_opener` | Claude | `{{personalized_opener}}` |
 | `status` | pipeline | always `ready_to_send` |
 | `enriched_at` | pipeline | reference |
@@ -227,11 +234,12 @@ stricter prompt. Two failures drop the candidate.
 | --- | --- |
 | Brave Search API | ~$5 (free tier covers most use) |
 | Exa.ai | $10–20 |
-| Hunter.io Starter | $49 |
-| NeverBounce | $5 |
+| Hunter.io Starter | $49 (covers editor lookup + email verification) |
 | Anthropic API (Haiku) | $3–5 |
 | MailMeteor Premium | $10 |
-| **Total** | **~$80–100/month** |
+| **Total** | **~$77–95/month** |
+
+NeverBounce/ZeroBounce add ~$5/mo if you want a dedicated verifier on top.
 
 ## Audit checklist
 

@@ -70,9 +70,9 @@ def _check_keys(cfg: Config, *, mode: str) -> None:
             needed.append("BRAVE_SEARCH_API_KEY or EXA_API_KEY (need at least one)")
     if mode == "full":
         if not cfg.hunter_key:
+            # Hunter is now used both for domain search and (by default)
+            # for email verification, so it's a single hard requirement.
             needed.append("HUNTER_API_KEY")
-        if not cfg.neverbounce_key and not cfg.zerobounce_key:
-            needed.append("NEVERBOUNCE_API_KEY or ZEROBOUNCE_API_KEY")
         if not cfg.anthropic_key:
             needed.append("ANTHROPIC_API_KEY")
         if not cfg.google_service_account_json:
@@ -137,10 +137,12 @@ def _enrich_one(
     if not hunter or not hunter.get("editor_email"):
         return None, "no_editor_found"
 
-    # Verify.
+    # Verify. Hunter is the default; NeverBounce/ZeroBounce override
+    # when configured (they catch a few catch-all cases Hunter misses).
     try:
         verdict = email_verify(
             hunter["editor_email"],
+            hunter_key=cfg.hunter_key,
             neverbounce_key=cfg.neverbounce_key,
             zerobounce_key=cfg.zerobounce_key,
         )

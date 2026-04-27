@@ -115,8 +115,10 @@ class Config:
         mapping = {
             "brave": self.brave_key,
             "exa": self.exa_key,
+            # Hunter doubles as the default email verifier, so a single
+            # Hunter key satisfies both ``hunter`` and ``verify``.
             "hunter": self.hunter_key,
-            "verify": self.neverbounce_key or self.zerobounce_key,
+            "verify": self.hunter_key or self.neverbounce_key or self.zerobounce_key,
             "anthropic": self.anthropic_key,
             "google": self.google_service_account_json,
         }
