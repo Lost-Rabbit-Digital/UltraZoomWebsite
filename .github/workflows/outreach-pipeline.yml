@@ -1,0 +1,99 @@
+name: Outreach pipeline
+
+# Discovers, enriches, and stages cold-email candidates to the MailMeteor
+# source sheet. Runs weekday mornings at 7am Mountain (13:00 UTC). State
+# files (seen_urls.json, seen_domains.json, seed_rotation_state.json)
+# are committed back so dedupe and seed rotation persist across runs.
+#
+# Required GitHub Secrets:
+#   BRAVE_SEARCH_API_KEY
+#   EXA_API_KEY
+#   HUNTER_API_KEY                 (also acts as the default email verifier)
+#   ANTHROPIC_API_KEY
+#   GOOGLE_SERVICE_ACCOUNT_JSON    (full JSON blob, not a path)
+#   GOOGLE_SHEET_ID
+# Optional (override Hunter's verifier when set):
+#   NEVERBOUNCE_API_KEY
+#   ZEROBOUNCE_API_KEY
+
+on:
+  schedule:
+    - cron: '0 13 * * 1-5'  # 7am Mountain, weekdays
+  workflow_dispatch:
+    inputs:
+      max_stage:
+        description: 'Max enriched rows to stage'
+        required: false
+        default: '15'
+      bucket:
+        description: 'Override seed bucket (A/B/C/D)'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Dry run only'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: outreach-pipeline
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r outreach/requirements.txt
+
+      - name: Run pipeline
+        env:
+          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_API_KEY }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
+          NEVERBOUNCE_API_KEY: ${{ secrets.NEVERBOUNCE_API_KEY }}
+          ZEROBOUNCE_API_KEY: ${{ secrets.ZEROBOUNCE_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        run: |
+          set -euo pipefail
+          ARGS=(--max-stage "${{ inputs.max_stage || '15' }}")
+          if [ -n "${{ inputs.bucket }}" ]; then
+            ARGS+=(--bucket "${{ inputs.bucket }}")
+          fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS+=(--dry-run)
+          fi
+          python -m outreach.run_pipeline "${ARGS[@]}"
+
+      - name: Commit state files
+        if: ${{ inputs.dry_run != 'true' }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add outreach/state/ outreach/dropped/ || true
+          if git diff --cached --quiet; then
+            echo "No state changes to commit"
+          else
+            git commit -m "Update outreach state [skip ci]"
+            for i in 1 2 3 4; do
+              if git push; then
+                exit 0
+              fi
+              echo "push failed, retry ${i}"
+              sleep $((2 ** i))
+            done
+            echo "push failed after 4 attempts"
+            exit 1
+          fi

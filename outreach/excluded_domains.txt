@@ -1,0 +1,39 @@
+# Domains the qualifier always drops. Add to this list when you spot a
+# link farm, content mill, scraped-content blog, prior outreach partner,
+# unsubscribe request, or competitor.
+#
+# One domain per line. Blank lines and lines starting with `#` are
+# ignored. Match is exact host (no subdomain wildcard) — add the exact
+# domain you want to block.
+
+# Big platforms / app stores (we don't outreach these).
+chromewebstore.google.com
+chrome.google.com
+addons.mozilla.org
+microsoftedge.microsoft.com
+play.google.com
+apps.apple.com
+
+# Social / aggregators.
+youtube.com
+twitter.com
+x.com
+facebook.com
+instagram.com
+linkedin.com
+pinterest.com
+reddit.com
+
+# Q&A / dev / source.
+github.com
+stackoverflow.com
+quora.com
+
+# Search engines.
+google.com
+bing.com
+duckduckgo.com
+
+# Self.
+ultrazoom.app
+lostrabbitdigital.com
