@@ -70,6 +70,15 @@ def _http(
                 log(f"  wiza retry {attempt}/{MAX_ATTEMPTS - 1} after {wait}s — HTTP {e.code}")
                 time.sleep(wait)
                 continue
+            # Surface Wiza's response body — for 401/403 it carries the
+            # real reason ("invalid api key", "plan does not include API",
+            # etc.) which the bare HTTPError message hides.
+            try:
+                body = e.read().decode("utf-8", errors="replace").strip()
+                if body:
+                    log(f"  wiza HTTP {e.code} {method} {path} body: {body[:500]}")
+            except Exception:  # noqa: BLE001
+                pass
             raise
         except urllib.error.URLError as e:
             last_err = e
