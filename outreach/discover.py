@@ -15,7 +15,13 @@ from .seeds import SeedSelection
 from .util import log, now_iso
 
 
-def _tag(items: list[dict[str, Any]], *, source: str, seed: str) -> list[dict[str, Any]]:
+def _tag(
+    items: list[dict[str, Any]],
+    *,
+    source: str,
+    seed: str,
+    bucket: str,
+) -> list[dict[str, Any]]:
     discovered_at = now_iso()
     tagged: list[dict[str, Any]] = []
     for item in items:
@@ -24,6 +30,7 @@ def _tag(items: list[dict[str, Any]], *, source: str, seed: str) -> list[dict[st
         out = dict(item)
         out["source"] = source
         out["seed_used"] = seed
+        out["bucket"] = bucket
         out["discovered_at"] = discovered_at
         tagged.append(out)
     return tagged
@@ -54,36 +61,41 @@ def run(
                 log(f"  brave error on {seed!r}: {e}")
                 continue
             log(f"  + [{len(items)}]  {seed[:70]}")
-            candidates.extend(_tag(items, source="brave", seed=seed))
+            candidates.extend(_tag(items, source="brave", seed=seed, bucket=selection.bucket))
     else:
         log("brave: no BRAVE_SEARCH_API_KEY, skipping")
 
     if cfg.exa_key:
+        # Exa pay-as-you-go pricing: $7/1k for 1-10 results, +$1 per result
+        # beyond 10 — cap here to stay in the cheapest tier.
+        exa_results = min(per_query, 10)
         log(f"\n== exa search (bucket {selection.bucket}, {len(selection.seeds)} seeds) ==")
         for seed in selection.seeds:
             try:
                 items = discover_exa.search(
-                    api_key=cfg.exa_key, query=seed, num_results=per_query
+                    api_key=cfg.exa_key, query=seed, num_results=exa_results
                 )
             except Exception as e:  # noqa: BLE001
                 log(f"  exa error on {seed!r}: {e}")
                 continue
             log(f"  + [{len(items)}]  {seed[:70]}")
-            candidates.extend(_tag(items, source="exa", seed=seed))
+            candidates.extend(_tag(items, source="exa", seed=seed, bucket=selection.bucket))
 
-        targets = exa_similar_targets or discover_exa.KNOWN_GOOD_TARGETS
+        targets = exa_similar_targets or discover_exa.targets_for(selection.bucket)
         if targets:
             log(f"\n== exa findSimilar ({len(targets)} known-good targets) ==")
             for url in targets:
                 try:
                     items = discover_exa.find_similar(
-                        api_key=cfg.exa_key, url=url, num_results=per_query
+                        api_key=cfg.exa_key, url=url, num_results=exa_results
                     )
                 except Exception as e:  # noqa: BLE001
                     log(f"  exa similar error on {url}: {e}")
                     continue
                 log(f"  + [{len(items)}]  {url[:70]}")
-                candidates.extend(_tag(items, source="exa-similar", seed=url))
+                candidates.extend(
+                    _tag(items, source="exa-similar", seed=url, bucket=selection.bucket)
+                )
     else:
         log("exa: no EXA_API_KEY, skipping")
 
@@ -95,7 +107,7 @@ def run(
             log(f"  rss error: {e}")
             rss_items = []
         log(f"  + [{len(rss_items)}]  rss feed entries matching keyword filter")
-        candidates.extend(_tag(rss_items, source="rss", seed="rss-feed"))
+        candidates.extend(_tag(rss_items, source="rss", seed="rss-feed", bucket=selection.bucket))
 
     # Within-run dedupe by URL. We keep the first occurrence so the
     # source priority is implicit: brave first (highest volume), then exa,

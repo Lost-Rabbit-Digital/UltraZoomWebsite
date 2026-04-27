@@ -114,8 +114,7 @@ def search(
     body = {
         "query": query,
         "numResults": num_results,
-        "type": "neural",
-        "useAutoprompt": True,
+        "type": "auto",
         "excludeDomains": EXCLUDE_DOMAINS,
         "contents": {"text": {"maxCharacters": 400}},
     }
@@ -152,12 +151,31 @@ def find_similar(
     return items
 
 
-# Known-good targets for findSimilar. Pre-vetted Ultra Zoom-aligned
-# listicles and resource directories: feeding these into Exa's similarity
-# graph regularly surfaces comparable articles.
-KNOWN_GOOD_TARGETS: list[str] = [
-    "https://www.smartupworld.com/best-firefox-extensions-for-everyone/",
-    "https://www.designerdaily.com/web-designer-resources",
-    "https://www.makeuseof.com/tag/best-chrome-extensions/",
-    "https://www.howtogeek.com/the-best-chrome-extensions/",
-]
+# Known-good targets for findSimilar, keyed by seed bucket. Each list is
+# pre-vetted listicles or resource directories that Exa's similarity
+# graph reliably expands into comparable articles. Buckets without a
+# specific entry fall back to ``_default``.
+KNOWN_GOOD_TARGETS: dict[str, list[str]] = {
+    "_default": [
+        "https://www.smartupworld.com/best-firefox-extensions-for-everyone/",
+        "https://www.designerdaily.com/web-designer-resources",
+        "https://www.makeuseof.com/tag/best-chrome-extensions/",
+        "https://www.howtogeek.com/the-best-chrome-extensions/",
+    ],
+    "E": [
+        "https://familytreemagazine.com/free-genealogy-websites/",
+        "https://blog.eogn.com/",
+        "https://www.familyhistorydaily.com/genealogy-help-and-how-to/",
+        "https://www.geneabloggers.com/",
+    ],
+    "F": [
+        "https://www.afb.org/aw/",
+        "https://webaim.org/articles/",
+        "https://accessibility.com/",
+        "https://www.perkins.org/resource/",
+    ],
+}
+
+
+def targets_for(bucket: str) -> list[str]:
+    return KNOWN_GOOD_TARGETS.get(bucket) or KNOWN_GOOD_TARGETS["_default"]
