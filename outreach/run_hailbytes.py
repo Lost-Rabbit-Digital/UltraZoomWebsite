@@ -5,7 +5,7 @@ Apollo-direct cold-email lane. Flow:
     plain-English seed (kind of security firm)
       → Claude translates to Apollo people-search filter
         (decision-maker titles + security-services keywords; cached 7d)
-      → Apollo /mixed_people/search preview (free; logs match count)
+      → Apollo /mixed_people/api_search preview (free; logs match count)
       → Apollo paged search to ``max_profiles``, keeping verified emails
       → optional verifier fallback (Hunter / NeverBounce / ZeroBounce)
       → Claude personalized opener anchored to SAT or ASM (rotates daily;
@@ -81,7 +81,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument(
         "--preview-only",
         action="store_true",
-        help="Hit Apollo /mixed_people/search at page 1 and log match counts; "
+        help="Hit Apollo /mixed_people/api_search at page 1 and log match counts; "
         "do not collect more pages.",
     )
     p.add_argument("--dry-run", action="store_true")
