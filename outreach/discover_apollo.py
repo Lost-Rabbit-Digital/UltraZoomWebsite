@@ -3,17 +3,20 @@
 Replaces the prior Wiza prospect-search/list flow. Apollo bundles the
 filter, search, and email reveal into a single endpoint:
 
-  POST /v1/mixed_people/search
-      Returns people matching the filter object. Each result carries
-      title, company, LinkedIn URL, and (when Apollo already has it on
-      file and the account plan allows) a verified work email. Filter
-      ``contact_email_status=["verified"]`` to skip rows we'd have to
-      pay extra to reveal — those rows aren't useful for cold outreach.
+  POST /v1/mixed_people/api_search
+      Documented "People API Search" endpoint. Returns people matching
+      the filter object — title, company, LinkedIn URL, and (when
+      Apollo already has it on file and the account plan allows) a
+      verified work email. Filter ``contact_email_status=["verified"]``
+      to skip rows we'd have to pay extra to reveal.
+
+      Note: ``/mixed_people/search`` (no ``api_`` prefix) is Apollo's
+      internal/master-key-only endpoint and returns 403
+      ``API_INACCESSIBLE`` for normal API keys. Always use the
+      ``api_search`` variant.
 
   POST /v1/people/match  (optional, not used by default)
-      Per-person enrichment that consumes credits. Worth wiring in
-      later for stragglers; the search endpoint already returns enough
-      verified emails for the volume targets here.
+      Per-person enrichment that consumes credits.
 
 Auth: ``x-api-key: <APOLLO_API_KEY>`` header.
 
@@ -24,7 +27,7 @@ Cache rules (file-backed, see cache.py):
     workflow_dispatch.
 
 API references:
-  https://docs.apollo.io/reference/people-search
+  https://docs.apollo.io/reference/people-api-search
   https://docs.apollo.io/reference/people-enrichment
 """
 
@@ -115,7 +118,7 @@ def search(
     page: int = 1,
     cache: JsonCache | None = None,
 ) -> dict[str, Any]:
-    """Run /mixed_people/search. Returns ``{"total": int, "people": [...]}``.
+    """Run /mixed_people/api_search. Returns ``{"total": int, "people": [...]}``.
     Each person dict carries the raw Apollo shape — pass through
     ``to_candidate`` for the pipeline shape.
     """
@@ -129,7 +132,7 @@ def search(
     body = dict(filters)
     body["per_page"] = max(1, min(100, per_page))
     body["page"] = max(1, page)
-    resp = _http("POST", "/mixed_people/search", api_key=api_key, body=body)
+    resp = _http("POST", "/mixed_people/api_search", api_key=api_key, body=body)
     pagination = resp.get("pagination") or {}
     out = {
         "total": int(pagination.get("total_entries") or 0),

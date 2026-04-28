@@ -504,7 +504,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument(
         "--preview-only",
         action="store_true",
-        help="Prospects mode: hit Apollo /mixed_people/search at page 1 and stop.",
+        help="Prospects mode: hit Apollo /mixed_people/api_search at page 1 and stop.",
     )
     p.add_argument(
         "--no-verify",

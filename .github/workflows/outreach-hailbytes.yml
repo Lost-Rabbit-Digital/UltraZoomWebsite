@@ -4,7 +4,7 @@ name: HailBytes outreach
 #
 #   plain-English seed (seeds_hb_mssp.txt — pen-test + MSSP focus)
 #     → Claude translates to Apollo people-search filter (cached 7d)
-#     → Apollo /mixed_people/search preview (free)
+#     → Apollo /mixed_people/api_search preview (free)
 #     → Apollo paged search → verified-email contacts
 #     → optional verifier fallback (Hunter / NeverBounce / ZeroBounce)
 #     → Claude opener anchored to SAT (https://hailbytes.com/sat) or
