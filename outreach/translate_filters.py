@@ -108,9 +108,16 @@ def _extract_json(text: str) -> str:
 
 
 def _sanitize(filters: dict[str, Any]) -> dict[str, Any]:
-    """Drop unknown keys, normalize enum-valued fields, and force the
-    ``contact_email_status`` floor of ``verified`` so we never spend on
-    rows whose emails Apollo couldn't confirm.
+    """Drop unknown keys, normalize enum-valued fields, and set a default
+    ``contact_email_status`` floor of ``["verified", "likely_to_engage"]``.
+
+    A pure ``["verified"]`` floor is too strict on Apollo accounts that
+    haven't paid to reveal many emails: the api_search endpoint then
+    intersects the filter with the (possibly tiny) set of contacts whose
+    verified email is already on file for the key, and most reasonable
+    persona filters return 0. ``likely_to_engage`` rows still come with
+    Apollo's ~85% deliverability score and the downstream Hunter /
+    NeverBounce / ZeroBounce verifier drops the bad ones before staging.
     """
     clean: dict[str, Any] = {}
     for key, value in filters.items():
@@ -125,7 +132,7 @@ def _sanitize(filters: dict[str, Any]) -> dict[str, Any]:
             if not value:
                 continue
         clean[key] = value
-    clean.setdefault("contact_email_status", ["verified"])
+    clean.setdefault("contact_email_status", ["verified", "likely_to_engage"])
     return clean
 
 

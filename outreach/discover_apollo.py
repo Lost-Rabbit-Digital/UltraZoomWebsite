@@ -144,10 +144,30 @@ def search(
 
 def preview(*, api_key: str, filters: dict[str, Any]) -> dict[str, Any]:
     """One-page sanity check used to size a niche before pulling more.
-    Returns ``{"total": int, "sample": [...]}`` (first 5 people).
+
+    Returns ``{"total": int, "sample": [...], "total_without_email_status":
+    int | None}``. When ``total`` is 0 and the filter pins
+    ``contact_email_status``, we re-run preview once with that key
+    stripped so the log can distinguish "niche too narrow" from "email
+    reveal floor too strict for this Apollo account". The diagnostic
+    count is ``None`` when the original preview already returned matches
+    or when ``contact_email_status`` wasn't set.
     """
     page = search(api_key=api_key, filters=filters, per_page=10, page=1)
-    return {"total": page["total"], "sample": page["people"][:5]}
+    total = page["total"]
+    diag: int | None = None
+    if total == 0 and "contact_email_status" in filters:
+        relaxed = {k: v for k, v in filters.items() if k != "contact_email_status"}
+        try:
+            diag_page = search(api_key=api_key, filters=relaxed, per_page=10, page=1)
+            diag = diag_page["total"]
+        except Exception:  # noqa: BLE001
+            diag = None
+    return {
+        "total": total,
+        "sample": page["people"][:5],
+        "total_without_email_status": diag,
+    }
 
 
 def collect(

@@ -13,7 +13,7 @@ The schema you may use (omit any field you don't need; do not invent fields):
   "person_locations": ["United States", "Canada"],
   "q_organization_keyword_tags": ["medical imaging", "radiology"],
   "organization_num_employees_ranges": ["11,50", "51,200", "201,500"],
-  "contact_email_status": ["verified"]
+  "contact_email_status": ["verified", "likely_to_engage"]
 }
 ```
 
@@ -24,7 +24,7 @@ Field rules:
 - `person_locations` only when the description names a country/region. Default: omit so we get global results.
 - `q_organization_keyword_tags` is a short list (1–4) of Apollo industry-style tags about the COMPANY the recipient works at. Examples: "insurance", "real estate", "medical imaging", "manufacturing quality assurance", "auction house", "genealogy".
 - `organization_num_employees_ranges` accepts ranges like "1,10", "11,50", "51,200", "201,500", "501,1000", "1001,5000". Include 2–4 ranges that match the kind of company described, biased toward 11–500 (small enough for a per-seat tool sale to land with one decision-maker).
-- ALWAYS include `"contact_email_status": ["verified"]` so we only get rows with already-revealed emails.
+- ALWAYS include `"contact_email_status": ["verified", "likely_to_engage"]` so Apollo's api_search returns rows whose email it can surface to our key. (Pure `["verified"]` is too strict on accounts that haven't paid to reveal many emails — the downstream verifier still drops bad addresses.)
 
 DESCRIPTION:
 {seed}

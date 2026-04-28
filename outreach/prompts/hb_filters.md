@@ -16,7 +16,7 @@ The schema you may use (omit any field you don't need; do not invent fields):
   "person_locations": ["United States", "Canada", "United Kingdom"],
   "q_organization_keyword_tags": ["penetration testing", "managed security service provider"],
   "organization_num_employees_ranges": ["11,50", "51,200", "201,500"],
-  "contact_email_status": ["verified"]
+  "contact_email_status": ["verified", "likely_to_engage"]
 }
 ```
 
@@ -27,7 +27,7 @@ Field rules:
 - `person_locations` only when the description names a country/region. If unspecified, default to ["United States", "Canada", "United Kingdom"].
 - `q_organization_keyword_tags` (1–4) describes the FIRM, not the recipient. Examples: "penetration testing", "managed security service provider", "managed detection and response", "red team", "offensive security", "attack surface management", "incident response". Use the description's concrete service/vertical cues.
 - `organization_num_employees_ranges` accepts ranges like "1,10", "11,50", "51,200", "201,500", "501,1000". Default for boutique pen-test/MSSP: ["11,50", "51,200", "201,500"]. Pure-solo-practitioner shops don't buy reseller deals; SMB-to-mid-market is the sweet spot.
-- ALWAYS include `"contact_email_status": ["verified"]` so we only get rows with already-revealed emails.
+- ALWAYS include `"contact_email_status": ["verified", "likely_to_engage"]` so Apollo's api_search returns rows whose email it can surface to our key. (Pure `["verified"]` is too strict on accounts that haven't paid to reveal many emails — the downstream verifier still drops bad addresses.)
 
 DESCRIPTION:
 {seed}
