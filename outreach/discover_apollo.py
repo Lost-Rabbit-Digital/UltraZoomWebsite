@@ -146,27 +146,43 @@ def preview(*, api_key: str, filters: dict[str, Any]) -> dict[str, Any]:
     """One-page sanity check used to size a niche before pulling more.
 
     Returns ``{"total": int, "sample": [...], "total_without_email_status":
-    int | None}``. When ``total`` is 0 and the filter pins
-    ``contact_email_status``, we re-run preview once with that key
-    stripped so the log can distinguish "niche too narrow" from "email
-    reveal floor too strict for this Apollo account". The diagnostic
-    count is ``None`` when the original preview already returned matches
-    or when ``contact_email_status`` wasn't set.
+    int | None, "per_filter_strip": dict[str, int]}``. When ``total`` is 0
+    we run a series of diagnostic queries, each stripping one filter key,
+    so the log identifies which dimension is over-constraining the search
+    (titles too specific, locations too narrow, keyword tags off-taxonomy,
+    etc.). ``total_without_email_status`` is the count when only the
+    ``contact_email_status`` floor is removed; ``per_filter_strip`` maps
+    each non-``contact_email_status`` key to the count when that key alone
+    is dropped (empty when the original preview already returned matches).
     """
     page = search(api_key=api_key, filters=filters, per_page=10, page=1)
     total = page["total"]
     diag: int | None = None
-    if total == 0 and "contact_email_status" in filters:
-        relaxed = {k: v for k, v in filters.items() if k != "contact_email_status"}
-        try:
-            diag_page = search(api_key=api_key, filters=relaxed, per_page=10, page=1)
-            diag = diag_page["total"]
-        except Exception:  # noqa: BLE001
-            diag = None
+    per_filter: dict[str, int] = {}
+    if total == 0:
+        base = {k: v for k, v in filters.items() if k != "contact_email_status"}
+        if "contact_email_status" in filters:
+            try:
+                diag = search(api_key=api_key, filters=base, per_page=10, page=1)["total"]
+            except Exception:  # noqa: BLE001
+                diag = None
+        # Email floor wasn't the bottleneck — pinpoint which other filter
+        # is over-constraining by dropping one key at a time on the
+        # email-status-free baseline.
+        if diag in (None, 0):
+            for key in list(base):
+                stripped = {k: v for k, v in base.items() if k != key}
+                try:
+                    per_filter[key] = search(
+                        api_key=api_key, filters=stripped, per_page=10, page=1
+                    )["total"]
+                except Exception:  # noqa: BLE001
+                    continue
     return {
         "total": total,
         "sample": page["people"][:5],
         "total_without_email_status": diag,
+        "per_filter_strip": per_filter,
     }
 
 
