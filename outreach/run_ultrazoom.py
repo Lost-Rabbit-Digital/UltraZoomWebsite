@@ -344,6 +344,7 @@ def _run_prospects(cfg: Config, args: argparse.Namespace) -> int:
                 continue
             previews[seed] = pv["total"]
             diag = pv.get("total_without_email_status")
+            per_filter = pv.get("per_filter_strip") or {}
             if pv["total"] == 0 and diag is not None:
                 log(
                     f"  preview [{seed[:50]}]: 0 matches "
@@ -351,6 +352,12 @@ def _run_prospects(cfg: Config, args: argparse.Namespace) -> int:
                 )
             else:
                 log(f"  preview [{seed[:50]}]: {pv['total']} matches")
+            if per_filter:
+                strip_summary = ", ".join(
+                    f"-{k}={v}" for k, v in sorted(per_filter.items(), key=lambda kv: -kv[1])
+                )
+                log(f"    bottleneck strip [{seed[:50]}]: {strip_summary}")
+                log(f"    full filter [{seed[:50]}]: {json.dumps(filters)}")
 
     if args.preview_only or cfg.dry_run:
         total = sum(previews.values())
