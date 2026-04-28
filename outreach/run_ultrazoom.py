@@ -343,7 +343,14 @@ def _run_prospects(cfg: Config, args: argparse.Namespace) -> int:
                 log(f"  preview error on {seed[:50]}: {e}")
                 continue
             previews[seed] = pv["total"]
-            log(f"  preview [{seed[:50]}]: {pv['total']} matches")
+            diag = pv.get("total_without_email_status")
+            if pv["total"] == 0 and diag is not None:
+                log(
+                    f"  preview [{seed[:50]}]: 0 matches "
+                    f"(without contact_email_status filter: {diag})"
+                )
+            else:
+                log(f"  preview [{seed[:50]}]: {pv['total']} matches")
 
     if args.preview_only or cfg.dry_run:
         total = sum(previews.values())
