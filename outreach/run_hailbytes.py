@@ -2,15 +2,23 @@
 
 Apollo-direct cold-email lane. Flow:
 
-    plain-English seed (kind of security firm)
-      → Claude translates to Apollo people-search filter
-        (decision-maker titles + security-services keywords; cached 7d)
-      → Apollo /mixed_people/api_search preview (free; logs match count)
+    titles list (seeds_hb_titles.txt — decision-maker titles at MSSP /
+      pen-test / offensive-security firms; signers, not ICs)
+      → single Apollo /mixed_people/api_search filter
+        {"person_titles": [<titles>],
+         "contact_email_status": ["verified", "likely_to_engage"]}
+      → preview (free; logs match count + per-filter strip diagnostic
+        when 0)
       → Apollo paged search to ``max_profiles``, keeping verified emails
       → optional verifier fallback (Hunter / NeverBounce / ZeroBounce)
       → Claude personalized opener anchored to SAT or ASM (rotates daily;
         prompt links the recipient to hailbytes.com/sat or hailbytes.com/asm)
-      → append to "HailBytes" tab of the source Sheet
+      → append to "HailBytes" tab of the source Sheet (MailMeteor reads
+        from there to schedule sends inside Gmail)
+
+No per-seed loop and no LLM filter translation: a single batched
+people-search keeps the API surface honest and stops the per-seed
+0-match cascade we hit when the LLM-generated filters were too narrow.
 
 Dedupe is per-email against the HailBytes tab — domains aren't reused
 across products, and the same firm could legitimately receive separate
@@ -33,7 +41,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from . import discover_apollo, translate_filters
+from . import discover_apollo
 from .config import (
     DEFAULT_MODEL,
     OUTREACH_DIR,
@@ -47,10 +55,9 @@ from .enrich_verify import verify as email_verify
 from .stage_sheet import stage as stage_to_sheet
 from .util import log, now_iso, today_iso
 
-SEEDS_PATH = OUTREACH_DIR / "seeds_hb_mssp.txt"
+TITLES_PATH = OUTREACH_DIR / "seeds_hb_titles.txt"
 PROMPT_PATH = PROMPTS_DIR / "hailbytes_opener.md"
-DEFAULT_LIMIT_SEEDS = 5
-DEFAULT_MAX_PROFILES = 25
+DEFAULT_MAX_PROFILES = 100
 
 PRODUCT_URLS = {
     "sat": "https://hailbytes.com/sat",
@@ -64,13 +71,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "--max-profiles",
         type=int,
         default=DEFAULT_MAX_PROFILES,
-        help="Max contacts pulled per seed from Apollo.",
-    )
-    p.add_argument(
-        "--limit-seeds",
-        type=int,
-        default=DEFAULT_LIMIT_SEEDS,
-        help="How many seeds to run this invocation (rotated daily).",
+        help="Max contacts pulled from Apollo for the title batch.",
     )
     p.add_argument(
         "--product",
@@ -94,19 +95,14 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     return p.parse_args(argv)
 
 
-def _load_seeds(path: Path, *, limit: int) -> list[str]:
-    seeds: list[str] = []
+def _load_titles(path: Path) -> list[str]:
+    titles: list[str] = []
     for raw in path.read_text().splitlines():
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
-        seeds.append(line)
-    import hashlib
-    from datetime import datetime
-
-    day = datetime.utcnow().date().toordinal()
-    seeds.sort(key=lambda s: hashlib.md5(f"{day}|{s}".encode()).hexdigest())
-    return seeds[:limit]
+        titles.append(line)
+    return titles
 
 
 def _render_prompt(template: str, **fields: str) -> str:
@@ -179,89 +175,74 @@ def main(argv: list[str] | None = None) -> int:
             return 1
 
     product = _pick_product(args.product)
-    seeds = _load_seeds(SEEDS_PATH, limit=args.limit_seeds)
+    titles = _load_titles(TITLES_PATH)
+    if not titles:
+        log(f"error: no titles loaded from {TITLES_PATH}")
+        return 1
+
+    filters: dict[str, Any] = {
+        "person_titles": titles,
+        "contact_email_status": ["verified", "likely_to_engage"],
+    }
     log(
         f"== hailbytes outreach @ {today_iso()}  product={product}  "
-        f"product_url={PRODUCT_URLS[product]}  seeds={len(seeds)}  "
+        f"product_url={PRODUCT_URLS[product]}  titles={len(titles)}  "
         f"max_profiles={args.max_profiles}  preview_only={args.preview_only}  "
         f"dry_run={args.dry_run} =="
     )
+    log(f"  filter: {json.dumps(filters)}")
 
-    # Step 1: translate seeds to Apollo filter objects (cached 7d).
-    seed_filters: list[tuple[str, dict[str, Any]]] = []
-    for seed in seeds:
-        if cfg.dry_run:
-            log(f"  [dry] translate: {seed}")
-            seed_filters.append((seed, {}))
-            continue
-        filters = translate_filters.translate(
-            lane="hb",
-            seed=seed,
-            api_key=cfg.anthropic_key or "",
-            model=args.model,
-        )
-        if not filters:
-            log(f"  ! filter translation failed for: {seed[:70]}")
-            continue
-        log(f"  filter [{seed[:50]}]: {json.dumps(filters)[:160]}")
-        seed_filters.append((seed, filters))
-
-    # Step 2: preview (free).
-    previews: dict[str, int] = {}
-    if not cfg.dry_run:
-        for seed, filters in seed_filters:
-            try:
-                pv = discover_apollo.preview(api_key=cfg.apollo_key or "", filters=filters)
-            except Exception as e:  # noqa: BLE001
-                log(f"  preview error on {seed[:50]}: {e}")
-                continue
-            previews[seed] = pv["total"]
-            diag = pv.get("total_without_email_status")
-            per_filter = pv.get("per_filter_strip") or {}
-            if pv["total"] == 0 and diag is not None:
-                log(
-                    f"  preview [{seed[:50]}]: 0 matches "
-                    f"(without contact_email_status filter: {diag})"
-                )
-            else:
-                log(f"  preview [{seed[:50]}]: {pv['total']} matches")
-            if per_filter:
-                strip_summary = ", ".join(
-                    f"-{k}={v}" for k, v in sorted(per_filter.items(), key=lambda kv: -kv[1])
-                )
-                log(f"    bottleneck strip [{seed[:50]}]: {strip_summary}")
-                log(f"    full filter [{seed[:50]}]: {json.dumps(filters)}")
-
-    if args.preview_only or cfg.dry_run:
-        total = sum(previews.values())
-        log(f"\npreview totals: {total} matches across {len(previews)} seeds")
+    if cfg.dry_run:
+        log("[dry] skipping Apollo + verify + personalize + stage")
         return 0
 
-    # Step 3: collect contacts per seed.
+    # Step 1: preview (free).
+    try:
+        pv = discover_apollo.preview(api_key=cfg.apollo_key or "", filters=filters)
+    except Exception as e:  # noqa: BLE001
+        log(f"  preview error: {e}")
+        return 1
+    total = pv["total"]
+    diag = pv.get("total_without_email_status")
+    per_filter = pv.get("per_filter_strip") or {}
+    if total == 0 and diag is not None:
+        log(f"  preview: 0 matches (without contact_email_status filter: {diag})")
+    else:
+        log(f"  preview: {total} matches")
+    if per_filter:
+        strip_summary = ", ".join(
+            f"-{k}={v}" for k, v in sorted(per_filter.items(), key=lambda kv: -kv[1])
+        )
+        log(f"    bottleneck strip: {strip_summary}")
+
+    if args.preview_only:
+        return 0
+    if total == 0:
+        log("  aborting: 0 preview matches, nothing to collect")
+        return 0
+
+    # Step 2: collect contacts.
+    try:
+        people = discover_apollo.collect(
+            api_key=cfg.apollo_key or "",
+            filters=filters,
+            max_results=args.max_profiles,
+        )
+    except Exception as e:  # noqa: BLE001
+        log(f"  collect error: {e}")
+        return 1
+    log(f"  collected {len(people)} from Apollo")
+
     raw_contacts: list[dict[str, Any]] = []
-    for seed, filters in seed_filters:
-        if previews.get(seed, 0) == 0:
-            log(f"  skipping (0 preview matches): {seed[:60]}")
-            continue
-        try:
-            people = discover_apollo.collect(
-                api_key=cfg.apollo_key or "",
-                filters=filters,
-                max_results=args.max_profiles,
-            )
-        except Exception as e:  # noqa: BLE001
-            log(f"  collect error on {seed[:50]}: {e}")
-            continue
-        log(f"  collected {len(people)} for {seed[:50]}")
-        for p in people:
-            cand = discover_apollo.to_candidate(p, bucket="HB", source=f"apollo-{product}")
-            cand["seed_used"] = seed
-            cand["discovered_at"] = now_iso()
-            raw_contacts.append(cand)
+    for p in people:
+        cand = discover_apollo.to_candidate(p, bucket="HB", source=f"apollo-{product}")
+        cand["seed_used"] = cand.get("editor_title", "")
+        cand["discovered_at"] = now_iso()
+        raw_contacts.append(cand)
 
-    log(f"\ndiscovery: {len(raw_contacts)} contacts across {len(seed_filters)} seeds")
+    log(f"\ndiscovery: {len(raw_contacts)} contacts")
 
-    # Step 4: optional verify, then personalize.
+    # Step 3: optional verify, then personalize.
     enriched: list[dict[str, Any]] = []
     dropped = {"no_email": 0, "bad_email": 0, "manual_review": 0, "personalization": 0}
     for cand in raw_contacts:

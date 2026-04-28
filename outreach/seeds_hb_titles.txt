@@ -1,0 +1,27 @@
+# HailBytes seed titles — decision-makers at MSSP / pen-test / offensive-security firms.
+#
+# Used by outreach/run_hailbytes.py. Each non-blank, non-comment line becomes
+# an entry in a single Apollo people-search `person_titles` array — no
+# per-title loop, no LLM filter translation.
+#
+# Bias toward titles that can sign a trial or assign a contract: founders,
+# partners, heads, directors, C-suite. Skip ICs (Penetration Tester,
+# Security Engineer) — they aren't buyers for SAT/ASM resale or self-host
+# trials.
+
+CEO
+Founder
+Co-Founder
+Managing Partner
+CTO
+Chief Technology Officer
+Chief Information Security Officer
+CISO
+Director of Penetration Testing
+Director of Offensive Security
+Head of Offensive Security
+VP of MSSP Services
+VP of Security Services
+Director of Managed Security
+Director of Cybersecurity
+Head of Cybersecurity Services
