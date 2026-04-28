@@ -2,21 +2,23 @@ name: HailBytes outreach
 
 # Consolidated HailBytes (SAT + ASM) cold-email pipeline. Apollo-direct:
 #
-#   plain-English seed (seeds_hb_mssp.txt — pen-test + MSSP focus)
-#     → Claude translates to Apollo people-search filter (cached 7d)
-#     → Apollo /mixed_people/api_search preview (free)
+#   titles list (seeds_hb_titles.txt — decision-maker titles at MSSP /
+#     pen-test / offensive-security firms)
+#     → single Apollo /mixed_people/api_search filter (titles + email
+#       status; no LLM filter translation)
+#     → preview (free; logs match count + per-filter strip diagnostic)
 #     → Apollo paged search → verified-email contacts
 #     → optional verifier fallback (Hunter / NeverBounce / ZeroBounce)
 #     → Claude opener anchored to SAT (https://hailbytes.com/sat) or
 #       ASM (https://hailbytes.com/asm); rotates daily by default
-#     → append to "HailBytes" tab of the source Sheet
+#     → append to "HailBytes" tab of the source Sheet (MailMeteor reads
+#       from there to schedule sends inside Gmail)
 #
 # No cron — dispatch only. Re-enable a schedule once steady-state quality
 # is verified.
 #
-# Defaults are tuned for scale-up runs:
-#   limit_seeds=5  max_profiles=25  ⇒ ~125 contacts/run.
-# Drop both back to small numbers for a smoke test on a new template.
+# Default max_profiles=100 for a single batched search. Drop to a small
+# number for a smoke test on a new template.
 #
 # Required GitHub Secrets:
 #   APOLLO_API_KEY                 (people search + email reveal)
@@ -37,13 +39,9 @@ on:
   workflow_dispatch:
     inputs:
       max_profiles:
-        description: 'Max contacts pulled from Apollo per seed'
+        description: 'Max contacts pulled from Apollo for the title batch'
         required: false
-        default: '25'
-      limit_seeds:
-        description: 'Seeds to run from seeds_hb_mssp.txt'
-        required: false
-        default: '5'
+        default: '100'
       product:
         description: 'Which HailBytes product the opener anchors'
         required: false
@@ -139,8 +137,7 @@ jobs:
         run: |
           set -euo pipefail
           ARGS=(
-            --max-profiles "${{ inputs.max_profiles || '25' }}"
-            --limit-seeds "${{ inputs.limit_seeds || '5' }}"
+            --max-profiles "${{ inputs.max_profiles || '100' }}"
             --product "${{ inputs.product || 'rotate' }}"
             --model "${{ inputs.model || 'haiku' }}"
           )
