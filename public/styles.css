@@ -2228,3 +2228,69 @@ kbd {
     }
 }
 
+/* ── Press Page ───────────────────────────────────── */
+
+.press-release {
+    max-width: 760px;
+    margin: 0 auto;
+    text-align: left;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 2rem 2.25rem;
+}
+
+.press-meta {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.press-headline {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem;
+}
+
+.press-subhead {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+}
+
+.press-release p {
+    text-align: left;
+    margin-bottom: 1rem;
+}
+
+.press-quote {
+    border-left: 3px solid var(--brand);
+    padding: 0.5rem 1rem;
+    margin: 1.25rem 0;
+    color: var(--text-primary);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.press-quote cite {
+    display: block;
+    margin-top: 0.5rem;
+    font-style: normal;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 640px) {
+    .press-release {
+        padding: 1.5rem 1.25rem;
+    }
+    .press-headline {
+        font-size: 1.25rem;
+    }
+}
+
