@@ -27,7 +27,7 @@ public/
 wrangler.jsonc         Cloudflare Workers config (static assets from dist/)
 astro.config.mjs       Astro configuration
 outreach/                Cold-email pipeline (Python). See outreach/README.md.
-  run_ultrazoom.py       UZ pipeline (--campaign realtors|press)
+  run_ultrazoom.py       UZ pipeline (--campaign realtors)
   inbox/                 Apollo CSV drop folders, one per campaign
   campaigns/             Campaign briefs (strategy + Apollo filters)
   prompts/               Per-touch reference templates for Claude

@@ -175,46 +175,9 @@ REALTORS = CampaignConfig(
 )
 
 
-PRESS = CampaignConfig(
-    name="ultrazoom-press",
-    sender_email="boden@lostrabbitdigital.com",
-    sheet_id_env="GOOGLE_SHEET_ID_UZ_PRESS",
-    sheet_tab_t1="UZ_Press_T1",
-    sheet_tab_t2="UZ_Press_T2",
-    prompt_t1=PROMPTS_DIR / "ultrazoom_press_touch1.md",
-    prompt_t2=PROMPTS_DIR / "ultrazoom_press_touch2.md",
-    extra_columns_t1=("specific_recent_topic",),
-    required_tokens_t1=("{{specific_recent_topic}}", "{{press_kit_link}}"),
-    required_tokens_t2=("{{license_signup_link}}",),
-    landing_link_template=(
-        "https://ultrazoom.com/press"
-        "?utm_source=email&utm_campaign=press_w{week}"
-        "&utm_content=touch{touch}"
-    ),
-    coupon_code="PRESS-FREE-12",
-    persona_summary=(
-        "Tech journalists and niche-blog operators in productivity, "
-        "real-estate-tech, and browser-tools verticals at outlets like "
-        "Lifehacker, MakeUseOf, How-To Geek, TechRadar, Chrome Unboxed, "
-        "Beebom, Ghacks, plus YouTube reviewers covering productivity "
-        "extensions. Editor / Senior Editor / Staff Writer / Contributor / "
-        "Reviewer / Founder titles."
-    ),
-    voice_summary=(
-        "Founder-pitching-press voice. Specific, concise, respects the "
-        "reader's time. References a recent piece by them via the literal "
-        "merge tag {{specific_recent_topic}} — Boden fills the actual "
-        "phrase before MailMeteor send, so the AI must leave the tag "
-        "intact and not invent any topic. No em-dashes. No sycophancy."
-    ),
-)
-
-
 CAMPAIGNS: dict[str, CampaignConfig] = {
     REALTORS.name: REALTORS,
     "realtors": REALTORS,  # short alias for the CLI
-    PRESS.name: PRESS,
-    "press": PRESS,
 }
 
 

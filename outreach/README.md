@@ -7,7 +7,9 @@ campaign-specific Google Sheet. MailMeteor imports each tab to send the
 two touches as separate campaigns spaced ~5 days apart.
 
 The HailBytes pipelines (ASM and SAT) live in `hailbytes-static`. This
-repo only owns the Ultra Zoom side: Realtors and Press.
+repo only owns the Ultra Zoom Realtors campaign. (UZ Press cold email
+was retired in favor of $75-tier press releases — see
+`docs/press/ultrazoom-launch-press-release.md`.)
 
 ```
                   ┌──────────────────┐
@@ -56,23 +58,19 @@ outreach/
   ingest_apollo_csv.py             read Apollo CSV → candidate dicts
   enrich_personalize.py            Claude T1+T2 drafting with prompt caching
   stage_sheet.py                   append to per-tab Sheet schema
-  run_ultrazoom.py                 CLI: --campaign realtors | press
+  run_ultrazoom.py                 CLI: --campaign realtors
 
   excluded_domains.txt             hard-block list
 
   inbox/                           Apollo CSVs land here, by campaign
     ultrazoom-realtors/
-    ultrazoom-press/
 
   prompts/                         per-touch reference templates
     ultrazoom_realtors_touch1.md
     ultrazoom_realtors_touch2.md
-    ultrazoom_press_touch1.md
-    ultrazoom_press_touch2.md
 
   campaigns/                       campaign briefs (strategy + Apollo filters)
     ultrazoom-realtors-q2-2026.md
-    ultrazoom-press-q2-2026.md
 
 .github/workflows/
   outreach-ultrazoom.yml           workflow_dispatch + push:outreach/inbox/**
@@ -87,9 +85,8 @@ pip install -r outreach/requirements.txt
 Required env vars (or GitHub Secrets):
 
 ```
-ANTHROPIC_API_KEY                 personalization (both campaigns)
-GOOGLE_SHEET_ID_UZ_REALTORS       campaign-specific Sheets target
-GOOGLE_SHEET_ID_UZ_PRESS          campaign-specific Sheets target
+ANTHROPIC_API_KEY                 personalization
+GOOGLE_SHEET_ID_UZ_REALTORS       Sheets target for the Realtors campaign
 ```
 
 Email verification is intentionally not in this pipeline. Apollo's saved
@@ -111,9 +108,6 @@ and share the target sheet with the SA's email as Editor. See
 ```bash
 # Realtors campaign
 python -m outreach.run_ultrazoom --campaign realtors
-
-# Press campaign
-python -m outreach.run_ultrazoom --campaign press
 
 # Smoke test against a sample CSV without spending API credit
 python -m outreach.run_ultrazoom --campaign realtors --dry-run
@@ -142,7 +136,7 @@ touches them.
 | `last_name` | Apollo | reference |
 | `editor_email` | Apollo | **To: address** |
 | `editor_title` | Apollo | reference |
-| `company` | Apollo | `{{company}}` / `{{publication}}` (press) |
+| `company` | Apollo | `{{company}}` |
 | `domain` | parsed from Apollo Website | reference |
 | `linkedin_url` | Apollo | reference |
 | `city` | Apollo | reference |
@@ -156,8 +150,6 @@ touches them.
 | `enriched_at` | pipeline | reference |
 | `notes` | pipeline (campaign + touch + sender) | reference |
 
-Press T1 also has `specific_recent_topic` (empty when staged; Boden
-fills before MailMeteor send).
 
 ## MailMeteor send settings
 
@@ -185,8 +177,6 @@ The Claude prompt enforces and the validator re-checks:
 - Required merge tags must appear in the body verbatim:
   - Realtors T1: `{{landing_page_link}}`, `REALTOR30`
   - Realtors T2: `REALTOR30`
-  - Press T1: `{{specific_recent_topic}}`, `{{press_kit_link}}`
-  - Press T2: `{{license_signup_link}}`
 
 ## Audit checklist
 

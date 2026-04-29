@@ -4,20 +4,20 @@
 **Target launch:** This week
 **Owner:** David (strategy, escalations) / Boden (sending, replies)
 **Last updated:** April 2026
-**Sister campaign:** [`ultrazoom-press-q2-2026.md`](./ultrazoom-press-q2-2026.md) — runs from the same `boden@lostrabbitdigital.com` mailbox on alternating send days.
+**Companion press strategy:** [`docs/press/ultrazoom-launch-press-release.md`](../../docs/press/ultrazoom-launch-press-release.md) — $75-tier syndicated release replaces the cold-press cold-email motion that earlier drafts of this brief paired with the realtor track.
 
 ---
 
 ## TL;DR
 
-60-day cold-email campaign to U.S. real estate agents at small (1–50 employee) brokerages, sending **up to 15 emails/day total** (mix of new Touch 1 sends and queued Touch 2 follow-ups) from `boden@lostrabbitdigital.com` via MailMeteor. Boden's mailbox alternates with the Ultra Zoom Press campaign on non-realtor send days; the 15/day cap applies regardless of which campaign is running. Drives traffic to `/realtors`. Attribution via Stripe coupon `REALTOR30`. Net new monthly cost: ~$30.
+60-day cold-email campaign to U.S. real estate agents at small (1–50 employee) brokerages, sending **up to 15 emails/day total** (mix of new Touch 1 sends and queued Touch 2 follow-ups) from `boden@lostrabbitdigital.com` via MailMeteor. Drives traffic to `/realtors`. Attribution via Stripe coupon `REALTOR30`. Net new monthly cost: ~$30.
 
-**Steady-state pattern (week 2 onward):** ~8 new Touch 1 sends + ~7 Touch 2 follow-ups per active realtor day.
+**Steady-state pattern (week 2 onward):** ~8 new Touch 1 sends + ~7 Touch 2 follow-ups per active send day.
 
 **Total prospect volume over 60 days:**
-- ~200 unique realtors contacted (Touch 1 sends)
-- ~400 total emails (with Touch 2 follow-ups for each)
-- Active realtor send days: ~25 (assumes M/W/F realtor cadence; adjust to Boden's calendar)
+- ~300 unique realtors contacted (Touch 1 sends)
+- ~600 total emails (with Touch 2 follow-ups for each)
+- Active send days: ~40 (assumes weekday cadence with modest vacation/conference allowance)
 
 ---
 
@@ -29,8 +29,8 @@ Must complete before first send. Ordered by criticality.
 - [ ] **Gmail Postmaster Tools** set up at [postmaster.google.com](http://postmaster.google.com) for `lostrabbitdigital.com`. DNS verification record added.
 - [ ] **Stripe coupon code** `REALTOR30` created (see Section 4)
 - [ ] **`/realtors` landing page** live with UTM-aware checkout link and coupon prefill
-- [ ] **MailMeteor account** connected to `boden@lostrabbitdigital.com` with daily cap set to 15 (applies across realtor and press send days)
-- [ ] **Boden sync** — 30-min walkthrough of reply scenarios, escalation path, and the realtor/press alternation calendar
+- [ ] **MailMeteor account** connected to `boden@lostrabbitdigital.com` with daily cap set to 15
+- [ ] **Boden sync** — 30-min walkthrough of reply scenarios and escalation path
 - [ ] **Apollo realtor list exported** for week 1 — see Section 6
 - [ ] **Suppression list** seeded with HailBytes existing-contact exclusions and competitor list
 - [ ] **Google Sheet** for UZ Realtors created and shared (Editor) with the leads-writer service-principal email
@@ -153,9 +153,8 @@ MLS sites require active agent credentials. Options ranked by speed:
 
 2-touch sequence. Both touches have their subject and body drafted per-lead by Claude in the GitHub Action, then staged into separate sheet tabs that MailMeteor imports as two campaigns (Touch 1 first; Touch 2 imported five send-days later). The reference templates below define the **voice, structure, and required elements** the AI prompt enforces — they are not literal MailMeteor templates.
 
-**Send window:** realtor send days (default M/W/F), 8am–6pm recipient local time, randomized
-**Daily volume on a realtor day:** ≤15 total, mixing new Touch 1 sends with Touch 2 follow-ups from leads sent five send-days prior. Steady-state mix ~8 T1 + ~7 T2.
-**Mailbox sharing:** boden@lostrabbitdigital.com runs the Press campaign on non-realtor send days. Never run both campaigns on the same calendar day.
+**Send window:** weekdays, 8am–6pm recipient local time, randomized
+**Daily volume:** ≤15 total per send day, mixing new Touch 1 sends with Touch 2 follow-ups from leads sent five send-days prior. Steady-state mix ~8 T1 + ~7 T2.
 
 ### Per-lead AI-drafted fields (per touch)
 
@@ -236,7 +235,7 @@ Touch 2 deliberately does not repeat the demo link — recipients who care saw i
 
 ## 4. Stripe Coupon Setup
 
-**Purpose:** Track campaign attribution and offer a launch incentive. The realtor track only needs one coupon; press / partner codes belong to the [press brief](./ultrazoom-press-q2-2026.md).
+**Purpose:** Track campaign attribution and offer a launch incentive. The realtor track only needs one coupon.
 
 | Code | Discount | Audience | Duration | Redemption Limit |
 |---|---|---|---|---|
@@ -257,10 +256,10 @@ Touch 2 deliberately does not repeat the demo link — recipients who care saw i
 
 ### Stack
 
-- **Sender:** `boden@lostrabbitdigital.com` (only — same mailbox as Press, alternating send days)
+- **Sender:** `boden@lostrabbitdigital.com`
 - **Sending tool:** MailMeteor (Pro tier, ~$30/mo)
-- **Daily cap in MailMeteor:** 15 hard limit, applies across realtor and press campaigns
-- **Send schedule:** realtor send days only (default M/W/F), randomized between 8am-6pm recipient local time
+- **Daily cap in MailMeteor:** 15 hard limit
+- **Send schedule:** weekdays, randomized between 8am-6pm recipient local time
 
 ### Why this setup
 
@@ -472,14 +471,13 @@ Tactical items not covered above. Knock these out this week.
 - [ ] Suppression list seeded with HailBytes exclusions and competitor list
 - [ ] Google Sheet for UZ Realtors created, tabs `UZ_Realtors_T1` and `UZ_Realtors_T2` created (header rows can be left empty; the pipeline writes them on first append), shared with the leads-writer service-principal email
 - [ ] `GOOGLE_SHEET_ID_UZ_REALTORS` repo secret added to UltraZoomWebsite
-- [ ] Realtor/Press send-day rotation agreed with Boden (default M/W/F realtor, T/Th press)
 
 ---
 
 ## 10. Cost Summary
 
 **Monthly recurring (net new):**
-- MailMeteor Pro: ~$30/mo (shared with Press campaign)
+- MailMeteor Pro: ~$30/mo
 - **Total: ~$30/mo**
 
 **Already paid for:**
@@ -500,9 +498,9 @@ Tactical items not covered above. Knock these out this week.
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Domain reputation hit on `lostrabbitdigital.com` affects other Lost Rabbit Digital comms (Press campaign, client work, internal mail) | Medium | High | Postmaster Tools weekly, hard 15/day cap shared across campaigns, immediate pause triggers |
+| Domain reputation hit on `lostrabbitdigital.com` affects other Lost Rabbit Digital comms (client work, internal mail) | Medium | High | Postmaster Tools weekly, hard 15/day cap, immediate pause triggers |
 | Ultra Zoom breaks on a major MLS, causing refund requests | Medium | High | Compatibility testing pre-launch, Tier 1 sites must pass |
-| Boden overwhelmed by reply volume | Low (at 15/day, alternating) | Medium | Reply playbook + escalation path documented |
+| Boden overwhelmed by reply volume | Low (at 15/day) | Medium | Reply playbook + escalation path documented |
 | Cold email considered SPAM by recipient → complaint | Low-Medium | Medium-High | List hygiene, suppression list discipline, AI validation of copy quality |
 | Apollo data quality (wrong emails, role changes) | Medium | Low | Email verification ON in Apollo at export time, tolerance of 5% bounce |
 | Brokerage inquiries arrive without enterprise sales process | Medium | Low (good problem) | Calendly link + David handles escalation |
@@ -520,4 +518,4 @@ Tactical items not covered above. Knock these out this week.
 - UZ Realtors Google Sheet: [link once created]
 - Suppression list: `outreach/suppression.csv` in this repo
 - Brand assets: `/public/press/` in this repo
-- Sister campaign: [`ultrazoom-press-q2-2026.md`](./ultrazoom-press-q2-2026.md)
+- Companion press strategy: [`docs/press/ultrazoom-launch-press-release.md`](../../docs/press/ultrazoom-launch-press-release.md)

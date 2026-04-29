@@ -10,9 +10,6 @@ Usage:
     # Realtors campaign (boden@lostrabbitdigital.com sender)
     python -m outreach.run_ultrazoom --campaign realtors
 
-    # Press campaign (same sender, alternating send days)
-    python -m outreach.run_ultrazoom --campaign press
-
     # Smoke-test against a sample CSV without spending API credit
     python -m outreach.run_ultrazoom --campaign realtors --dry-run
 
@@ -23,8 +20,7 @@ Usage:
 
 Required env vars (live runs):
     ANTHROPIC_API_KEY                  personalization
-    GOOGLE_SHEET_ID_UZ_REALTORS       (campaign-specific) Sheets target
-    GOOGLE_SHEET_ID_UZ_PRESS          (campaign-specific) Sheets target
+    GOOGLE_SHEET_ID_UZ_REALTORS       Sheets target for the Realtors campaign
     Google Sheets auth via ADC / Workload Identity Federation in CI
 
 Email verification is intentionally not in this pipeline. Apollo's saved
@@ -55,7 +51,7 @@ from .util import log, now_iso, today_iso
 
 
 def _campaign_choices() -> list[str]:
-    return sorted({c.name for c in CAMPAIGNS.values()} | {"realtors", "press"})
+    return sorted({c.name for c in CAMPAIGNS.values()} | {"realtors"})
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
@@ -175,29 +171,20 @@ def _process_lead(
 
     t1_row = dict(lead)
     t1_row["personalized_subject"] = t1["subject"]
-    # Substitute ``{{landing_page_link}}`` (realtor) and
-    # ``{{press_kit_link}}`` (press) at stage time. The AI is told to
-    # leave the literal merge tags in the body for validation; the
-    # runner resolves them before the row hits the Sheet so MailMeteor
-    # ships a real URL. Other merge tags (``{{specific_recent_topic}}``
-    # for press T1, ``{{license_signup_link}}`` for press T2) are
-    # intentionally left as merge tags — Boden fills the topic
-    # manually, and MailMeteor substitutes the license link from a
-    # template-side variable.
-    t1_row["personalized_body"] = (
-        t1["body"]
-        .replace("{{landing_page_link}}", landing_t1)
-        .replace("{{press_kit_link}}", landing_t1)
+    # Substitute ``{{landing_page_link}}`` at stage time. The AI is told
+    # to leave the literal merge tag in the body for validation; the
+    # runner resolves it before the row hits the Sheet so MailMeteor
+    # ships a real URL.
+    t1_row["personalized_body"] = t1["body"].replace(
+        "{{landing_page_link}}", landing_t1
     )
     t1_row["enriched_at"] = enriched_at
     t1_row["notes"] = f"{campaign.name} | t1 | sender={campaign.sender_email}"
 
     t2_row = dict(lead)
     t2_row["personalized_subject"] = t2["subject"]
-    t2_row["personalized_body"] = (
-        t2["body"]
-        .replace("{{landing_page_link}}", landing_t2)
-        .replace("{{press_kit_link}}", landing_t2)
+    t2_row["personalized_body"] = t2["body"].replace(
+        "{{landing_page_link}}", landing_t2
     )
     t2_row["enriched_at"] = enriched_at
     t2_row["notes"] = f"{campaign.name} | t2 | sender={campaign.sender_email}"

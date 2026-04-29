@@ -1,18 +1,20 @@
 name: Ultra Zoom outreach
 
-# Cold-email pipeline for both Ultra Zoom campaigns: Realtors and Press.
-# One workflow handles both campaigns. Triggered by:
+# Cold-email pipeline for the Ultra Zoom Realtors campaign. Triggered by:
 #
-#   workflow_dispatch  Operator picks campaign explicitly (good for ad-hoc
-#                      runs and dry-run testing on feature branches).
-#   push to main       Auto-detects which campaign's inbox folder changed
-#                      and runs that one. If both folders changed in the
-#                      same commit, both campaigns run sequentially.
+#   workflow_dispatch  Operator runs ad-hoc (good for dry-run testing on
+#                      feature branches).
+#   push to main       Triggers automatically when a new Apollo CSV lands
+#                      under outreach/inbox/ultrazoom-realtors/.
 #
-# The pipeline reads the newest *.csv in outreach/inbox/<campaign>/, asks
-# Claude to draft a personalized Touch 1 + Touch 2 per row, and appends
-# the results to two tabs of the campaign's Google Sheet that MailMeteor
-# imports independently. See outreach/README.md.
+# The pipeline reads the newest *.csv in
+# outreach/inbox/ultrazoom-realtors/, asks Claude to draft a personalized
+# Touch 1 + Touch 2 per row, and appends the results to two tabs
+# (UZ_Realtors_T1, UZ_Realtors_T2) of the campaign's Google Sheet that
+# MailMeteor imports independently. See outreach/README.md.
+#
+# (UZ Press cold email was retired in favor of $75-tier press releases;
+# see docs/press/ultrazoom-launch-press-release.md.)
 #
 # Required GitHub Secrets:
 #   ANTHROPIC_API_KEY               Claude API key for personalization.
@@ -20,22 +22,13 @@ name: Ultra Zoom outreach
 #   GCP_WORKLOAD_IDENTITY_PROVIDER  WIF provider resource name.
 #   GCP_SERVICE_ACCOUNT             leads-writer service-principal email.
 #   GOOGLE_SHEET_ID_UZ_REALTORS     Sheet for the Realtors campaign.
-#   GOOGLE_SHEET_ID_UZ_PRESS        Sheet for the Press campaign.
 #
-# Each Sheet must already exist with two tabs (UZ_Realtors_T1/T2 or
-# UZ_Press_T1/T2) and be shared (Editor) with the SP email above.
+# The Sheet must already exist with tabs UZ_Realtors_T1 and
+# UZ_Realtors_T2 and be shared (Editor) with the SP email above.
 
 on:
   workflow_dispatch:
     inputs:
-      campaign:
-        description: 'Which UZ campaign to run'
-        required: true
-        type: choice
-        options:
-          - realtors
-          - press
-        default: realtors
       model:
         description: 'Anthropic model'
         required: false
@@ -59,7 +52,6 @@ on:
       - main
     paths:
       - 'outreach/inbox/ultrazoom-realtors/**'
-      - 'outreach/inbox/ultrazoom-press/**'
 
 permissions:
   contents: read
@@ -75,10 +67,6 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-        with:
-          # Need at least the previous commit so the push-path autodetect
-          # step can diff HEAD^..HEAD.
-          fetch-depth: 2
 
       - uses: actions/setup-python@v5
         with:
@@ -87,84 +75,43 @@ jobs:
       - name: Install dependencies
         run: pip install -r outreach/requirements.txt
 
-      - name: Determine campaigns to run
-        id: detect
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          INPUT_CAMPAIGN: ${{ inputs.campaign }}
-        run: |
-          set -euo pipefail
-          campaigns=()
-          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            campaigns+=("$INPUT_CAMPAIGN")
-          else
-            changed="$(git diff --name-only HEAD^ HEAD || true)"
-            echo "Changed files in this push:"
-            echo "$changed"
-            if echo "$changed" | grep -q '^outreach/inbox/ultrazoom-realtors/'; then
-              campaigns+=("realtors")
-            fi
-            if echo "$changed" | grep -q '^outreach/inbox/ultrazoom-press/'; then
-              campaigns+=("press")
-            fi
-          fi
-          if [ ${#campaigns[@]} -eq 0 ]; then
-            echo "::warning::no UZ campaign inbox changed, nothing to run"
-          fi
-          # Space-separated string for the loop in the run step.
-          printf 'campaigns=%s\n' "${campaigns[*]:-}" >> "$GITHUB_OUTPUT"
-
       - name: Sanity-check secrets and variables
-        if: ${{ inputs.dry_run != true && steps.detect.outputs.campaigns != '' }}
+        if: ${{ inputs.dry_run != true }}
         env:
-          CAMPAIGNS: ${{ steps.detect.outputs.campaigns }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
           GOOGLE_SHEET_ID_UZ_REALTORS: ${{ vars.GOOGLE_SHEET_ID_UZ_REALTORS }}
-          GOOGLE_SHEET_ID_UZ_PRESS: ${{ vars.GOOGLE_SHEET_ID_UZ_PRESS }}
         run: |
           set -euo pipefail
           missing=()
           [ -z "${ANTHROPIC_API_KEY:-}" ] && missing+=("ANTHROPIC_API_KEY")
           [ -z "${GCP_WORKLOAD_IDENTITY_PROVIDER:-}" ] && missing+=("GCP_WORKLOAD_IDENTITY_PROVIDER")
           [ -z "${GCP_SERVICE_ACCOUNT:-}" ] && missing+=("GCP_SERVICE_ACCOUNT")
-          for c in $CAMPAIGNS; do
-            case "$c" in
-              realtors) [ -z "${GOOGLE_SHEET_ID_UZ_REALTORS:-}" ] && missing+=("GOOGLE_SHEET_ID_UZ_REALTORS") ;;
-              press)    [ -z "${GOOGLE_SHEET_ID_UZ_PRESS:-}"    ] && missing+=("GOOGLE_SHEET_ID_UZ_PRESS")    ;;
-            esac
-          done
+          [ -z "${GOOGLE_SHEET_ID_UZ_REALTORS:-}" ] && missing+=("GOOGLE_SHEET_ID_UZ_REALTORS")
           if [ ${#missing[@]} -ne 0 ]; then
             echo "::error::missing secrets/vars: ${missing[*]}"
             exit 1
           fi
 
       - name: Authenticate to Google Cloud
-        if: ${{ inputs.dry_run != true && steps.detect.outputs.campaigns != '' }}
+        if: ${{ inputs.dry_run != true }}
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
-      - name: Run Ultra Zoom outreach
-        if: ${{ steps.detect.outputs.campaigns != '' }}
+      - name: Run Ultra Zoom Realtors outreach
         env:
-          CAMPAIGNS: ${{ steps.detect.outputs.campaigns }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GOOGLE_SHEET_ID_UZ_REALTORS: ${{ vars.GOOGLE_SHEET_ID_UZ_REALTORS }}
-          GOOGLE_SHEET_ID_UZ_PRESS: ${{ vars.GOOGLE_SHEET_ID_UZ_PRESS }}
           MODEL: ${{ inputs.model || 'haiku' }}
           LIMIT: ${{ inputs.limit || '0' }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
           set -euo pipefail
-          for c in $CAMPAIGNS; do
-            echo "::group::Run $c"
-            ARGS=(--campaign "$c" --model "$MODEL" --limit "$LIMIT")
-            if [ "$DRY_RUN" = "true" ]; then
-              ARGS+=(--dry-run)
-            fi
-            python -m outreach.run_ultrazoom "${ARGS[@]}"
-            echo "::endgroup::"
-          done
+          ARGS=(--campaign realtors --model "$MODEL" --limit "$LIMIT")
+          if [ "$DRY_RUN" = "true" ]; then
+            ARGS+=(--dry-run)
+          fi
+          python -m outreach.run_ultrazoom "${ARGS[@]}"
