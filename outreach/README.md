@@ -1,68 +1,79 @@
-# Ultra Zoom + HailBytes outreach pipelines
+# Ultra Zoom outreach pipelines
 
-Two consolidated cold-email lanes that share one Python codebase, one
-Google Sheet, and one MailMeteor sender. Both are dispatch-only — no
-crons. Re-enable a schedule per workflow once steady-state quality is
-verified.
+Manual Apollo CSV in, personalized email drafts out. The pipeline reads
+a CSV exported from a saved Apollo people-search, asks Claude to draft
+a Touch 1 + Touch 2 per row, and appends the results to two tabs of a
+campaign-specific Google Sheet. MailMeteor imports each tab to send the
+two touches as separate campaigns spaced ~5 days apart.
+
+The HailBytes pipelines (ASM and SAT) live in `hailbytes-static`. This
+repo only owns the Ultra Zoom Realtors campaign. (UZ Press cold email
+was retired in favor of $75-tier press releases — see
+`docs/press/ultrazoom-launch-press-release.md`.)
 
 ```
-                              ┌─ content   (Brave/Exa/RSS → Hunter editor) ─┐
-   Ultra Zoom outreach ──────►│                                              ├─► UltraZoom tab
-                              └─ prospects (Apollo people-search → verify) ─┘
-                                                                              │
-   HailBytes outreach ─────────► prospects (Apollo people-search → verify) ──┴─► HailBytes tab
-                                                                              │
-                                                                  MailMeteor reads
-                                                                  from each tab
-                                                                  independently.
+                  ┌──────────────────┐
+   manual         │  Apollo people   │
+   Apollo UI ──── │  search → CSV    │ ─── drop in ────┐
+   export         └──────────────────┘                 │
+                                                       ▼
+                                       outreach/inbox/<campaign>/<date>.csv
+                                                       │
+                                                       │  push triggers GH Action
+                                                       ▼
+                              ┌──────────────────────────────────────┐
+                              │ run_ultrazoom.py --campaign <name>   │
+                              │  · ingest CSV                        │
+                              │  · dedupe vs. existing sheet rows    │
+                              │  · per lead: T1 + T2 via Claude      │
+                              │  · validate (em-dashes, banned       │
+                              │    words, required merge tags)       │
+                              │  · stage to <Campaign>_T1 tab        │
+                              │  · stage to <Campaign>_T2 tab        │
+                              └──────────────────────────────────────┘
+                                                       │
+                                                       ▼
+                                          ┌──────────────────────┐
+                                          │ Google Sheet (per    │
+                                          │ campaign, two tabs)  │
+                                          └──────────────────────┘
+                                                       │
+                                                       ▼
+                                          MailMeteor imports each
+                                          tab as a separate send
 ```
 
-Neither pipeline sends email. MailMeteor handles sending, throttling,
-opens/clicks, follow-ups, and reply detection from each tab.
-
-The previous Wiza-based prospect path was removed in April 2026 — Wiza
-returned too many bad addresses for too high a per-credit cost. Apollo
-covers the same "filter people, get verified work emails" workflow at
-better data quality. Hunter still owns the content-mode editor lookup;
-Exa still owns content-mode discovery.
+The pipeline does not send email. MailMeteor handles sending,
+throttling, opens/clicks, and reply detection per-tab.
 
 ## Repo layout
 
 ```
 outreach/
-  config.py                  env loading, paths, sheet schema, tunable thresholds
-  cache.py                   TTL'd JSON file cache for external API calls
-  state.py                   persistent dedupe (seen_urls.json, seen_domains.json)
-  seeds.py                   content-mode bucket rotation (A–F)
-  seeds_uz_companies.txt     prospects-mode UZ seeds (image-heavy B2B teams)
-  seeds_hb_mssp.txt          prospects-mode HB seeds (MSSP + pen-test)
-  rss_feeds.txt              curated RSS feed list for content discovery
-  excluded_domains.txt       hard-block list (qualify.py reads this)
+  README.md                        this file
+  __init__.py
+  config.py                        env loading, paths, base sheet schema
+  campaign_config.py               per-campaign config (tabs, prompts, voice rules)
 
-  discover.py                content discovery orchestrator
-  discover_brave.py          Brave Search client
-  discover_exa.py            Exa.ai search + findSimilar client
-  discover_rss.py            stdlib RSS feed parser
-  discover_apollo.py         Apollo.io People Search client (prospect path)
-  qualify.py                 hard filters + 0–100 lead_score (content path)
-  translate_filters.py       Claude: plain-English seed → Apollo filter object
+  ingest_apollo_csv.py             read Apollo CSV → candidate dicts
+  enrich_personalize.py            Claude T1+T2 drafting with prompt caching
+  stage_sheet.py                   append to per-tab Sheet schema
+  run_ultrazoom.py                 CLI: --campaign realtors
 
-  enrich_hunter.py           Hunter.io editor lookup (content path)
-  enrich_verify.py           email verifier (Hunter / NeverBounce / ZeroBounce)
-  enrich_personalize.py      Claude personalized opener with validation
+  excluded_domains.txt             hard-block list
 
-  stage_sheet.py             append rows to per-campaign Sheet tab
-  run_ultrazoom.py           CLI: Ultra Zoom outreach (--mode content|prospects|both)
-  run_hailbytes.py           CLI: HailBytes outreach (Apollo-direct only)
+  inbox/                           Apollo CSVs land here, by campaign
+    ultrazoom-realtors/
 
-  prompts/                   Claude opener + filter-translation templates
-  state/                     dedupe + rotation state (committed back from CI)
-  cache/                     per-API JSON caches
-  dropped/                   drop logs by reason; retry queue
+  prompts/                         per-touch reference templates
+    ultrazoom_realtors_touch1.md
+    ultrazoom_realtors_touch2.md
+
+  campaigns/                       campaign briefs (strategy + Apollo filters)
+    ultrazoom-realtors-q2-2026.md
 
 .github/workflows/
-  outreach-ultrazoom.yml     workflow_dispatch — calls run_ultrazoom
-  outreach-hailbytes.yml     workflow_dispatch — calls run_hailbytes
+  outreach-ultrazoom.yml           workflow_dispatch + push:outreach/inbox/**
 ```
 
 ## Setup
@@ -74,137 +85,108 @@ pip install -r outreach/requirements.txt
 Required env vars (or GitHub Secrets):
 
 ```
-APOLLO_API_KEY                  # both pipelines, prospects path
-ANTHROPIC_API_KEY               # both pipelines (filter translation + opener)
-HUNTER_API_KEY                  # UZ content path: editor lookup + verifier
-BRAVE_SEARCH_API_KEY            # UZ content path: discovery (one of these two)
-EXA_API_KEY                     # UZ content path: discovery
+ANTHROPIC_API_KEY                 personalization
+GOOGLE_SHEET_ID_UZ_REALTORS       Sheets target for the Realtors campaign
 ```
 
-Optional:
-
-```
-NEVERBOUNCE_API_KEY             # overrides Hunter as the verifier
-ZEROBOUNCE_API_KEY              # overrides Hunter as the verifier
-GOOGLE_SHEET_ID                 # overrides the default MailMeteor source sheet
-```
+Email verification is intentionally not in this pipeline. Apollo's saved
+search already filters to ``Email Status = Verified`` and the ingest
+step re-asserts that filter as defense in depth. Layering Hunter /
+NeverBounce / ZeroBounce on top costs API credits without changing
+reply rates in practice.
 
 Google Sheets auth uses Application Default Credentials. In CI,
-`google-github-actions/auth@v2` exchanges the workflow's OIDC token for
-a short-lived service-account credential — no JSON key. Set repo
+`google-github-actions/auth@v2` exchanges the workflow's OIDC token
+for a short-lived service-account credential — no JSON key. Set repo
 variables `GCP_WORKLOAD_IDENTITY_PROVIDER` and `GCP_SERVICE_ACCOUNT`,
 and share the target sheet with the SA's email as Editor. See
-`docs/outreach/sheets-setup.md`. Locally, `gcloud auth application-default
-login` once.
+`docs/outreach/sheets-setup.md`. Locally, run
+`gcloud auth application-default login` once.
 
 ## Running locally
 
 ```bash
-# Ultra Zoom — both lanes (default), genealogy bucket, ~25 content + ~125 prospects
-python -m outreach.run_ultrazoom
+# Realtors campaign
+python -m outreach.run_ultrazoom --campaign realtors
 
-# Ultra Zoom — content only (genealogy editors via Brave/Exa/RSS)
-python -m outreach.run_ultrazoom --mode content
+# Smoke test against a sample CSV without spending API credit
+python -m outreach.run_ultrazoom --campaign realtors --dry-run
 
-# Ultra Zoom — prospects only (image-heavy B2B teams via Apollo)
-python -m outreach.run_ultrazoom --mode prospects --preview-only  # dry-check match counts first
+# Pin to a specific CSV (otherwise the latest by mtime in the
+# campaign's inbox folder is used)
+python -m outreach.run_ultrazoom --campaign realtors \
+    --inbox-csv outreach/inbox/ultrazoom-realtors/2026-04-29.csv
 
-# HailBytes — MSSP + pen-test, default scale knobs (links recipients to
-# https://hailbytes.com/sat or https://hailbytes.com/asm in the human's
-# follow-up sentence; the AI opener does NOT include the URL)
-python -m outreach.run_hailbytes --preview-only  # spend zero, just preview
-
-# Dry runs (no external writes, no API spend)
-python -m outreach.run_ultrazoom --dry-run --no-reachability
-python -m outreach.run_hailbytes --dry-run
+# Cap the number of leads processed (good for first-batch sanity)
+python -m outreach.run_ultrazoom --campaign realtors --limit 5
 ```
-
-Defaults are tuned for scale-up runs:
-
-| Pipeline | Lane | Default knobs | Approx output |
-|---|---|---|---|
-| Ultra Zoom | content | bucket=E, max_stage=25 | up to 25 staged |
-| Ultra Zoom | prospects | seeds=5, profiles=25 | up to 125 staged |
-| HailBytes | prospects | seeds=5, profiles=25 | up to 125 staged |
-
-Drop both numbers (e.g. `--prospects-limit-seeds 1 --prospects-max-profiles 5`)
-for a single-row smoke test before you trust a new opener template.
 
 ## Sheet schema
 
-Pipelines own these columns on their per-campaign tab. MailMeteor adds
-its own (Merge status, Date sent, Opens, Clicks, Replied, Bounced) to
-the right when you launch a campaign — pipelines never touch those.
+Each campaign has two tabs in a campaign-specific Sheet. Pipeline owns
+the columns below; MailMeteor adds its own (Merge status, Date sent,
+Opens, Clicks, Replied, Bounced) to the right and the pipeline never
+touches them.
 
 | Column | Source | Used by MailMeteor as |
 | --- | --- | --- |
-| `discovered_at` | discovery | reference |
-| `source` | brave / exa / rss / apollo-prospect / apollo-sat / apollo-asm | reference |
-| `seed_used` | seed that surfaced it | reference |
-| `domain` | discovery | reference |
-| `recent_post_url` | content: article URL · prospects: LinkedIn URL | `{{recent_post_url}}` |
-| `recent_post_title` | content: article title · prospects: job title | `{{recent_post_title}}` |
-| `recent_post_description` | discovery | reference |
-| `published_date` | discovery | reference |
-| `lead_score` | qualification | sort/filter |
-| `editor_first_name` | Hunter / Apollo | `{{editor_first_name}}` |
-| `editor_last_name` | Hunter / Apollo | `{{editor_last_name}}` |
-| `editor_email` | Hunter / Apollo | **To: address** |
-| `hunter_confidence` | Hunter / Apollo | reference |
-| `email_status` | verifier (always `valid` for staged rows) | filter |
-| `personalized_opener` | Claude | `{{personalized_opener}}` |
-| `status` | pipeline | `ready_to_send` |
+| `discovered_at` | ingest | reference |
+| `source` | ingest (`apollo-csv-<campaign>`) | reference |
+| `first_name` | Apollo | `{{first_name}}` |
+| `last_name` | Apollo | reference |
+| `editor_email` | Apollo | **To: address** |
+| `editor_title` | Apollo | reference |
+| `company` | Apollo | `{{company}}` |
+| `domain` | parsed from Apollo Website | reference |
+| `linkedin_url` | Apollo | reference |
+| `city` | Apollo | reference |
+| `state` | Apollo | reference |
+| `industry` | Apollo | reference |
+| `keywords` | Apollo | reference (signal mining for AI prompt) |
+| `apollo_contact_id` | Apollo | hard dedupe key |
+| `personalized_subject` | Claude | **MailMeteor Subject** |
+| `personalized_body` | Claude | **MailMeteor Body** |
+| `status` | pipeline | filter (`= ready_to_send`) |
 | `enriched_at` | pipeline | reference |
-| `notes` | freeform (HB rows include the product URL) | manual overrides |
+| `notes` | pipeline (campaign + touch + sender) | reference |
+
 
 ## MailMeteor send settings
 
-- **Filter**: `status = ready_to_send` AND `email_status = valid`
-- **Daily quota**: 25/day (target middle of 20–30 range)
-- **Inter-send delay**: 2–5 minutes random
-- **Sending window**: weekdays 9am–1pm Mountain
-- **Tracking**: opens + clicks
-- **Follow-up**: one auto-follow-up at +5 days, only when no reply
-
-For HailBytes, the human-written sentence after the AI opener should
-link the recipient to the anchored product page:
-
-- SAT: `https://hailbytes.com/sat`
-- ASM: `https://hailbytes.com/asm`
-
-The pipeline writes the URL to the row's `notes` column (`hb-sat | https://hailbytes.com/sat`)
-so you can pull it into the MailMeteor template via a merge tag if you want.
+- **Filter:** `status = ready_to_send`
+- **Daily quota:** 15 hard limit on the sender mailbox
+- **Subject:** `{{personalized_subject}}`
+- **Body:** `{{personalized_body}}`
+- **Sending window:** weekdays, recipient local hours
+- **Tracking:** opens + clicks
+- **Threading:** Touch 2 imported separately ~5 send-days after Touch 1.
+  T2 subject is `Re: <T1 subject>` so Gmail threads it.
 
 ## Personalization rules
 
-The Claude prompt enforces, and `validate()` in `enrich_personalize.py`
-re-checks:
+The Claude prompt enforces and the validator re-checks:
 
-- ≤25 words (hard cap 30, retry if over 25)
-- No em dashes (standing Lost Rabbit Digital preference)
-- No sycophantic openers (`I loved`, `great post`, etc.)
-- Banned words: `stumbled`, `amazing`
-- One sentence, ends with terminal punctuation
-- No quotes, no preamble — just the sentence
-
-If the first call fails validation, the pipeline retries once with a
-stricter prompt. Two failures drop the candidate. Content-mode
-candidates land in `dropped/personalization_failures.jsonl` for
-`--retry-failed` reruns.
+- Subject: ≤ 9 words
+- Body: 50–180 words (campaign config can lower the upper bound)
+- No em-dashes (period or comma instead)
+- No sycophancy (`I love`, `great post`, `really enjoyed`, etc.)
+- Banned words: `stumbled`, `amazing`, `revolutionize`, `leverage`,
+  `synergy`, `robust solution`, `cutting-edge`, `world-class`
+- One-shot retry with a stricter prompt on validation failure;
+  candidate is dropped after two failures
+- Required merge tags must appear in the body verbatim:
+  - Realtors T1: `{{landing_page_link}}`, `REALTOR30`
+  - Realtors T2: `REALTOR30`
 
 ## Audit checklist
 
 - [x] All API keys via env vars / GitHub Secrets, never hardcoded
-- [x] All discovery + enrichment responses cached locally
-- [x] State files prevent duplicate outreach across runs
-- [x] One-domain-one-outreach rule enforced at qualification (content path)
-- [x] Excluded domains list respected (`outreach/excluded_domains.txt`)
-- [x] Email verification mandatory before staging
-- [x] Pipelines never write to MailMeteor-managed columns
-- [x] Pipelines append only, never overwrite or delete
-- [x] Personalization output validated for em dashes before staging
+- [x] Sheet-side dedupe at append time (existing `editor_email` rows skipped)
+- [x] Pipeline never writes to MailMeteor-managed columns
+- [x] Pipeline appends only, never overwrites or deletes
+- [x] Personalization output validated before staging
 - [x] `--dry-run` works end-to-end without external writes
-- [x] Service account scoped to one sheet ID
-- [x] No active crons — manual dispatch only until quality is verified
-- [x] Apollo filter forces `contact_email_status=["verified"]` so we never
-      pay for rows whose emails Apollo couldn't confirm
+- [x] Service account scoped per-sheet (one campaign = one Sheet)
+- [x] No active crons — manual dispatch + push-triggered only
+- [x] `excluded_domains.txt` honored at ingest time
+- [x] Apollo "verified-only" filter is enforced again on the read side

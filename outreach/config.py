@@ -8,75 +8,59 @@ without any secrets configured.
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 # Repo-relative paths. ``OUTREACH_DIR`` resolves to the directory containing
 # this file, so the pipeline works whether invoked from the repo root or
 # elsewhere.
 OUTREACH_DIR = Path(__file__).resolve().parent
-STATE_DIR = OUTREACH_DIR / "state"
-CACHE_DIR = OUTREACH_DIR / "cache"
-DROPPED_DIR = OUTREACH_DIR / "dropped"
+INBOX_DIR = OUTREACH_DIR / "inbox"
 PROMPTS_DIR = OUTREACH_DIR / "prompts"
-
-SEEN_URLS_PATH = STATE_DIR / "seen_urls.json"
-SEEN_DOMAINS_PATH = STATE_DIR / "seen_domains.json"
-SEED_ROTATION_PATH = STATE_DIR / "seed_rotation_state.json"
+CAMPAIGNS_DIR = OUTREACH_DIR / "campaigns"
 
 EXCLUDED_DOMAINS_PATH = OUTREACH_DIR / "excluded_domains.txt"
-RSS_FEEDS_PATH = OUTREACH_DIR / "rss_feeds.txt"
+SUPPRESSION_PATH = OUTREACH_DIR / "suppression.csv"
 
-BRAVE_CACHE = CACHE_DIR / "brave_cache.json"
-EXA_CACHE = CACHE_DIR / "exa_cache.json"
-HUNTER_CACHE = CACHE_DIR / "hunter_cache.json"
-VERIFY_CACHE = CACHE_DIR / "verify_cache.json"
+# Validation thresholds shared by all campaigns. Per-campaign overrides
+# (banned words, required tokens, max word count) live on the
+# ``CampaignConfig`` object in ``campaign_config.py``.
+PERSONALIZATION_BODY_MIN_WORDS = 50
+PERSONALIZATION_BODY_MAX_WORDS = 180
+PERSONALIZATION_SUBJECT_MAX_WORDS = 9
 
-# Default sheet — overridden by GOOGLE_SHEET_ID env var. The fallback value
-# is the production target; the override exists for staging copies of the
-# sheet during template work.
-DEFAULT_SHEET_ID = "1Q-Cr3MdarGttpULJwv6n1eRGoa1GYg7SpB7W5mmYGA0"
-SHEET_TAB = "Leads"
-# Per-campaign tabs. MailMeteor reads from each tab independently so each
-# campaign gets its own template + send schedule. Tabs must already exist
-# in the Sheet — the pipeline does not create them.
-SHEET_TAB_HAILBYTES = "HailBytes"
-SHEET_TAB_UZ_PEOPLE = "UltraZoom"
-
-# Qualification thresholds. ``MIN_LEAD_SCORE`` is the floor for advancing a
-# candidate to enrichment.
-MIN_LEAD_SCORE = 50
-MAX_AGE_MONTHS = 24
-PERSONALIZATION_MAX_WORDS = 25
-PERSONALIZATION_HARD_MAX_WORDS = 30
-
-# Cache TTLs.
-HUNTER_TTL_DAYS = 90
-VERIFY_TTL_DAYS = 60
-
-# Per-run defaults — override on the CLI.
-DEFAULT_MAX_STAGE = 15
-DEFAULT_PER_QUERY = 15
+# Default Claude model for personalization. Haiku is fast and cheap and
+# easily strong enough for an opener-quality draft. Override on the CLI
+# with ``--model sonnet`` for higher-stakes batches.
 DEFAULT_MODEL = "haiku"
 
-# Sheet column order. Pipeline owns these; MailMeteor adds its own columns
-# (Merge status, Date sent, etc.) to the right and we never touch them.
-SHEET_COLUMNS = [
+# Sheet columns the pipeline owns on each per-touch tab. MailMeteor adds
+# its own columns (Merge status, Date sent, Opens, Clicks, etc.) to the
+# right of these and we never touch those.
+#
+# ``personalized_subject`` and ``personalized_body`` are what MailMeteor
+# pulls into the Subject and Body fields of its template. The other
+# columns are merge tags the AI is allowed to reference (e.g.
+# ``{{first_name}}`` inside the body) plus reference fields for
+# debugging. Per-campaign extras (``specific_recent_topic`` for press)
+# are appended to this base in ``campaign_config.py``.
+BASE_SHEET_COLUMNS = [
     "discovered_at",
     "source",
-    "seed_used",
-    "domain",
-    "recent_post_url",
-    "recent_post_title",
-    "recent_post_description",
-    "published_date",
-    "lead_score",
-    "editor_first_name",
-    "editor_last_name",
+    "first_name",
+    "last_name",
     "editor_email",
-    "hunter_confidence",
-    "email_status",
-    "personalized_opener",
+    "editor_title",
+    "company",
+    "domain",
+    "linkedin_url",
+    "city",
+    "state",
+    "industry",
+    "keywords",
+    "apollo_contact_id",
+    "personalized_subject",
+    "personalized_body",
     "status",
     "enriched_at",
     "notes",
@@ -87,49 +71,19 @@ SHEET_COLUMNS = [
 class Config:
     """Resolved runtime configuration. Constructed once per CLI invocation."""
 
-    brave_key: str | None = None
-    exa_key: str | None = None
-    hunter_key: str | None = None
-    apollo_key: str | None = None
-    neverbounce_key: str | None = None
-    zerobounce_key: str | None = None
     anthropic_key: str | None = None
-    sheet_id: str = DEFAULT_SHEET_ID
-    serpapi_key: str | None = None
-    rss_feed_list_path: Path = field(default_factory=lambda: RSS_FEEDS_PATH)
+    sheet_id: str | None = None
     dry_run: bool = False
 
     @classmethod
-    def from_env(cls, *, dry_run: bool = False) -> "Config":
+    def from_env(cls, *, sheet_id_env: str, dry_run: bool = False) -> "Config":
         return cls(
-            brave_key=os.environ.get("BRAVE_SEARCH_API_KEY"),
-            exa_key=os.environ.get("EXA_API_KEY"),
-            hunter_key=os.environ.get("HUNTER_API_KEY"),
-            apollo_key=os.environ.get("APOLLO_API_KEY"),
-            neverbounce_key=os.environ.get("NEVERBOUNCE_API_KEY"),
-            zerobounce_key=os.environ.get("ZEROBOUNCE_API_KEY"),
             anthropic_key=os.environ.get("ANTHROPIC_API_KEY"),
-            sheet_id=os.environ.get("GOOGLE_SHEET_ID") or DEFAULT_SHEET_ID,
-            serpapi_key=os.environ.get("SERPAPI_KEY"),
-            rss_feed_list_path=Path(os.environ.get("RSS_FEED_LIST_PATH", str(RSS_FEEDS_PATH))),
+            sheet_id=os.environ.get(sheet_id_env),
             dry_run=dry_run,
         )
 
-    def require(self, *names: str) -> list[str]:
-        """Return any required keys missing from the environment."""
-        mapping = {
-            "brave": self.brave_key,
-            "exa": self.exa_key,
-            # Hunter doubles as the default email verifier, so a single
-            # Hunter key satisfies both ``hunter`` and ``verify``.
-            "hunter": self.hunter_key,
-            "apollo": self.apollo_key,
-            "verify": self.hunter_key or self.neverbounce_key or self.zerobounce_key,
-            "anthropic": self.anthropic_key,
-        }
-        return [n for n in names if not mapping.get(n)]
-
 
 def ensure_dirs() -> None:
-    for d in (STATE_DIR, CACHE_DIR, DROPPED_DIR, PROMPTS_DIR):
+    for d in (PROMPTS_DIR, INBOX_DIR):
         d.mkdir(parents=True, exist_ok=True)
