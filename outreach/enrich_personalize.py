@@ -1,11 +1,15 @@
-"""Claude-powered personalized opener generation.
+"""Claude-powered personalized email drafting.
 
-Renders ``prompts/personalization.md`` with the post's title, description,
-and domain, calls the Anthropic Messages API directly via stdlib, and
-validates the output against the standing-preference rules (no em dashes,
-no sycophancy, ≤25 words, etc.). One retry with a stricter prompt on
-validation failure; if that also fails, the candidate is dropped with
-status ``personalization_failed``.
+Per lead, generates a JSON payload ``{"subject": ..., "body": ...}`` for
+one touch (1 or 2) of a campaign. The system prompt is the campaign
+brief excerpt plus the touch's reference template, and is sent with
+``cache_control`` so successive leads in the same batch only pay the
+prompt-caching write cost on the first call.
+
+The output is then validated against the campaign's rules (banned
+words, required merge tags, length, em-dashes, sycophancy). One strict
+retry on failure; two failures drop the candidate so MailMeteor never
+sees a junk row.
 """
 
 from __future__ import annotations
@@ -17,7 +21,11 @@ import urllib.error
 import urllib.request
 from typing import Any
 
-from .config import PERSONALIZATION_HARD_MAX_WORDS, PERSONALIZATION_MAX_WORDS, PROMPTS_DIR
+from .campaign_config import CampaignConfig
+from .config import (
+    PERSONALIZATION_BODY_MIN_WORDS,
+    PERSONALIZATION_SUBJECT_MAX_WORDS,
+)
 from .util import log
 
 ANTHROPIC_BASE = "https://api.anthropic.com/v1/messages"
@@ -31,8 +39,6 @@ MODEL_IDS = {
     "opus": "claude-opus-4-7",
 }
 
-# Sycophantic openers to reject. Matched at the start of the sentence,
-# case-insensitive.
 SYCOPHANTIC_PATTERNS = [
     r"^i\s+love",
     r"^i\s+loved",
@@ -45,38 +51,138 @@ SYCOPHANTIC_PATTERNS = [
     r"^just\s+wanted\s+to\s+say",
 ]
 SYCOPHANCY_RE = re.compile("|".join(SYCOPHANTIC_PATTERNS), re.IGNORECASE)
-BANNED_WORDS_RE = re.compile(r"\b(stumbled|amazing)\b", re.IGNORECASE)
 
 
-# Buckets with their own tuned personalization prompt. Buckets not listed
-# here fall back to ``personalization.md``.
-BUCKET_PROMPTS: dict[str, str] = {
-    "E": "personalization-genealogy.md",
-    "F": "personalization-a11y.md",
-}
+# ---------------------------------------------------------------------------
+# Prompt construction
+# ---------------------------------------------------------------------------
+
+_SYSTEM_HEADER = """\
+You are drafting a single cold-email touch for a Lost Rabbit Digital outreach
+campaign. Your job is to produce a JSON object with two fields, ``subject``
+and ``body``, personalized to the lead's data the user message will give you.
+
+You are NOT writing marketing copy from scratch. The campaign brief below
+defines the voice, the structure, and the required merge tags. Your room to
+maneuver is the opening hook tied to the lead's specific signals (city,
+company, role, industry, keywords) and the phrasing of the value prop.
+
+Hard rules — violations cause your draft to be rejected:
+- No em-dashes. Use periods or commas instead.
+- No sycophancy. Do not open with "I love", "great article", "really
+  enjoyed", or similar.
+- No vendor buzzwords. The campaign config below lists banned phrases.
+- Subject line: at most {subject_max} words. No clickbait, no all-caps.
+- Body: between {body_min} and {body_max} words. Ends with terminal
+  punctuation. Plain prose. No bullet lists, no markdown.
+- Output only the JSON object. No preamble, no commentary, no code fences.
+"""
 
 
-def _load_prompt(bucket: str | None = None) -> str:
-    filename = BUCKET_PROMPTS.get(bucket or "", "personalization.md")
-    path = PROMPTS_DIR / filename
-    if not path.exists():
-        path = PROMPTS_DIR / "personalization.md"
-    return path.read_text()
+def _build_system_prompt(campaign: CampaignConfig, *, touch: int) -> str:
+    """Assemble the cached system-prompt text for one (campaign, touch).
 
+    The same prompt is reused for every lead in a batch, so prompt
+    caching pays off after the first call. Caching is requested by the
+    HTTP layer via ``cache_control``; this function only assembles the
+    text.
+    """
+    prompt_path = campaign.prompt_t1 if touch == 1 else campaign.prompt_t2
+    if not prompt_path.exists():
+        raise FileNotFoundError(
+            f"campaign prompt missing for {campaign.name} touch {touch}: "
+            f"{prompt_path}"
+        )
+    reference = prompt_path.read_text()
 
-def _render(template: str, *, title: str, description: str, domain: str) -> str:
-    return (
-        template.replace("{title}", title)
-        .replace("{description}", description)
-        .replace("{domain}", domain)
+    required_tokens = (
+        campaign.required_tokens_t1 if touch == 1 else campaign.required_tokens_t2
     )
+    banned = campaign.all_banned_words()
+
+    pieces = [
+        _SYSTEM_HEADER.format(
+            subject_max=PERSONALIZATION_SUBJECT_MAX_WORDS,
+            body_min=PERSONALIZATION_BODY_MIN_WORDS,
+            body_max=campaign.max_body_words,
+        ),
+        f"\n## Campaign\n\n{campaign.name} — Touch {touch}\n",
+        f"\n## Sender voice\n\n{campaign.voice_summary}\n",
+        f"\n## Recipient persona\n\n{campaign.persona_summary}\n",
+        f"\n## Touch reference template + tone notes\n\n{reference}\n",
+    ]
+    if required_tokens:
+        listed = "\n".join(f"- `{t}`" for t in required_tokens)
+        pieces.append(
+            "\n## Required body tokens (must appear verbatim)\n\n"
+            f"{listed}\n\n"
+            "Embed each of these strings somewhere in the body, exactly as "
+            "written. The literal-string merge tags (anything wrapped in "
+            "double curly braces) are placeholders MailMeteor will fill at "
+            "send time. Do not invent a value or remove the braces.\n"
+        )
+    if banned:
+        listed = ", ".join(f"`{w}`" for w in banned)
+        pieces.append(
+            "\n## Banned words/phrases (case-insensitive)\n\n"
+            f"{listed}\n\n"
+            "If a banned word is unavoidable to discuss the topic, rephrase "
+            "the topic.\n"
+        )
+    pieces.append(
+        "\n## Output schema\n\n"
+        'Return exactly:\n\n```json\n{"subject": "...", "body": "..."}\n```\n\n'
+        "No other keys. No comments. No code fence in the actual output — "
+        "just the JSON.\n"
+    )
+    return "".join(pieces)
 
 
-def _call_anthropic(api_key: str, model_id: str, prompt: str, *, max_tokens: int = 200) -> str:
+def _build_user_message(lead: dict[str, Any]) -> str:
+    """Render one lead's signals as a compact prompt-friendly block."""
+    fields = [
+        ("First name", lead.get("first_name", "")),
+        ("Last name", lead.get("last_name", "")),
+        ("Title", lead.get("editor_title", "")),
+        ("Company", lead.get("company", "")),
+        ("Domain", lead.get("domain", "")),
+        ("City", lead.get("city", "")),
+        ("State", lead.get("state", "")),
+        ("Industry", lead.get("industry", "")),
+        ("Keywords", lead.get("keywords", "")),
+    ]
+    rendered = "\n".join(f"- {label}: {value}" for label, value in fields if value)
+    return f"Lead data:\n\n{rendered}\n\nDraft the JSON now."
+
+
+# ---------------------------------------------------------------------------
+# HTTP
+# ---------------------------------------------------------------------------
+
+
+def _call_anthropic(
+    *,
+    api_key: str,
+    model_id: str,
+    system_text: str,
+    user_text: str,
+    max_tokens: int,
+) -> str:
+    """POST to /v1/messages with prompt caching on the system block.
+
+    Returns the raw text of the first text block in the response.
+    """
     body = {
         "model": model_id,
         "max_tokens": max_tokens,
-        "messages": [{"role": "user", "content": prompt}],
+        "system": [
+            {
+                "type": "text",
+                "text": system_text,
+                "cache_control": {"type": "ephemeral"},
+            }
+        ],
+        "messages": [{"role": "user", "content": user_text}],
     }
     last_err: Exception | None = None
     for attempt in range(1, MAX_ATTEMPTS + 1):
@@ -119,67 +225,154 @@ def _call_anthropic(api_key: str, model_id: str, prompt: str, *, max_tokens: int
     raise RuntimeError("claude: exhausted attempts")
 
 
-def _strip(text: str) -> str:
-    s = text.strip()
-    # Strip surrounding quotes Claude sometimes adds despite instructions.
-    if len(s) >= 2 and s[0] in {'"', "'", "“", "‘"} and s[-1] in {'"', "'", "”", "’"}:
-        s = s[1:-1].strip()
-    # Take the first sentence only.
-    parts = re.split(r"(?<=[.!?])\s+", s)
-    return parts[0].strip() if parts else s
+# ---------------------------------------------------------------------------
+# Validation
+# ---------------------------------------------------------------------------
 
 
-def validate(opener: str) -> tuple[bool, str]:
-    """Return ``(ok, reason)``. Reason is empty when ``ok`` is True."""
-    if not opener:
-        return False, "empty"
-    if "—" in opener or "–" in opener:
+def _parse_json(raw: str) -> dict[str, str] | None:
+    """Salvage a JSON object out of Claude's response. Tolerates code
+    fences, language tags, and leading commentary even though the prompt
+    forbids them.
+    """
+    s = raw.strip()
+    # Locate the outermost ``{...}``. The brace search reliably skips
+    # past any leading commentary, opening code fence, or language tag
+    # without us having to special-case each variant.
+    start = s.find("{")
+    end = s.rfind("}")
+    if start == -1 or end == -1 or end <= start:
+        return None
+    blob = s[start : end + 1]
+    try:
+        # ``strict=False`` allows literal newlines inside string values.
+        # Claude routinely emits multi-line bodies with real ``\n``
+        # characters rather than JSON ``\\n`` escapes, and rejecting those
+        # over a pedantic-compliance check would cost us a free retry.
+        parsed = json.loads(blob, strict=False)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(parsed, dict):
+        return None
+    subject = parsed.get("subject")
+    body = parsed.get("body")
+    if not isinstance(subject, str) or not isinstance(body, str):
+        return None
+    return {"subject": subject.strip(), "body": body.strip()}
+
+
+def _word_count(text: str) -> int:
+    return len([w for w in re.split(r"\s+", text.strip()) if w])
+
+
+def validate(
+    drafted: dict[str, str],
+    *,
+    campaign: CampaignConfig,
+    touch: int,
+) -> tuple[bool, str]:
+    """Return ``(ok, reason)``. ``reason`` is empty when ``ok`` is True."""
+    subject = drafted.get("subject", "")
+    body = drafted.get("body", "")
+
+    if not subject:
+        return False, "empty subject"
+    if not body:
+        return False, "empty body"
+
+    if "—" in body or "–" in body or "—" in subject or "–" in subject:
         return False, "em dash"
-    words = opener.split()
-    if len(words) > PERSONALIZATION_HARD_MAX_WORDS:
-        return False, f"too long ({len(words)} words)"
-    if SYCOPHANCY_RE.search(opener):
+
+    sub_words = _word_count(subject)
+    if sub_words > PERSONALIZATION_SUBJECT_MAX_WORDS:
+        return False, f"subject too long ({sub_words} words)"
+
+    body_words = _word_count(body)
+    if body_words < PERSONALIZATION_BODY_MIN_WORDS:
+        return False, f"body too short ({body_words} words)"
+    if body_words > campaign.max_body_words:
+        return False, f"body too long ({body_words} words)"
+
+    if SYCOPHANCY_RE.search(body):
         return False, "sycophantic opener"
-    if BANNED_WORDS_RE.search(opener):
-        return False, "banned word"
-    if not re.search(r"[.!?]$", opener):
+
+    banned_lower = [w.lower() for w in campaign.all_banned_words()]
+    body_lower = body.lower()
+    for w in banned_lower:
+        if w in body_lower:
+            return False, f"banned phrase: {w!r}"
+
+    if not re.search(r"[.!?]$", body.strip()):
         return False, "missing terminal punctuation"
+
+    required = (
+        campaign.required_tokens_t1 if touch == 1 else campaign.required_tokens_t2
+    )
+    for token in required:
+        if token not in body:
+            return False, f"missing required token: {token!r}"
+
     return True, ""
 
 
+# ---------------------------------------------------------------------------
+# Public entry point
+# ---------------------------------------------------------------------------
+
+
 def personalize(
-    candidate: dict[str, Any],
+    lead: dict[str, Any],
     *,
+    campaign: CampaignConfig,
+    touch: int,
     api_key: str,
     model: str = "haiku",
-) -> tuple[str, str]:
-    """Return ``(opener, error)``. ``error`` is empty on success."""
+) -> tuple[dict[str, str] | None, str]:
+    """Generate a personalized ``{"subject": ..., "body": ...}`` for one
+    touch of one lead. Returns ``(payload, "")`` on success or
+    ``(None, reason)`` after the strict retry also fails.
+    """
     model_id = MODEL_IDS.get(model, MODEL_IDS["haiku"])
-    base_prompt = _render(
-        _load_prompt(candidate.get("bucket")),
-        title=candidate.get("title", ""),
-        description=candidate.get("description", ""),
-        domain=candidate.get("domain", ""),
+    system_text = _build_system_prompt(campaign, touch=touch)
+    user_text = _build_user_message(lead)
+
+    raw = _call_anthropic(
+        api_key=api_key,
+        model_id=model_id,
+        system_text=system_text,
+        user_text=user_text,
+        max_tokens=600,
     )
+    drafted = _parse_json(raw)
+    if drafted is not None:
+        ok, reason = validate(drafted, campaign=campaign, touch=touch)
+        if ok:
+            return drafted, ""
+    else:
+        reason = "unparseable JSON"
 
-    raw = _call_anthropic(api_key, model_id, base_prompt)
-    opener = _strip(raw)
-    ok, reason = validate(opener)
-    if ok:
-        return opener, ""
-
-    log(f"  personalization failed ({reason}), retrying strict — {candidate.get('domain')}")
-    strict_prompt = (
-        base_prompt
+    log(
+        f"  personalization failed ({reason}), retrying strict — "
+        f"{lead.get('editor_email')} touch{touch}"
+    )
+    strict_user = (
+        user_text
         + "\n\nYour previous attempt failed validation: "
         + reason
-        + ". Try again. "
-        + f"Stay under {PERSONALIZATION_MAX_WORDS} words. No em dashes, no sycophancy, "
-        "no quotes, no preamble. Output only the sentence."
+        + ". Output ONLY the JSON object, no preamble, no code fence. "
+        + "Re-check the required tokens and banned words before responding."
     )
-    raw = _call_anthropic(api_key, model_id, strict_prompt)
-    opener = _strip(raw)
-    ok, reason = validate(opener)
+    raw = _call_anthropic(
+        api_key=api_key,
+        model_id=model_id,
+        system_text=system_text,
+        user_text=strict_user,
+        max_tokens=600,
+    )
+    drafted = _parse_json(raw)
+    if drafted is None:
+        return None, "unparseable JSON (retry)"
+    ok, reason = validate(drafted, campaign=campaign, touch=touch)
     if ok:
-        return opener, ""
-    return "", reason
+        return drafted, ""
+    return None, reason

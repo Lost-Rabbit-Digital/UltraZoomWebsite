@@ -26,15 +26,17 @@ public/
   images/              Icons and assets
 wrangler.jsonc         Cloudflare Workers config (static assets from dist/)
 astro.config.mjs       Astro configuration
-outreach/                Cold-email pipelines (Python). See outreach/README.md.
-  run_ultrazoom.py       UZ pipeline (--mode content|prospects|both)
-  run_hailbytes.py       HailBytes pipeline (Apollo-direct)
+outreach/                Cold-email pipeline (Python). See outreach/README.md.
+  run_ultrazoom.py       UZ pipeline (--campaign realtors|press)
+  inbox/                 Apollo CSV drop folders, one per campaign
+  campaigns/             Campaign briefs (strategy + Apollo filters)
+  prompts/               Per-touch reference templates for Claude
+  (HailBytes outreach lives in the hailbytes-static repo.)
 .github/
   workflows/
     static.yml                 CI pipeline
     record-scroll.yml          Promotional video recording (Playwright)
-    outreach-ultrazoom.yml     UZ outreach (workflow_dispatch only)
-    outreach-hailbytes.yml     HailBytes outreach (workflow_dispatch only)
+    outreach-ultrazoom.yml     UZ outreach (workflow_dispatch + push:outreach/inbox/**)
   lighthouse/
     lighthouserc.json  Lighthouse CI config
 docs/
