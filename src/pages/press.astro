@@ -1,0 +1,142 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Press | Ultra Zoom"
+  description="Press kit, launch release, and media contact for Ultra Zoom, the privacy-respecting hover-to-zoom browser extension from Lost Rabbit Digital LLC."
+  currentPage="press"
+  og={{
+    url: 'https://ultrazoom.app/press',
+    title: 'Ultra Zoom Press Kit',
+    description: 'Launch release, boilerplate, quick facts, and media contact for Ultra Zoom.',
+    image: 'https://ultrazoom.app/images/icon-128.png',
+  }}
+>
+    <main class="main page-content" id="main-content">
+        <h1>Press</h1>
+
+        <p class="pricing-intro">
+            Ultra Zoom is a hover-to-zoom browser extension built by Lost Rabbit Digital LLC.
+            This page mirrors the official launch release and collects everything a journalist
+            or reviewer needs in one place. For interview requests, demo accounts, or
+            higher-resolution screenshots, contact <a href="mailto:press@ultrazoom.app">press@ultrazoom.app</a>.
+        </p>
+
+        <section class="help-section" id="release">
+            <h2>Launch release</h2>
+
+            <article class="press-release">
+                <p class="press-meta"><strong>FOR IMMEDIATE RELEASE</strong></p>
+
+                <h3 class="press-headline">Ultra Zoom Launches Hover-to-Zoom Browser Extension Built Without Tracking</h3>
+                <p class="press-subhead">Independent studio releases a Chrome and Firefox add-on that restores hover-to-zoom on image-heavy websites without collecting browsing data.</p>
+
+                <p>
+                    <strong>April 29, 2026</strong> &mdash; Lost Rabbit Digital LLC today announced the public launch of
+                    Ultra Zoom, a free hover-to-zoom browser extension for Google Chrome and Mozilla Firefox.
+                    The tool enlarges any image on a webpage the moment a cursor passes over it, replacing
+                    a workflow that has long required users to open photos in separate tabs.
+                </p>
+
+                <p>
+                    Hover-to-zoom is a long-standing browser feature category, but the most widely installed
+                    extensions in the space have a troubled history. The original Hover Zoom extension, once
+                    installed by millions of users, was caught logging the URLs of every page its users
+                    visited and selling the data. Successor extensions have stopped working on the
+                    highest-traffic image sites, including major image search engines, social networks, and
+                    marketplace platforms.
+                </p>
+
+                <p>
+                    Ultra Zoom is engineered to make that scenario structurally impossible, the company said.
+                    The extension contains no analytics endpoints, no remote-code loaders, and no server-side
+                    component that processes browsing activity. All image handling happens in the browser.
+                    The codebase is built on Manifest V3, the current Chrome extension security standard,
+                    which restricts the dynamic code patterns that enabled past privacy abuses.
+                </p>
+
+                <blockquote class="press-quote">
+                    &ldquo;People shouldn&rsquo;t have to choose between a tool that works and a tool that
+                    respects them. Ultra Zoom does the boring thing: it zooms images, and that&rsquo;s it.
+                    There is no telemetry pipeline because we never built one. There is no opt-out for data
+                    collection because there is no data collection.&rdquo;
+                    <cite>&mdash; David McHale, founder, Lost Rabbit Digital</cite>
+                </blockquote>
+
+                <p>
+                    The extension supports more than sixty popular destinations out of the box, including
+                    Google Images, Bing Images, Instagram, Pinterest, Reddit, Amazon, eBay, AliExpress,
+                    Unsplash, Pexels, Wikimedia Commons, Getty, AP News, and Bilibili. A generic engine
+                    handles hover-zoom on the long tail of websites that do not have a dedicated plugin,
+                    and a community-maintained URL rules pack lets users add new sites between releases.
+                </p>
+
+                <p>
+                    Free features include theater mode, which expands a hovered image to fill the browser
+                    window; one-key reverse image search shortcuts for Google, TinEye, Yandex, and other
+                    engines; gallery navigation with arrow keys; and a local hover history of the last fifty
+                    images a user has previewed. Power features such as video playback controls, batch image
+                    download, an expanded one-thousand-entry hover history with full-text search, and custom
+                    URL rules are bundled in an optional Pro tier priced at $29.99 per year or $59.99 for a
+                    lifetime license. A seven-day free trial is available at install.
+                </p>
+
+                <p>
+                    Ultra Zoom is available immediately from the
+                    <a href="https://chromewebstore.google.com/detail/ultra-zoom/jalclpdejbeamaamcpbolkclpnleagmg" target="_blank" rel="noopener">Chrome Web Store</a>
+                    and the
+                    <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/" target="_blank" rel="noopener">Firefox Add-ons gallery</a>.
+                    Install links, documentation, and the full list of supported sites are published at
+                    <a href="https://ultrazoom.app">https://ultrazoom.app</a>.
+                </p>
+            </article>
+        </section>
+
+        <section class="help-section" id="quick-facts">
+            <h2>Quick facts</h2>
+            <ul class="help-list">
+                <li><strong>Product:</strong> Ultra Zoom &mdash; hover-to-zoom browser extension.</li>
+                <li><strong>Publisher:</strong> Lost Rabbit Digital LLC, an independent, bootstrapped software studio.</li>
+                <li><strong>Founder:</strong> David McHale.</li>
+                <li><strong>Browsers:</strong> Google Chrome (Manifest V3) and Mozilla Firefox.</li>
+                <li><strong>Pricing:</strong> Free core extension. Optional Ultra Zoom Pro at $29.99 / year or $59.99 lifetime, with a 7-day free trial.</li>
+                <li><strong>Privacy posture:</strong> Zero telemetry, zero analytics, no remote code, no server-side processing of browsing data.</li>
+                <li><strong>Coverage:</strong> 60+ optimized site plugins plus a generic engine and a community URL rules pack.</li>
+                <li><strong>Launched:</strong> April 29, 2026.</li>
+            </ul>
+        </section>
+
+        <section class="help-section" id="boilerplate">
+            <h2>About Lost Rabbit Digital</h2>
+            <p>
+                Lost Rabbit Digital LLC is an independent software studio building privacy-respecting
+                productivity tools for the modern browser. Ultra Zoom is the studio&rsquo;s first commercial
+                product. The company is bootstrapped and self-funded.
+            </p>
+        </section>
+
+        <section class="help-section" id="assets">
+            <h2>Media assets</h2>
+            <p>Logos and product screenshots are free to use in coverage of Ultra Zoom. Please credit Lost Rabbit Digital LLC.</p>
+            <ul class="help-list">
+                <li><a href="/images/icon-128.png">Ultra Zoom logo &mdash; 128px PNG</a></li>
+                <li><a href="/images/icon-48.png">Ultra Zoom logo &mdash; 48px PNG</a></li>
+                <li><a href="/images/ultra_zoom_screen_1.png">Screenshot &mdash; welcome page</a></li>
+                <li><a href="/images/ultra_zoom_screen_2.png">Screenshot &mdash; settings</a></li>
+                <li><a href="/images/ultra_zoom_screen_3.png">Screenshot &mdash; site plugins</a></li>
+                <li><a href="/images/ultra_zoom_screen_4.png">Screenshot &mdash; account &amp; Pro</a></li>
+                <li><a href="/images/ultra-zoom-google-example.gif">Animated demo &mdash; Google Images hover-zoom</a></li>
+            </ul>
+        </section>
+
+        <section class="help-section" id="contact">
+            <h2>Press contact</h2>
+            <p>
+                David McHale, Founder, Lost Rabbit Digital LLC<br>
+                <a href="mailto:press@ultrazoom.app">press@ultrazoom.app</a><br>
+                <a href="https://ultrazoom.app">https://ultrazoom.app</a>
+            </p>
+        </section>
+    </main>
+</BaseLayout>
