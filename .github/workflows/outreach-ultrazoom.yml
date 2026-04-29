@@ -16,10 +16,6 @@ name: Ultra Zoom outreach
 #
 # Required GitHub Secrets:
 #   ANTHROPIC_API_KEY               Claude API key for personalization.
-# Optional Secrets (verifier keys; pipeline tolerates absence):
-#   HUNTER_API_KEY
-#   NEVERBOUNCE_API_KEY
-#   ZEROBOUNCE_API_KEY
 # Required GitHub Variables:
 #   GCP_WORKLOAD_IDENTITY_PROVIDER  WIF provider resource name.
 #   GCP_SERVICE_ACCOUNT             leads-writer service-principal email.
@@ -49,11 +45,6 @@ on:
           - sonnet
           - opus
         default: haiku
-      no_verify:
-        description: 'Skip post-Apollo email verifier'
-        required: false
-        type: boolean
-        default: false
       limit:
         description: 'Cap leads processed (0 = no cap)'
         required: false
@@ -161,13 +152,9 @@ jobs:
         env:
           CAMPAIGNS: ${{ steps.detect.outputs.campaigns }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
-          NEVERBOUNCE_API_KEY: ${{ secrets.NEVERBOUNCE_API_KEY }}
-          ZEROBOUNCE_API_KEY: ${{ secrets.ZEROBOUNCE_API_KEY }}
           GOOGLE_SHEET_ID_UZ_REALTORS: ${{ vars.GOOGLE_SHEET_ID_UZ_REALTORS }}
           GOOGLE_SHEET_ID_UZ_PRESS: ${{ vars.GOOGLE_SHEET_ID_UZ_PRESS }}
           MODEL: ${{ inputs.model || 'haiku' }}
-          NO_VERIFY: ${{ inputs.no_verify }}
           LIMIT: ${{ inputs.limit || '0' }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
@@ -175,9 +162,6 @@ jobs:
           for c in $CAMPAIGNS; do
             echo "::group::Run $c"
             ARGS=(--campaign "$c" --model "$MODEL" --limit "$LIMIT")
-            if [ "$NO_VERIFY" = "true" ]; then
-              ARGS+=(--no-verify)
-            fi
             if [ "$DRY_RUN" = "true" ]; then
               ARGS+=(--dry-run)
             fi

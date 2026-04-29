@@ -16,15 +16,11 @@ from pathlib import Path
 # elsewhere.
 OUTREACH_DIR = Path(__file__).resolve().parent
 INBOX_DIR = OUTREACH_DIR / "inbox"
-CACHE_DIR = OUTREACH_DIR / "cache"
 PROMPTS_DIR = OUTREACH_DIR / "prompts"
 CAMPAIGNS_DIR = OUTREACH_DIR / "campaigns"
 
 EXCLUDED_DOMAINS_PATH = OUTREACH_DIR / "excluded_domains.txt"
 SUPPRESSION_PATH = OUTREACH_DIR / "suppression.csv"
-
-VERIFY_CACHE = CACHE_DIR / "verify_cache.json"
-VERIFY_TTL_DAYS = 60
 
 # Validation thresholds shared by all campaigns. Per-campaign overrides
 # (banned words, required tokens, max word count) live on the
@@ -76,9 +72,6 @@ class Config:
     """Resolved runtime configuration. Constructed once per CLI invocation."""
 
     anthropic_key: str | None = None
-    hunter_key: str | None = None
-    neverbounce_key: str | None = None
-    zerobounce_key: str | None = None
     sheet_id: str | None = None
     dry_run: bool = False
 
@@ -86,17 +79,11 @@ class Config:
     def from_env(cls, *, sheet_id_env: str, dry_run: bool = False) -> "Config":
         return cls(
             anthropic_key=os.environ.get("ANTHROPIC_API_KEY"),
-            hunter_key=os.environ.get("HUNTER_API_KEY"),
-            neverbounce_key=os.environ.get("NEVERBOUNCE_API_KEY"),
-            zerobounce_key=os.environ.get("ZEROBOUNCE_API_KEY"),
             sheet_id=os.environ.get(sheet_id_env),
             dry_run=dry_run,
         )
 
-    def has_verifier(self) -> bool:
-        return any([self.hunter_key, self.neverbounce_key, self.zerobounce_key])
-
 
 def ensure_dirs() -> None:
-    for d in (CACHE_DIR, PROMPTS_DIR, INBOX_DIR):
+    for d in (PROMPTS_DIR, INBOX_DIR):
         d.mkdir(parents=True, exist_ok=True)

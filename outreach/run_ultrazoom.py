@@ -27,11 +27,11 @@ Required env vars (live runs):
     GOOGLE_SHEET_ID_UZ_PRESS          (campaign-specific) Sheets target
     Google Sheets auth via ADC / Workload Identity Federation in CI
 
-Optional:
-    HUNTER_API_KEY / NEVERBOUNCE_API_KEY / ZEROBOUNCE_API_KEY
-        re-verify Apollo emails before personalization (Apollo's saved
-        search already filters to ``Verified``, so this is belt-and-
-        braces; skip with --no-verify).
+Email verification is intentionally not in this pipeline. Apollo's saved
+search already filters to ``Email Status = Verified``; layering a
+secondary verifier (Hunter / NeverBounce / ZeroBounce) on top costs API
+credits without changing reply rates in practice. The ingest step
+re-asserts the Verified-only filter as defense in depth.
 """
 
 from __future__ import annotations
@@ -46,7 +46,6 @@ from . import ingest_apollo_csv, stage_sheet
 from .campaign_config import CAMPAIGNS, CampaignConfig, by_name
 from .config import DEFAULT_MODEL, INBOX_DIR, Config, ensure_dirs
 from .enrich_personalize import personalize as claude_personalize
-from .enrich_verify import verify as email_verify
 from .util import log, now_iso, today_iso
 
 
@@ -77,12 +76,6 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--model", default=DEFAULT_MODEL, choices=["haiku", "sonnet", "opus"])
     p.add_argument(
-        "--no-verify",
-        action="store_true",
-        help="Skip the post-Apollo email verifier. Speeds up small batches "
-        "where Apollo's verified-only filter is trusted.",
-    )
-    p.add_argument(
         "--limit",
         type=int,
         default=0,
@@ -109,24 +102,6 @@ def _resolve_inbox_csv(campaign: CampaignConfig, override: Path | None) -> Path:
     return found
 
 
-def _verify_one(cfg: Config, email: str) -> str:
-    """Return the verifier verdict (or ``"unknown"`` when no verifier
-    keys are configured).
-    """
-    if not cfg.has_verifier():
-        return "unknown"
-    try:
-        return email_verify(
-            email,
-            hunter_key=cfg.hunter_key,
-            neverbounce_key=cfg.neverbounce_key,
-            zerobounce_key=cfg.zerobounce_key,
-        )
-    except Exception as e:  # noqa: BLE001
-        log(f"  verify error {email}: {e}")
-        return "unknown"
-
-
 def _week_number(ref: datetime | None = None) -> int:
     """ISO week-of-year. Used in the ``utm_campaign`` value so each
     week's send batch is attributable.
@@ -150,24 +125,14 @@ def _process_lead(
     cfg: Config,
     campaign: CampaignConfig,
     model: str,
-    no_verify: bool,
     week: int,
 ) -> tuple[dict[str, Any] | None, dict[str, Any] | None, str]:
     """Run T1 + T2 personalization for one lead.
 
     Returns ``(t1_row, t2_row, "")`` on success or
-    ``(None, None, drop_reason)``.
+    ``(None, None, drop_reason)``. Apollo's verified-only filter is
+    trusted — no secondary email verification step.
     """
-    email = lead.get("editor_email", "")
-    if not no_verify and not cfg.dry_run:
-        verdict = _verify_one(cfg, email)
-        if verdict == "invalid":
-            return None, None, "bad_email"
-        # ``risky`` and ``unknown`` are tolerated — Apollo already
-        # filtered to verified, and we don't want to drop legitimate
-        # role addresses (info@, david@) that secondary verifiers
-        # sometimes flag.
-
     if cfg.dry_run:
         t1 = {
             "subject": "[dry-run T1 subject]",
@@ -326,7 +291,6 @@ def main(argv: list[str] | None = None) -> int:
             cfg=cfg,
             campaign=campaign,
             model=args.model,
-            no_verify=args.no_verify,
             week=week,
         )
         if drop:

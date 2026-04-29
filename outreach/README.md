@@ -52,10 +52,8 @@ outreach/
   __init__.py
   config.py                        env loading, paths, base sheet schema
   campaign_config.py               per-campaign config (tabs, prompts, voice rules)
-  cache.py                         JSON file cache used by enrich_verify
 
   ingest_apollo_csv.py             read Apollo CSV → candidate dicts
-  enrich_verify.py                 optional Hunter/NeverBounce/ZeroBounce verifier
   enrich_personalize.py            Claude T1+T2 drafting with prompt caching
   stage_sheet.py                   append to per-tab Sheet schema
   run_ultrazoom.py                 CLI: --campaign realtors | press
@@ -94,13 +92,11 @@ GOOGLE_SHEET_ID_UZ_REALTORS       campaign-specific Sheets target
 GOOGLE_SHEET_ID_UZ_PRESS          campaign-specific Sheets target
 ```
 
-Optional:
-
-```
-HUNTER_API_KEY / NEVERBOUNCE_API_KEY / ZEROBOUNCE_API_KEY
-    Re-verify Apollo emails before personalization. Apollo's saved
-    search already filters to Verified, so this is belt-and-braces.
-```
+Email verification is intentionally not in this pipeline. Apollo's saved
+search already filters to ``Email Status = Verified`` and the ingest
+step re-asserts that filter as defense in depth. Layering Hunter /
+NeverBounce / ZeroBounce on top costs API credits without changing
+reply rates in practice.
 
 Google Sheets auth uses Application Default Credentials. In CI,
 `google-github-actions/auth@v2` exchanges the workflow's OIDC token
@@ -195,7 +191,6 @@ The Claude prompt enforces and the validator re-checks:
 ## Audit checklist
 
 - [x] All API keys via env vars / GitHub Secrets, never hardcoded
-- [x] Verifier responses cached locally (`outreach/cache/verify_cache.json`)
 - [x] Sheet-side dedupe at append time (existing `editor_email` rows skipped)
 - [x] Pipeline never writes to MailMeteor-managed columns
 - [x] Pipeline appends only, never overwrites or deletes
