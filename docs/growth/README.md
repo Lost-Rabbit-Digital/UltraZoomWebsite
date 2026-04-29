@@ -2,6 +2,10 @@
 
 Companion to the master growth plan in `ultrazoom/growth/README.md`. This doc covers only the work that lands in **this repo** (marketing website + per-repo Worker deploys).
 
+## Related plans
+
+- [`realtor-outreach.md`](./realtor-outreach.md) — vertical-specific outreach plan for real estate professionals (positioning, channels, pricing notes).
+
 ## Summary of website-side scope
 
 | Feature | Route(s) added | Backend needed | Effort in this repo |
