@@ -46,9 +46,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <p class="landing-blurb">
                 You screen dozens of listings a day. Ultra Zoom collapses
                 <em>open listing &rarr; click photo &rarr; wait for lightbox</em>
-                into a single hover &mdash; with Lanczos upscaling that pulls
-                detail out of the low-resolution images MLS systems insist on
-                serving.
+                into a single hover &mdash; with on-device AI upscaling that
+                pulls detail out of the low-resolution images MLS systems
+                insist on serving.
             </p>
 
             <p class="landing-help-link">
@@ -88,14 +88,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
         </section>
 
-        <section class="screenshot-gallery" aria-label="What Lanczos upscaling does">
-            <h2 class="gallery-title">Lanczos upscaling, in plain English</h2>
+        <section class="screenshot-gallery" aria-label="What AI upscaling does">
+            <h2 class="gallery-title">AI upscaling, in plain English</h2>
             <p class="pricing-intro pricing-intro--centered">
-                MLS systems compress listing photos aggressively. Ultra Zoom uses
-                Lanczos resampling &mdash; the same algorithm pro photo editors
-                use &mdash; to enlarge those images while preserving edge detail.
-                The result: a hover preview that lets you actually <em>see</em>
-                what the listing agent uploaded, not a pixelated guess.
+                MLS systems compress listing photos aggressively. Ultra Zoom runs
+                Real-ESRGAN (general x4v3) on-device to enlarge those images
+                while reconstructing edge detail, with Lanczos resampling as a
+                fallback when the AI model isn&rsquo;t available. The result: a
+                hover preview that lets you actually <em>see</em> what the
+                listing agent uploaded, not a pixelated guess.
             </p>
             <div class="gallery-grid">
                 <figure class="gallery-item">
@@ -137,9 +138,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     <span class="savings-banner-old">$29.99/yr</span>
                     <span class="savings-banner-arrow" aria-hidden="true">&rarr;</span>
                     <span class="savings-banner-new">$20.99</span>
-                    <span class="savings-banner-period">first year</span>
+                    <span class="savings-banner-period">/yr forever</span>
                 </p>
-                <p class="savings-banner-note">30% off the annual plan. Renews at $29.99/yr after year one. Apply <code>REALTOR30</code> at checkout.</p>
+                <p class="savings-banner-note">30% off the annual plan, every year. Apply <code>REALTOR30</code> at checkout.</p>
             </div>
         </section>
 
