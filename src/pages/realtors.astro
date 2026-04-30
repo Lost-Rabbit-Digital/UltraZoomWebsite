@@ -150,6 +150,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             var errEl = document.getElementById('checkout-error');
             var PLAN_PRICES = { monthly: 3.99, annual: 29.99, lifetime: 59.99 };
 
+            var coupon = null;
+            try {
+                var c = new URLSearchParams(window.location.search).get('coupon');
+                if (c) coupon = c;
+            } catch (_) {}
+
             document.querySelectorAll('[data-plan]').forEach(function (btn) {
                 btn.addEventListener('click', function (e) {
                     e.preventDefault();
@@ -175,10 +181,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     btn.style.opacity = '0.6';
                     btn.style.pointerEvents = 'none';
 
+                    var payload = { plan: plan, source: 'realtors' };
+                    if (coupon) payload.coupon = coupon;
+
                     fetch('https://api.ultrazoom.app/api/checkout', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ plan: plan, source: 'realtors' })
+                        body: JSON.stringify(payload)
                     })
                     .then(function (res) { return res.json(); })
                     .then(function (data) {
