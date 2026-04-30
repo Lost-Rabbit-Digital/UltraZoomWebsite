@@ -52,6 +52,16 @@ const articleSchema = {
   },
 };
 
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ultrazoom.app/' },
+    { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://ultrazoom.app/blog' },
+    { '@type': 'ListItem', position: 3, name: title, item: canonicalUrl },
+  ],
+};
+
 const allPosts = await getCollection('blog');
 const relatedPosts = allPosts
   .filter(p => p.id !== slug)
@@ -74,11 +84,13 @@ const relatedPosts = allPosts
     title,
     description,
     image: ogImage,
+    imageWidth: 1200,
+    imageHeight: 630,
     publishedTime: isoDateTime,
     modifiedTime: isoDateTime,
     section: category,
   }}
-  jsonLd={articleSchema}
+  jsonLd={[articleSchema, breadcrumbSchema]}
   currentPage="blog"
 >
     <main class="main page-content" id="main-content">

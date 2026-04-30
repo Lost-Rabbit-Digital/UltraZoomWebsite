@@ -12,16 +12,83 @@ const fontBold = await fs.readFile(
   path.resolve('./src/assets/fonts/DejaVuSans-Bold.ttf')
 );
 
+interface OgCard {
+  title: string;
+  eyebrow: string;
+}
+
+const SITE_PAGES: Record<string, OgCard> = {
+  home: {
+    eyebrow: 'Browser extension',
+    title: 'Hover-to-zoom for Chrome and Firefox, with zero tracking.',
+  },
+  pricing: {
+    eyebrow: 'Pricing',
+    title: 'Free on every site. Pro from $3.99/mo with a 7-day free trial.',
+  },
+  help: {
+    eyebrow: 'Help & docs',
+    title: 'Setup, keyboard shortcuts, and supported sites for Ultra Zoom.',
+  },
+  sites: {
+    eyebrow: 'Supported sites',
+    title: '70+ image-heavy sites, hover-zoomed out of the box.',
+  },
+  'whats-new': {
+    eyebrow: "What's new",
+    title: 'On-device AI upscaling, theater mode, reverse image search, and more.',
+  },
+  realtors: {
+    eyebrow: 'For realtors',
+    title: 'Spot deferred maintenance before you book the showing.',
+  },
+  press: {
+    eyebrow: 'Press kit',
+    title: 'Launch release, boilerplate, and assets for Ultra Zoom.',
+  },
+  contact: {
+    eyebrow: 'Contact',
+    title: 'Get help, report bugs, or request new sites.',
+  },
+  terms: {
+    eyebrow: 'Terms',
+    title: 'Terms of use for the Ultra Zoom browser extension.',
+  },
+  privacy: {
+    eyebrow: 'Privacy',
+    title: 'Zero telemetry, zero tracking. How Ultra Zoom handles your data.',
+  },
+  blog: {
+    eyebrow: 'Blog',
+    title: 'Release notes, tips, and stories from the Ultra Zoom team.',
+  },
+  'compare-imagus': {
+    eyebrow: 'Comparison',
+    title: 'Ultra Zoom vs. Imagus — a privacy-first, actively maintained alternative.',
+  },
+  'compare-hover-zoom-plus': {
+    eyebrow: 'Comparison',
+    title: 'Ultra Zoom vs. Hover Zoom Plus — a modern, privacy-first alternative.',
+  },
+};
+
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
-  return posts.map(post => ({
+  const blogPaths = posts.map(post => ({
     params: { slug: post.id },
-    props: { post },
+    props: {
+      card: { eyebrow: post.data.category, title: post.data.title } as OgCard,
+    },
   }));
+  const sitePaths = Object.entries(SITE_PAGES).map(([slug, card]) => ({
+    params: { slug },
+    props: { card },
+  }));
+  return [...blogPaths, ...sitePaths];
 }
 
 export async function GET({ props }: APIContext) {
-  const { post } = props as { post: { data: { title: string; category: string } } };
+  const { card } = props as { card: OgCard };
 
   const svg = await satori(
     {
@@ -93,7 +160,7 @@ export async function GET({ props }: APIContext) {
                       letterSpacing: '0.12em',
                       fontWeight: 700,
                     },
-                    children: post.data.category,
+                    children: card.eyebrow,
                   },
                 },
                 {
@@ -106,7 +173,7 @@ export async function GET({ props }: APIContext) {
                       color: '#e6edf3',
                       letterSpacing: '-0.02em',
                     },
-                    children: post.data.title,
+                    children: card.title,
                   },
                 },
               ],

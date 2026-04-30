@@ -1,5 +1,41 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const productSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: 'Ultra Zoom Pro',
+  description:
+    'Pro features for Ultra Zoom: premium site plugins, on-device AI upscaling, advanced gallery, video controls, history search, and custom URL rules.',
+  brand: { '@type': 'Brand', name: 'Ultra Zoom' },
+  image: 'https://ultrazoom.app/og/pricing.png',
+  offers: [
+    {
+      '@type': 'Offer',
+      name: 'Monthly',
+      price: '3.99',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      url: 'https://ultrazoom.app/pricing',
+    },
+    {
+      '@type': 'Offer',
+      name: 'Annual',
+      price: '29.99',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      url: 'https://ultrazoom.app/pricing',
+    },
+    {
+      '@type': 'Offer',
+      name: 'Lifetime',
+      price: '59.99',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      url: 'https://ultrazoom.app/pricing',
+    },
+  ],
+};
 ---
 
 <BaseLayout
@@ -10,8 +46,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     url: 'https://ultrazoom.app/pricing',
     title: 'Pricing | Ultra Zoom',
     description: 'Ultra Zoom is free on every site. Upgrade to Pro for premium plugins and power features.',
-    image: 'https://ultrazoom.app/images/icon-128.png',
+    image: 'https://ultrazoom.app/og/pricing.png',
+    imageWidth: 1200,
+    imageHeight: 630,
   }}
+  jsonLd={productSchema}
 >
     <main class="main page-content" id="main-content">
         <h1>Pricing</h1>

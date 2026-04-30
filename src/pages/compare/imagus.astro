@@ -1,5 +1,46 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ultrazoom.app/' },
+    { '@type': 'ListItem', position: 2, name: 'Compare', item: 'https://ultrazoom.app/compare/imagus' },
+    { '@type': 'ListItem', position: 3, name: 'Ultra Zoom vs. Imagus', item: 'https://ultrazoom.app/compare/imagus' },
+  ],
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Is Ultra Zoom a drop-in Imagus replacement?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes for the core workflow. Ultra Zoom supports the same hover-zoom patterns Imagus users expect: sieve-style URL rules, gallery navigation, theater mode, and reverse image search shortcuts. Hosts that need special handling beyond URL rules ship as built-in plugins.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Why switch from Imagus to Ultra Zoom?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Active development with releases every few weeks, native Manifest V3 builds for Chrome and current Firefox add-on, zero telemetry by design, and a transparent Pro tier with Stripe-managed billing — no opaque license server.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can I import my Imagus sieve rules?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Ultra Zoom supports community URL-rules packs that auto-update weekly to extend coverage. Custom URL rules are a Pro feature for users migrating from Imagus with their own rule sets.',
+      },
+    },
+  ],
+};
 ---
 
 <BaseLayout
@@ -10,8 +51,11 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     url: 'https://ultrazoom.app/compare/imagus',
     title: 'Ultra Zoom vs. Imagus',
     description: 'A privacy-first, actively maintained Imagus alternative for Chrome and Firefox.',
-    image: 'https://ultrazoom.app/images/icon-128.png',
+    image: 'https://ultrazoom.app/og/compare-imagus.png',
+    imageWidth: 1200,
+    imageHeight: 630,
   }}
+  jsonLd={[breadcrumbSchema, faqSchema]}
 >
     <main class="main page-content" id="main-content">
         <h1>Ultra Zoom vs. Imagus</h1>

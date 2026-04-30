@@ -1,5 +1,60 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'How do I install Ultra Zoom?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Install Ultra Zoom from the Chrome Web Store or Mozilla Add-ons. After installing, hover any image on a supported site to see the full-resolution version. No account or sign-in required.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Which browsers are supported?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Ultra Zoom runs on Google Chrome, Mozilla Firefox, Microsoft Edge, and Brave. The Chrome build is Manifest V3 native.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Does Ultra Zoom track me?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'No. Ultra Zoom has zero telemetry, no analytics, and no server that sees your browsing. Settings are stored locally in your browser. Pro license validation is the only network request the extension makes, and it carries only the license key.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Which sites does Ultra Zoom support?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Ultra Zoom ships with optimized plugins for 70+ image-heavy sites including Google Images, Amazon, Reddit, Twitter/X, Pinterest, eBay, Etsy, Instagram, Flickr, Imgur, ArtStation, and Pixiv. Generic hover-zoom can be enabled for sites without a dedicated plugin.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What does Pro unlock?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Pro unlocks on-device AI upscaling (Real-ESRGAN), advanced gallery navigation, video preview and playback controls, hover history search, and custom URL rules. Pro starts at $3.99/mo with a 7-day free trial; lifetime access is available for $59.99.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can I disable Ultra Zoom on specific sites?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. Click the Ultra Zoom toolbar icon on any site to toggle it off for that domain. The master toggle in the popup disables the extension globally.',
+      },
+    },
+  ],
+};
 ---
 
 <BaseLayout
@@ -10,8 +65,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     url: 'https://ultrazoom.app/help',
     title: 'Help & Documentation | Ultra Zoom',
     description: 'Setup, keyboard shortcuts, supported sites, and troubleshooting for the Ultra Zoom browser extension.',
-    image: 'https://ultrazoom.app/images/icon-128.png',
+    image: 'https://ultrazoom.app/og/help.png',
+    imageWidth: 1200,
+    imageHeight: 630,
   }}
+  jsonLd={faqSchema}
 >
     <main class="main" id="main-content">
 
