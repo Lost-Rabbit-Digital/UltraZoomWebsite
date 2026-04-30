@@ -1340,6 +1340,259 @@ kbd {
     margin-right: auto;
 }
 
+/* ── Testimonials (Realtors) ─────────────────────── */
+
+.testimonials {
+    max-width: 960px;
+    margin: 0 auto 3rem;
+    padding: 0 1rem;
+}
+
+.testimonials-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.testimonial-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--brand);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+}
+
+.testimonial-quote {
+    margin: 0 0 0.5rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    line-height: 1.55;
+    font-style: italic;
+}
+
+.testimonial-attribution {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 720px) {
+    .testimonials-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Savings banner (Realtors coupon) ────────────── */
+
+.savings-banner {
+    max-width: 720px;
+    margin: 0 auto 1.25rem;
+    padding: 0 1rem;
+}
+
+.savings-banner-inner {
+    background: var(--bg-secondary);
+    border: 1px solid var(--brand);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    text-align: center;
+}
+
+.savings-banner-eyebrow {
+    margin: 0 0 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--brand-light);
+}
+
+.savings-banner-prices {
+    margin: 0 0 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.savings-banner-old {
+    color: var(--text-secondary);
+    text-decoration: line-through;
+    font-weight: 500;
+}
+
+.savings-banner-arrow {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.savings-banner-new {
+    color: var(--success);
+    font-size: 1.6rem;
+}
+
+.savings-banner-period {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.savings-banner-note {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.savings-banner-note code {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.05rem 0.35rem;
+    font-size: 0.85rem;
+    color: var(--brand-light);
+}
+
+.support-strip-btn-sub {
+    display: inline-block;
+    margin-left: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+/* ── FAQ (Realtors) ──────────────────────────────── */
+
+.faq {
+    max-width: 720px;
+    margin: 0 auto 3rem;
+    padding: 0 1rem;
+}
+
+.faq-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--brand-light);
+    text-align: center;
+    margin: 0 0 1.25rem;
+}
+
+.faq-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.faq-item details {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.85rem 1.1rem;
+}
+
+.faq-item details[open] {
+    border-color: var(--brand);
+}
+
+.faq-item summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1rem;
+    list-style: none;
+    position: relative;
+    padding-right: 1.5rem;
+}
+
+.faq-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.faq-item summary::after {
+    content: '+';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    color: var(--brand-light);
+    line-height: 1;
+}
+
+.faq-item details[open] summary::after {
+    content: '\2212';
+}
+
+.faq-item details > p {
+    margin: 0.7rem 0 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.faq-item details > p a {
+    color: var(--brand-light);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* ── Final CTA (Realtors) ────────────────────────── */
+
+.final-cta {
+    max-width: 720px;
+    margin: 0 auto 3rem;
+    padding: 0 1rem;
+}
+
+.final-cta-inner {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem 1.75rem;
+    text-align: center;
+}
+
+.final-cta-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.final-cta-body {
+    margin: 0 0 1.25rem;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.final-cta-install {
+    margin-bottom: 1rem;
+}
+
+.final-cta-brokerage {
+    margin: 0.75rem 0 0;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.final-cta-brokerage a {
+    color: var(--brand-light);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 /* ── Screenshot Gallery (Landing) ────────────────── */
 
 .screenshot-gallery {

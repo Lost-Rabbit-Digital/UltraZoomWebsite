@@ -117,6 +117,32 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
         </section>
 
+        <section class="testimonials" aria-label="What agents say">
+            <ul class="testimonials-list">
+                <li class="testimonial-card">
+                    <blockquote class="testimonial-quote">&ldquo;Fan of Ultra Zoom &mdash; glad it works with CREXI.&rdquo;</blockquote>
+                    <p class="testimonial-attribution">&mdash; David Johnson, commercial broker</p>
+                </li>
+                <li class="testimonial-card">
+                    <blockquote class="testimonial-quote">&ldquo;Love how fast listing [photo] review [has gotten] with Ultra Zoom.&rdquo;</blockquote>
+                    <p class="testimonial-attribution">&mdash; Paul Duggan, listing agent</p>
+                </li>
+            </ul>
+        </section>
+
+        <section class="savings-banner" aria-label="Realtor coupon">
+            <div class="savings-banner-inner">
+                <p class="savings-banner-eyebrow">REALTOR30 from your inbox</p>
+                <p class="savings-banner-prices">
+                    <span class="savings-banner-old">$29.99/yr</span>
+                    <span class="savings-banner-arrow" aria-hidden="true">&rarr;</span>
+                    <span class="savings-banner-new">$20.99</span>
+                    <span class="savings-banner-period">first year</span>
+                </p>
+                <p class="savings-banner-note">30% off the annual plan. Renews at $29.99/yr after year one. Apply <code>REALTOR30</code> at checkout.</p>
+            </div>
+        </section>
+
         <section class="support-strip" aria-label="Pricing for agents">
             <div class="support-strip-inner">
                 <p class="support-strip-text">
@@ -126,11 +152,75 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     <a href="/pricing">See full pricing &rarr;</a>
                 </p>
                 <div class="support-strip-actions">
-                    <a href="#" class="payment-btn-hero support-strip-btn" data-plan="lifetime">$59.99 lifetime</a>
-                    <span class="support-strip-or"><a href="#" data-plan="annual">$29.99/yr</a> &middot; <a href="#" data-plan="monthly">7-day free trial</a></span>
+                    <a href="#" class="payment-btn-hero support-strip-btn" data-plan="annual">$29.99/yr <span class="support-strip-btn-sub">&mdash; $20.99 with REALTOR30</span></a>
+                    <span class="support-strip-or"><a href="#" data-plan="lifetime">$59.99 lifetime</a> &middot; <a href="#" data-plan="monthly">7-day free trial</a></span>
                 </div>
             </div>
             <p id="checkout-error" class="checkout-error" hidden></p>
+        </section>
+
+        <section class="faq" aria-label="Realtor FAQ">
+            <h2 class="faq-title">Common questions from agents</h2>
+            <ul class="faq-list">
+                <li class="faq-item">
+                    <details>
+                        <summary>Does this work with my MLS?</summary>
+                        <p>Confirmed working on Zillow, Redfin, Realtor.com, CoStar, and LoopNet, plus most major MLS image viewers. Browse the <a href="/sites">supported sites list</a>, or install the free trial and try it on yours &mdash; if a site we haven&rsquo;t listed misbehaves, <a href="/contact">let us know</a> and we&rsquo;ll add a selector.</p>
+                    </details>
+                </li>
+                <li class="faq-item">
+                    <details>
+                        <summary>Is my client data safe?</summary>
+                        <p>Yes. Ultra Zoom runs entirely in your browser. There is no analytics endpoint, no remote code, and no server that sees what listings you&rsquo;re reviewing. Read the <a href="/privacy">privacy policy</a> for the full posture.</p>
+                    </details>
+                </li>
+                <li class="faq-item">
+                    <details>
+                        <summary>Will this slow down my browser?</summary>
+                        <p>No. Upscaling only runs on the photo you hover, only when you hover it. There&rsquo;s no background processing, no preloading of every image on the page, and no network calls to a remote service. Screening 50 listings feels the same as without the extension &mdash; just with sharper photos when you want them.</p>
+                    </details>
+                </li>
+                <li class="faq-item">
+                    <details>
+                        <summary>Can I install on multiple devices?</summary>
+                        <p>Yes &mdash; install on every browser where you&rsquo;re signed into your Chrome or Firefox account. There is no device limit. Pro keeps your settings in sync across them.</p>
+                    </details>
+                </li>
+                <li class="faq-item">
+                    <details>
+                        <summary>Is it a tax-deductible business expense?</summary>
+                        <p>Most agents expense it like any other business software subscription. We&rsquo;re not your accountant though &mdash; consult your CPA for specifics on your situation.</p>
+                    </details>
+                </li>
+            </ul>
+        </section>
+
+        <section class="final-cta" aria-label="Install Ultra Zoom">
+            <div class="final-cta-inner">
+                <h2 class="final-cta-title">Try it on your next listing review</h2>
+                <p class="final-cta-body">Free to install. No account, no credit card. Most agents know within an afternoon whether it stays in their workflow.</p>
+                <ul class="install-links final-cta-install">
+                    <li>
+                        <a href="https://chromewebstore.google.com/detail/ultra-zoom/jalclpdejbeamaamcpbolkclpnleagmg?utm_source=realtors-page-final" class="install-button chrome" target="_blank" rel="noopener">
+                            <svg class="install-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false">
+                                <path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29zm13.342 2.166a5.446 5.446 0 0 1 1.45 7.09l.002.001-3.953 6.848c.313.03.63.047.951.047 6.627 0 12-5.373 12-12 0-1.034-.135-2.035-.377-2.986zM12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/>
+                            </svg>
+                            Install free for Chrome
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/?utm_source=realtors-page-final" class="install-button firefox" target="_blank" rel="noopener">
+                            <svg class="install-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false">
+                                <path d="M22.207 5.534a11.18 11.18 0 0 0-2.455-3.218c.472.869.744 1.79.864 2.352a9.597 9.597 0 0 0-3.678-3.533c-2.057-1.17-4.228-1.32-5.2-1.238a9.747 9.747 0 0 0-5.393 2.138c-.346.3-1.178 1.095-1.884 2.268-.58 1.024-.876 1.963-1.034 2.608a10.783 10.783 0 0 1 2.873-3.312c3.617-2.746 8.239-2.227 8.694-2.174l.03.003c-2.282.103-4.267.8-5.725 1.753A10.143 10.143 0 0 0 6.32 6.8 8.505 8.505 0 0 0 4.25 9.87a7.106 7.106 0 0 0-.143 4.093 8.154 8.154 0 0 0 1.446 3.143 8.482 8.482 0 0 0 2.875 2.455A8.91 8.91 0 0 0 12 20.634a8.62 8.62 0 0 0 3.71-.818 8.177 8.177 0 0 0 2.925-2.283 7.775 7.775 0 0 0 1.503-3.2 7.236 7.236 0 0 0-.115-3.582 6.687 6.687 0 0 0-1.57-2.815z"/>
+                            </svg>
+                            Install free for Firefox
+                        </a>
+                    </li>
+                </ul>
+                <p class="final-cta-brokerage">
+                    Running a team or brokerage? <a href="mailto:boden@lostrabbitdigital.com?subject=Ultra%20Zoom%20brokerage%20licensing">Talk to us about brokerage licensing &rarr;</a>
+                </p>
+            </div>
         </section>
 
         <section class="referral-strip" aria-label="Refer other agents">
