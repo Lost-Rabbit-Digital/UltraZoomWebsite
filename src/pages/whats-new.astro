@@ -4,12 +4,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout
   title="What's New | Ultra Zoom"
-  description="Recent Ultra Zoom releases, including the Imagus-parity release with theater mode, reverse image search, advanced gallery, and twelve new site plugins."
+  description="Recent Ultra Zoom releases, including on-device AI upscaling powered by Real-ESRGAN, theater mode, reverse image search, advanced gallery, and twelve new site plugins."
   currentPage="whats-new"
   og={{
     url: 'https://ultrazoom.app/whats-new',
     title: "What's New in Ultra Zoom",
-    description: 'Latest Ultra Zoom releases at a glance: theater mode, reverse image search, advanced gallery, video playback controls, and a dozen new free sites.',
+    description: 'Latest Ultra Zoom releases at a glance: on-device AI upscaling, theater mode, reverse image search, advanced gallery, and a dozen new free sites.',
     image: 'https://ultrazoom.app/images/icon-128.png',
   }}
 >
@@ -18,8 +18,24 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
         <p class="pricing-intro">A running log of Ultra Zoom releases. The TL;DR for power users coming from another hover-zoom tool: feature parity is here, and the basics that used to require Pro are now free.</p>
 
+        <article class="help-section" id="ai-upscaling-release">
+            <h2>AI upscaling release <span class="badge-pro">Latest</span></h2>
+            <p>Ultra Zoom now <em>enhances</em> the photo as you zoom &mdash; not just enlarge it. The model runs entirely on your device, so no image leaves the browser.</p>
+
+            <h3>New Pro feature</h3>
+            <ul class="help-list">
+                <li><strong>On-device AI upscaling</strong> &mdash; Real-ESRGAN (general x4v3) reconstructs detail in low-resolution images at hover time, with Lanczos resampling as an automatic fallback when the model isn&rsquo;t available. Useful for MLS thumbnails, compressed product photos, and any tiny preview that used to go pixelated when you zoomed in.</li>
+                <li><strong>Per-site toggle</strong> &mdash; turn AI upscaling on only where you need it; the popup remembers your choice per domain.</li>
+                <li><strong>Zero network calls.</strong> The model is bundled with the extension. Like everything else in Ultra Zoom, no image data is sent to a server.</li>
+            </ul>
+
+            <p class="pro-cta">
+                <a href="/pricing" class="pro-cta-btn">See Pro plans</a>
+            </p>
+        </article>
+
         <article class="help-section" id="parity-release">
-            <h2>Imagus-parity release <span class="badge-pro">Latest</span></h2>
+            <h2>Imagus-parity release</h2>
             <p>The big one: every staple of the legacy hover-zoom tools is now in Ultra Zoom, plus a dozen new site plugins and a power-user upgrade path.</p>
 
             <h3>Free for everyone</h3>
