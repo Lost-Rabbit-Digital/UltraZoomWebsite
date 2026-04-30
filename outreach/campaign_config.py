@@ -145,13 +145,6 @@ class CampaignConfig:
     def all_banned_words(self) -> tuple[str, ...]:
         return GLOBAL_BANNED_WORDS + self.extra_banned_words
 
-    def render_landing_link(self, *, week: int, touch: int) -> str:
-        return (
-            self.landing_link_template.replace("{week}", str(week)).replace(
-                "{touch}", str(touch)
-            )
-        )
-
 
 REALTORS = CampaignConfig(
     name="ultrazoom-realtors",

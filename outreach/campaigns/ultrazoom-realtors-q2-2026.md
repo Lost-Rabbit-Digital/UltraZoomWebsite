@@ -46,9 +46,8 @@ Must complete before first send. Ordered by criticality.
 **URL:** `ultrazoom.com/realtors`
 
 **Tracking requirements:**
-- UTM-aware: read `utm_source`, `utm_campaign`, `utm_content` from URL
-- Coupon prefill: if `?coupon=REALTOR30` in URL, prefill Stripe checkout coupon field
-- Distinct conversion event in analytics (`realtor_signup`, `realtor_trial_start`)
+- Coupon prefill: if `?coupon=REALTOR30` in URL, forward it to the checkout API so Stripe applies the discount automatically
+- Attribution is read from Stripe (count of `REALTOR30` redemptions) and Cloudflare's built-in request analytics (visits to `/realtors`). No client-side analytics SDK is added for this campaign.
 
 ### Page structure
 

@@ -34,7 +34,6 @@ from __future__ import annotations
 
 import argparse
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -98,13 +97,6 @@ def _resolve_inbox_csv(campaign: CampaignConfig, override: Path | None) -> Path:
     return found
 
 
-def _week_number(ref: datetime | None = None) -> int:
-    """ISO week-of-year. Used in the ``utm_campaign`` value so each
-    week's send batch is attributable.
-    """
-    return (ref or datetime.now(timezone.utc)).isocalendar().week
-
-
 def _force_re_prefix(subject: str) -> str:
     """Ensure a T2 subject starts with ``Re: `` so Gmail threads it
     under the T1 conversation.
@@ -121,7 +113,6 @@ def _process_lead(
     cfg: Config,
     campaign: CampaignConfig,
     model: str,
-    week: int,
 ) -> tuple[dict[str, Any] | None, dict[str, Any] | None, str]:
     """Run T1 + T2 personalization for one lead.
 
@@ -166,9 +157,6 @@ def _process_lead(
 
     enriched_at = now_iso()
 
-    landing_t1 = campaign.render_landing_link(week=week, touch=1)
-    landing_t2 = campaign.render_landing_link(week=week, touch=2)
-
     t1_row = dict(lead)
     t1_row["personalized_subject"] = t1["subject"]
     # Substitute ``{{landing_page_link}}`` at stage time. The AI is told
@@ -176,7 +164,7 @@ def _process_lead(
     # runner resolves it before the row hits the Sheet so MailMeteor
     # ships a real URL.
     t1_row["personalized_body"] = t1["body"].replace(
-        "{{landing_page_link}}", landing_t1
+        "{{landing_page_link}}", campaign.landing_link_template
     )
     t1_row["enriched_at"] = enriched_at
     t1_row["notes"] = f"{campaign.name} | t1 | sender={campaign.sender_email}"
@@ -184,7 +172,7 @@ def _process_lead(
     t2_row = dict(lead)
     t2_row["personalized_subject"] = t2["subject"]
     t2_row["personalized_body"] = t2["body"].replace(
-        "{{landing_page_link}}", landing_t2
+        "{{landing_page_link}}", campaign.landing_link_template
     )
     t2_row["enriched_at"] = enriched_at
     t2_row["notes"] = f"{campaign.name} | t2 | sender={campaign.sender_email}"
@@ -264,7 +252,6 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     # 3. Personalize each lead's T1 + T2.
-    week = _week_number()
     t1_rows: list[dict[str, Any]] = []
     t2_rows: list[dict[str, Any]] = []
     drops: dict[str, int] = {}
@@ -278,7 +265,6 @@ def main(argv: list[str] | None = None) -> int:
             cfg=cfg,
             campaign=campaign,
             model=args.model,
-            week=week,
         )
         if drop:
             log(f"    dropped: {drop}")
