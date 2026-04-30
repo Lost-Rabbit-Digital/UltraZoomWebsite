@@ -1,5 +1,11 @@
 User-agent: *
 Allow: /
 Disallow: /success
+Disallow: /account
+Disallow: /feedback
+Disallow: /r
+Disallow: /r/
+Disallow: /z
+Disallow: /z/
 
 Sitemap: https://ultrazoom.app/sitemap-index.xml

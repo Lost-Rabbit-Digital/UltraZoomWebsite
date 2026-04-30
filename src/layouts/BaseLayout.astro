@@ -8,6 +8,8 @@ interface Props {
     title?: string;
     description?: string;
     image?: string;
+    imageWidth?: number;
+    imageHeight?: number;
     publishedTime?: string;
     modifiedTime?: string;
     section?: string;
@@ -40,6 +42,8 @@ if (canonicalPath.endsWith('/index.html')) {
 }
 const canonicalUrl = canonical ?? new URL(canonicalPath, Astro.site).toString();
 const ogType = og?.type ?? 'website';
+const ogImageWidth = og?.imageWidth;
+const ogImageHeight = og?.imageHeight;
 const twitterCard = og?.image ? 'summary_large_image' : 'summary';
 const jsonLdBlocks = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 
@@ -74,16 +78,20 @@ const footerLinks = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {description && <meta name="description" content={description}>}
-    <meta name="theme-color" content="#181a20">
+    <meta name="theme-color" content="#0d1117">
     {noindex && <meta name="robots" content="noindex">}
     {!noindex && <link rel="canonical" href={canonicalUrl}>}
     {og && (
         <>
             <meta property="og:type" content={ogType}>
+            <meta property="og:site_name" content="Ultra Zoom">
+            <meta property="og:locale" content="en_US">
             {og.url && <meta property="og:url" content={og.url}>}
             {og.title && <meta property="og:title" content={og.title}>}
             {og.description && <meta property="og:description" content={og.description}>}
             {og.image && <meta property="og:image" content={og.image}>}
+            {og.image && ogImageWidth && <meta property="og:image:width" content={String(ogImageWidth)}>}
+            {og.image && ogImageHeight && <meta property="og:image:height" content={String(ogImageHeight)}>}
             {og.publishedTime && <meta property="article:published_time" content={og.publishedTime}>}
             {og.modifiedTime && <meta property="article:modified_time" content={og.modifiedTime}>}
             {og.section && <meta property="article:section" content={og.section}>}

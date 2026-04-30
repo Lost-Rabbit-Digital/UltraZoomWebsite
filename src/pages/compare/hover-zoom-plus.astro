@@ -1,5 +1,46 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ultrazoom.app/' },
+    { '@type': 'ListItem', position: 2, name: 'Compare', item: 'https://ultrazoom.app/compare/hover-zoom-plus' },
+    { '@type': 'ListItem', position: 3, name: 'Ultra Zoom vs. Hover Zoom Plus', item: 'https://ultrazoom.app/compare/hover-zoom-plus' },
+  ],
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Is Ultra Zoom a Hover Zoom Plus replacement?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. Ultra Zoom keeps the workflow Hover Zoom and Hover Zoom Plus users know — instant hover-zoom on image-heavy sites — and adds active development, native Manifest V3 builds, on-device AI upscaling, and zero telemetry.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Why switch from Hover Zoom Plus?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Zero telemetry by design, regular release cadence, Manifest V3 native builds without the V3 traps that broke older forks, and a transparent Pro tier with Stripe-managed billing.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What was the Hover Zoom privacy issue?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'The original Hover Zoom extension was caught logging the URLs of every page its users visited and selling the data. That history is the reason many users switched away from the family of forks. Ultra Zoom is built without any analytics or tracking — see the architecture write-up on the blog.',
+      },
+    },
+  ],
+};
 ---
 
 <BaseLayout
@@ -10,8 +51,11 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     url: 'https://ultrazoom.app/compare/hover-zoom-plus',
     title: 'Ultra Zoom vs. Hover Zoom Plus',
     description: 'A privacy-first, actively maintained Hover Zoom Plus alternative for Chrome and Firefox.',
-    image: 'https://ultrazoom.app/images/icon-128.png',
+    image: 'https://ultrazoom.app/og/compare-hover-zoom-plus.png',
+    imageWidth: 1200,
+    imageHeight: 630,
   }}
+  jsonLd={[breadcrumbSchema, faqSchema]}
 >
     <main class="main page-content" id="main-content">
         <h1>Ultra Zoom vs. Hover Zoom Plus</h1>

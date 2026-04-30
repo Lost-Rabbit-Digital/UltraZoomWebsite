@@ -1,5 +1,84 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': 'https://ultrazoom.app/#organization',
+  name: 'Ultra Zoom',
+  legalName: 'Lost Rabbit Digital LLC',
+  url: 'https://ultrazoom.app',
+  logo: {
+    '@type': 'ImageObject',
+    url: 'https://ultrazoom.app/images/icon-128.png',
+    width: 128,
+    height: 128,
+  },
+  sameAs: [
+    'https://chromewebstore.google.com/detail/ultra-zoom/jalclpdejbeamaamcpbolkclpnleagmg',
+    'https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/',
+    'https://bsky.app/profile/bodengamedev.bsky.social',
+  ],
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': 'https://ultrazoom.app/#website',
+  url: 'https://ultrazoom.app',
+  name: 'Ultra Zoom',
+  description:
+    'Hover-to-zoom browser extension for Chrome and Firefox, with zero telemetry.',
+  publisher: { '@id': 'https://ultrazoom.app/#organization' },
+  inLanguage: 'en-US',
+};
+
+const softwareApplicationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  '@id': 'https://ultrazoom.app/#software',
+  name: 'Ultra Zoom',
+  description:
+    'Instant hover-to-zoom for images across image search, social, shopping, photography, and news sites. Free browser extension for Chrome and Firefox.',
+  url: 'https://ultrazoom.app',
+  image: 'https://ultrazoom.app/og/home.png',
+  applicationCategory: 'BrowserApplication',
+  operatingSystem: 'Chrome, Firefox, Edge, Brave',
+  publisher: { '@id': 'https://ultrazoom.app/#organization' },
+  offers: [
+    {
+      '@type': 'Offer',
+      name: 'Free',
+      price: '0',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+    },
+    {
+      '@type': 'Offer',
+      name: 'Pro Monthly',
+      price: '3.99',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      url: 'https://ultrazoom.app/pricing',
+    },
+    {
+      '@type': 'Offer',
+      name: 'Pro Annual',
+      price: '29.99',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      url: 'https://ultrazoom.app/pricing',
+    },
+    {
+      '@type': 'Offer',
+      name: 'Pro Lifetime',
+      price: '59.99',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      url: 'https://ultrazoom.app/pricing',
+    },
+  ],
+};
 ---
 
 <BaseLayout
@@ -9,8 +88,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     url: 'https://ultrazoom.app/',
     title: 'Ultra Zoom | Hover-to-Zoom Browser Extension',
     description: 'Instant hover-to-zoom for images across image search, social, shopping, photography, and news sites. Free browser extension for Chrome and Firefox.',
-    image: 'https://ultrazoom.app/images/icon-128.png',
+    image: 'https://ultrazoom.app/og/home.png',
+    imageWidth: 1200,
+    imageHeight: 630,
   }}
+  jsonLd={[organizationSchema, websiteSchema, softwareApplicationSchema]}
 >
     <main class="landing" id="main-content">
         <section class="landing-hero">

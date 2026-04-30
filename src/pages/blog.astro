@@ -11,6 +11,14 @@ const posts = (await getCollection('blog')).sort(
   title="Blog | Ultra Zoom"
   description="Updates, release notes, and tips for the Ultra Zoom hover-to-zoom browser extension."
   currentPage="blog"
+  og={{
+    url: 'https://ultrazoom.app/blog',
+    title: 'Ultra Zoom Blog',
+    description: 'Release notes, tips, and stories from the people building Ultra Zoom.',
+    image: 'https://ultrazoom.app/og/blog.png',
+    imageWidth: 1200,
+    imageHeight: 630,
+  }}
 >
     <main class="main page-content" id="main-content">
         <header class="blog-header">
