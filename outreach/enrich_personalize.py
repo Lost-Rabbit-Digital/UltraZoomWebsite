@@ -73,8 +73,8 @@ Hard rules — violations cause your draft to be rejected:
   enjoyed", or similar.
 - No vendor buzzwords. The campaign config below lists banned phrases.
 - Subject line: at most {subject_max} words. No clickbait, no all-caps.
-- Body: between {body_min} and {body_max} words. Ends with terminal
-  punctuation. Plain prose. No bullet lists, no markdown.
+- Body: between {body_min} and {body_max} words. Plain prose. No bullet
+  lists, no markdown. End with the signoff exactly as the reference shows.
 - Output only the JSON object. No preamble, no commentary, no code fences.
 """
 
@@ -301,9 +301,6 @@ def validate(
     for w in banned_lower:
         if w in body_lower:
             return False, f"banned phrase: {w!r}"
-
-    if not re.search(r"[.!?]$", body.strip()):
-        return False, "missing terminal punctuation"
 
     required = (
         campaign.required_tokens_t1 if touch == 1 else campaign.required_tokens_t2

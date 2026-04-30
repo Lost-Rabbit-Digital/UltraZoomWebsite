@@ -119,6 +119,36 @@ class SheetClient:
             self._credentials.refresh(self._auth_request)
         return self._credentials.token
 
+    def ensure_tab(self) -> None:
+        """Create ``self._tab`` on the spreadsheet if it isn't there yet.
+        Sheets API returns 400 ``Unable to parse range`` for any read or
+        append against a missing tab, so every entry point that touches
+        the sheet must call this first.
+        """
+        url = (
+            f"{SHEETS_BASE}/{self._sheet_id}"
+            "?fields=sheets.properties.title"
+        )
+        resp = _http("GET", url, self._auth())
+        titles = {
+            (s.get("properties") or {}).get("title")
+            for s in resp.get("sheets") or []
+        }
+        if self._tab in titles:
+            return
+        log(f"  sheet tab '{self._tab}' missing — creating it")
+        batch_url = f"{SHEETS_BASE}/{self._sheet_id}:batchUpdate"
+        _http(
+            "POST",
+            batch_url,
+            self._auth(),
+            {
+                "requests": [
+                    {"addSheet": {"properties": {"title": self._tab}}}
+                ]
+            },
+        )
+
     def ensure_header(self) -> None:
         last_col = _column_letter(len(self._columns) - 1)
         range_ = f"{self._tab}!A1:{last_col}1"
@@ -210,6 +240,7 @@ def stage(
         )
 
     client = SheetClient(sheet_id=cfg.sheet_id, tab=tab, columns=columns)
+    client.ensure_tab()
     client.ensure_header()
     existing = client.existing_emails()
 
@@ -238,4 +269,5 @@ def existing_emails_in(
     if cfg.dry_run or not cfg.sheet_id:
         return set()
     client = SheetClient(sheet_id=cfg.sheet_id, tab=tab, columns=columns)
+    client.ensure_tab()
     return client.existing_emails()
