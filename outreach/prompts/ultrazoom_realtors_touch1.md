@@ -6,13 +6,14 @@ emailing another, not like a sales sequence.
 
 ## Reference subject
 
-> How long does it take you to spot a hairline crack on Zillow?
+> Hairline crack on Zillow, or shadow?
 
 The subject doesn't have to be that exact line. Vary the question or the
 specific defect (water stain, paint chip, baseboard damage, lighting
 glare on hardwood) so a recipient receiving this in proximity to another
-agent gets a different opener. Keep the subject under 9 words and frame
-it as a concrete on-the-job problem, not a pitch.
+agent gets a different opener. **Hard cap: 9 words or fewer.** Frame it
+as a concrete on-the-job problem, not a pitch. Short fragments and
+sentence-cased questions both work; clickbait and all-caps do not.
 
 ## Reference body
 

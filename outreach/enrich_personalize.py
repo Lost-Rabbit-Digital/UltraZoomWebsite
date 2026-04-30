@@ -100,11 +100,18 @@ def _build_system_prompt(campaign: CampaignConfig, *, touch: int) -> str:
     )
     banned = campaign.all_banned_words()
 
+    if touch == 1:
+        body_min = PERSONALIZATION_BODY_MIN_WORDS
+        body_max = campaign.max_body_words
+    else:
+        body_min = campaign.min_body_words_t2
+        body_max = campaign.max_body_words_t2
+
     pieces = [
         _SYSTEM_HEADER.format(
             subject_max=PERSONALIZATION_SUBJECT_MAX_WORDS,
-            body_min=PERSONALIZATION_BODY_MIN_WORDS,
-            body_max=campaign.max_body_words,
+            body_min=body_min,
+            body_max=body_max,
         ),
         f"\n## Campaign\n\n{campaign.name} — Touch {touch}\n",
         f"\n## Sender voice\n\n{campaign.voice_summary}\n",
@@ -283,14 +290,24 @@ def validate(
     if "—" in body or "–" in body or "—" in subject or "–" in subject:
         return False, "em dash"
 
-    sub_words = _word_count(subject)
-    if sub_words > PERSONALIZATION_SUBJECT_MAX_WORDS:
-        return False, f"subject too long ({sub_words} words)"
+    # T2's subject is overwritten downstream with ``Re: {t1_subject}`` so
+    # the model's T2 subject never reaches the recipient. Skip the
+    # length check on T2 to avoid false-rejecting good T2 bodies for a
+    # discarded field.
+    if touch == 1:
+        sub_words = _word_count(subject)
+        if sub_words > PERSONALIZATION_SUBJECT_MAX_WORDS:
+            return False, f"subject too long ({sub_words} words)"
+
+    body_min = (
+        PERSONALIZATION_BODY_MIN_WORDS if touch == 1 else campaign.min_body_words_t2
+    )
+    body_max = campaign.max_body_words if touch == 1 else campaign.max_body_words_t2
 
     body_words = _word_count(body)
-    if body_words < PERSONALIZATION_BODY_MIN_WORDS:
+    if body_words < body_min:
         return False, f"body too short ({body_words} words)"
-    if body_words > campaign.max_body_words:
+    if body_words > body_max:
         return False, f"body too long ({body_words} words)"
 
     if SYCOPHANCY_RE.search(body):

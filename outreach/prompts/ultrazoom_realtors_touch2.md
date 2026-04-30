@@ -7,15 +7,13 @@ than Touch 1 — three short paragraphs at most.
 
 ## Reference subject
 
-> Re: How long does it take you to spot a hairline crack on Zillow?
+> Hairline crack on Zillow, or shadow?
 
-The subject MUST start with `Re: ` followed by the same question used in
-Touch 1's subject. MailMeteor uses subject matching for threading. If
-Touch 1's subject was personalized to the lead's city or specialty, the
-T2 subject mirrors it with `Re: ` prepended. (Operator note: the
-runner enforces the `Re: ` prefix automatically; you do not have to add
-it yourself in the JSON, but keep the rest of the subject aligned with
-T1's voice.)
+Mirror Touch 1's subject — same hook, same voice, **9 words or fewer**.
+MailMeteor threads on subject match, and the runner prepends `Re: `
+automatically, so do NOT include `Re: ` in the JSON yourself. The
+non-prefix portion still has to come in at 9 words or less so the
+threaded subject lands inside Gmail's preview width.
 
 ## Reference body
 
