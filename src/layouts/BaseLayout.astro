@@ -3,11 +3,17 @@ interface Props {
   title: string;
   description?: string;
   og?: {
+    type?: string;
     url?: string;
     title?: string;
     description?: string;
     image?: string;
+    publishedTime?: string;
+    modifiedTime?: string;
+    section?: string;
   };
+  canonical?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   noindex?: boolean;
   currentPage?: string;
   mainClass?: string;
@@ -18,11 +24,24 @@ const {
   title,
   description,
   og,
+  canonical,
+  jsonLd,
   noindex = false,
   currentPage,
   mainClass = 'main',
   mainId = 'main-content',
 } = Astro.props;
+
+let canonicalPath = Astro.url.pathname;
+if (canonicalPath.endsWith('/index.html')) {
+  canonicalPath = canonicalPath.slice(0, -'/index.html'.length) || '/';
+} else if (canonicalPath.endsWith('.html')) {
+  canonicalPath = canonicalPath.slice(0, -'.html'.length);
+}
+const canonicalUrl = canonical ?? new URL(canonicalPath, Astro.site).toString();
+const ogType = og?.type ?? 'website';
+const twitterCard = og?.image ? 'summary_large_image' : 'summary';
+const jsonLdBlocks = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 
 const navLinks = [
   { href: '/help', text: 'Help', page: 'help' },
@@ -57,14 +76,18 @@ const footerLinks = [
     {description && <meta name="description" content={description}>}
     <meta name="theme-color" content="#181a20">
     {noindex && <meta name="robots" content="noindex">}
+    {!noindex && <link rel="canonical" href={canonicalUrl}>}
     {og && (
         <>
-            <meta property="og:type" content="website">
+            <meta property="og:type" content={ogType}>
             {og.url && <meta property="og:url" content={og.url}>}
             {og.title && <meta property="og:title" content={og.title}>}
             {og.description && <meta property="og:description" content={og.description}>}
             {og.image && <meta property="og:image" content={og.image}>}
-            <meta name="twitter:card" content="summary">
+            {og.publishedTime && <meta property="article:published_time" content={og.publishedTime}>}
+            {og.modifiedTime && <meta property="article:modified_time" content={og.modifiedTime}>}
+            {og.section && <meta property="article:section" content={og.section}>}
+            <meta name="twitter:card" content={twitterCard}>
             {og.title && <meta name="twitter:title" content={og.title}>}
             {og.description && <meta name="twitter:description" content={og.description}>}
             {og.image && <meta name="twitter:image" content={og.image}>}
@@ -75,6 +98,9 @@ const footerLinks = [
     <link rel="alternate" type="application/rss+xml" title="Ultra Zoom Blog" href="/rss.xml">
     <link rel="sitemap" href="/sitemap-index.xml">
     <link rel="stylesheet" href="/styles.css">
+    {jsonLdBlocks.map(block => (
+        <script type="application/ld+json" is:inline set:html={JSON.stringify(block)}></script>
+    ))}
     <!-- Reddit Pixel -->
     <script is:inline>
     !function(w,d){if(!w.rdt){var p=w.rdt=function(){p.sendEvent?p.sendEvent.apply(p,arguments):p.callQueue.push(arguments)};p.callQueue=[];var t=d.createElement("script");t.src="https://www.redditstatic.com/ads/pixel.js",t.async=!0;var s=d.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}}(window,document);rdt('init','a2_gm9ylf7cid88');rdt('track','PageVisit');

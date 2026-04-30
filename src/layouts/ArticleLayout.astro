@@ -20,6 +20,37 @@ const formattedDate = date.toLocaleDateString('en-US', {
 const isoDate = date.toISOString().slice(0, 10);
 
 const ogImage = new URL(`/og/${slug}.png`, Astro.site).toString();
+const canonicalUrl = new URL(`/blog/${slug}`, Astro.site).toString();
+const isoDateTime = date.toISOString();
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  description,
+  image: ogImage,
+  datePublished: isoDateTime,
+  dateModified: isoDateTime,
+  articleSection: category,
+  author: {
+    '@type': 'Organization',
+    name: 'Ultra Zoom',
+    url: 'https://ultrazoom.app',
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Lost Rabbit Digital LLC',
+    url: 'https://ultrazoom.app',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://ultrazoom.app/images/icon-128.png',
+    },
+  },
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': canonicalUrl,
+  },
+};
 
 const allPosts = await getCollection('blog');
 const relatedPosts = allPosts
@@ -36,12 +67,18 @@ const relatedPosts = allPosts
 <BaseLayout
   title={`${title} | Ultra Zoom`}
   description={description}
+  canonical={canonicalUrl}
   og={{
-    url: Astro.url.href,
+    type: 'article',
+    url: canonicalUrl,
     title,
     description,
     image: ogImage,
+    publishedTime: isoDateTime,
+    modifiedTime: isoDateTime,
+    section: category,
   }}
+  jsonLd={articleSchema}
   currentPage="blog"
 >
     <main class="main page-content" id="main-content">
