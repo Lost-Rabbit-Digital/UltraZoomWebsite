@@ -46,9 +46,8 @@ Must complete before first send. Ordered by criticality.
 **URL:** `ultrazoom.com/realtors`
 
 **Tracking requirements:**
-- UTM-aware: read `utm_source`, `utm_campaign`, `utm_content` from URL
-- Coupon prefill: if `?coupon=REALTOR30` in URL, prefill Stripe checkout coupon field
-- Distinct conversion event in analytics (`realtor_signup`, `realtor_trial_start`)
+- Coupon prefill: if `?coupon=REALTOR30` in URL, forward it to the checkout API so Stripe applies the discount automatically
+- Attribution is read from Stripe (count of `REALTOR30` redemptions) and Cloudflare's built-in request analytics (visits to `/realtors`). No client-side analytics SDK is added for this campaign.
 
 ### Page structure
 
@@ -195,7 +194,7 @@ Ultra Zoom
 
 **Variables (resolved by the pipeline before staging):**
 - `{{first_name}}` — from the Apollo CSV `First Name` column
-- `{{landing_page_link}}` — `https://ultrazoom.com/realtors?utm_source=email&utm_campaign=realtor_w[N]&utm_content=touch1&coupon=REALTOR30` where `[N]` is the calendar week number of the send
+- `{{landing_page_link}}` — `https://ultrazoom.com/realtors?coupon=REALTOR30`
 
 ### Touch 2 — Day 5 (reference template)
 

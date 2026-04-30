@@ -109,8 +109,7 @@ class CampaignConfig:
 
     landing_link_template: str = ""
     """The full ``{{landing_page_link}}`` value the AI is told to embed
-    verbatim in T1. UTM placeholders ``{week}`` and ``{touch}`` are
-    substituted at render time."""
+    verbatim in T1."""
 
     coupon_code: str = ""
     """Stripe coupon code the AI is told to embed verbatim in T1 (when
@@ -146,13 +145,6 @@ class CampaignConfig:
     def all_banned_words(self) -> tuple[str, ...]:
         return GLOBAL_BANNED_WORDS + self.extra_banned_words
 
-    def render_landing_link(self, *, week: int, touch: int) -> str:
-        return (
-            self.landing_link_template.replace("{week}", str(week)).replace(
-                "{touch}", str(touch)
-            )
-        )
-
 
 REALTORS = CampaignConfig(
     name="ultrazoom-realtors",
@@ -169,11 +161,7 @@ REALTORS = CampaignConfig(
     # the touch-2 prompt's "Exceed 80 words total" rule.
     min_body_words_t2=20,
     max_body_words_t2=80,
-    landing_link_template=(
-        "https://ultrazoom.com/realtors"
-        "?utm_source=email&utm_campaign=realtor_w{week}"
-        "&utm_content=touch{touch}&coupon=REALTOR30"
-    ),
+    landing_link_template="https://ultrazoom.com/realtors?coupon=REALTOR30",
     coupon_code="REALTOR30",
     persona_summary=(
         "U.S. real-estate agents at small (1-50 employee) brokerages who "
