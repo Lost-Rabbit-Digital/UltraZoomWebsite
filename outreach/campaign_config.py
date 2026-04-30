@@ -20,6 +20,7 @@ from .config import (
     BASE_SHEET_COLUMNS,
     INBOX_DIR,
     PERSONALIZATION_BODY_MAX_WORDS,
+    PERSONALIZATION_BODY_MIN_WORDS,
     PROMPTS_DIR,
 )
 
@@ -91,9 +92,20 @@ class CampaignConfig:
     """Per-campaign banned words on top of ``GLOBAL_BANNED_WORDS``."""
 
     max_body_words: int = PERSONALIZATION_BODY_MAX_WORDS
-    """Hard cap on body word count. Enforced by the validator after
-    Claude returns a draft; one retry with a stricter prompt before the
-    candidate is dropped."""
+    """Hard cap on Touch 1 body word count. Enforced by the validator
+    after Claude returns a draft; one retry with a stricter prompt
+    before the candidate is dropped."""
+
+    min_body_words_t2: int = PERSONALIZATION_BODY_MIN_WORDS
+    """Minimum body word count for Touch 2. T2 is a follow-up nudge and
+    is typically much shorter than T1, so campaigns can drop this below
+    the global ``PERSONALIZATION_BODY_MIN_WORDS`` floor without weakening
+    the T1 floor."""
+
+    max_body_words_t2: int = PERSONALIZATION_BODY_MAX_WORDS
+    """Hard cap on Touch 2 body word count. Defaults to the same cap as
+    T1 but campaigns commonly tighten this since T2 is intentionally
+    terse."""
 
     landing_link_template: str = ""
     """The full ``{{landing_page_link}}`` value the AI is told to embed
@@ -152,6 +164,11 @@ REALTORS = CampaignConfig(
     prompt_t2=PROMPTS_DIR / "ultrazoom_realtors_touch2.md",
     required_tokens_t1=("{{landing_page_link}}", "REALTOR30"),
     required_tokens_t2=("REALTOR30",),
+    # T2 is a 3-paragraph closer, intentionally short. The reference body
+    # in ``ultrazoom_realtors_touch2.md`` is ~30 words; cap at 80 to match
+    # the touch-2 prompt's "Exceed 80 words total" rule.
+    min_body_words_t2=20,
+    max_body_words_t2=80,
     landing_link_template=(
         "https://ultrazoom.com/realtors"
         "?utm_source=email&utm_campaign=realtor_w{week}"
