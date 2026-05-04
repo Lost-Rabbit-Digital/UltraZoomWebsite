@@ -7,29 +7,8 @@ const breadcrumbSchema = {
   itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ultrazoom.app/' },
     { '@type': 'ListItem', position: 2, name: 'Compare', item: 'https://ultrazoom.app/compare' },
-    { '@type': 'ListItem', position: 3, name: 'Ultra Zoom vs. Hover Zoom Plus', item: 'https://ultrazoom.app/compare/hover-zoom-plus' },
+    { '@type': 'ListItem', position: 3, name: 'Ultra Zoom vs. Mage', item: 'https://ultrazoom.app/compare/mage' },
   ],
-};
-
-const softwareSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'SoftwareApplication',
-  name: 'Ultra Zoom',
-  applicationCategory: 'BrowserApplication',
-  operatingSystem: 'Chrome, Firefox, Edge, Brave',
-  url: 'https://ultrazoom.app/',
-  publisher: { '@type': 'Organization', name: 'Lost Rabbit Digital LLC' },
-  offers: {
-    '@type': 'Offer',
-    price: '0',
-    priceCurrency: 'USD',
-    description: 'Free core extension with optional Pro tier (7-day free trial)',
-  },
-  comparedTo: {
-    '@type': 'SoftwareApplication',
-    name: 'Hover Zoom Plus',
-    applicationCategory: 'BrowserApplication',
-  },
 };
 
 const faqSchema = {
@@ -38,26 +17,26 @@ const faqSchema = {
   mainEntity: [
     {
       '@type': 'Question',
-      name: 'Is Ultra Zoom a Hover Zoom Plus replacement?',
+      name: 'What is Mage?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes. Ultra Zoom keeps the workflow Hover Zoom and Hover Zoom Plus users know — instant hover-zoom on image-heavy sites — and adds active development, native Manifest V3 builds, on-device AI upscaling, and zero telemetry.',
+        text: 'Mage is one of the many Hover Zoom forks that appeared after the original Hover Zoom privacy scandal. Like most of those forks, it carries the legacy hover-zoom workflow but ships infrequently and has limited Manifest V3 support.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Why switch from Hover Zoom Plus?',
+      name: 'Is Ultra Zoom a Mage replacement?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Zero telemetry by design, regular release cadence, Manifest V3 native builds without the V3 traps that broke older forks, and a transparent Pro tier with Stripe-managed billing.',
+        text: 'Yes. Ultra Zoom matches the Mage workflow — instant hover preview, gallery navigation, full-resolution previews — and adds active development, native Manifest V3 builds, on-device AI upscaling, and zero telemetry.',
       },
     },
     {
       '@type': 'Question',
-      name: 'What was the Hover Zoom privacy issue?',
+      name: 'Why pick Ultra Zoom over a Hover Zoom fork?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'The original Hover Zoom extension was caught logging the URLs of every page its users visited and selling the data. That history is the reason many users switched away from the family of forks. Ultra Zoom is built without any analytics or tracking — see the architecture write-up on the blog.',
+        text: 'A real company behind it (Lost Rabbit Digital LLC), a transparent Stripe-managed Pro tier, regular releases, and a zero-knowledge architecture you can verify in the build artifacts — instead of trusting a single-author fork to stay maintained and trustworthy.',
       },
     },
   ],
@@ -65,31 +44,31 @@ const faqSchema = {
 ---
 
 <BaseLayout
-  title="Ultra Zoom vs. Hover Zoom Plus — A Modern Hover Zoom Plus Alternative"
-  description="Hover Zoom Plus has a complicated history. Ultra Zoom is a privacy-first, actively maintained hover-to-zoom extension for Chrome and Firefox with the workflow you already know."
+  title="Ultra Zoom vs. Mage — A Modern Hover Zoom Fork Alternative"
+  description="Mage is a Hover Zoom fork. Ultra Zoom is the actively maintained, MV3-native, zero-telemetry alternative for Chrome and Firefox with the workflow you already know."
   currentPage="compare"
   og={{
-    url: 'https://ultrazoom.app/compare/hover-zoom-plus',
-    title: 'Ultra Zoom vs. Hover Zoom Plus',
-    description: 'A privacy-first, actively maintained Hover Zoom Plus alternative for Chrome and Firefox.',
-    image: 'https://ultrazoom.app/og/compare-hover-zoom-plus.png',
+    url: 'https://ultrazoom.app/compare/mage',
+    title: 'Ultra Zoom vs. Mage',
+    description: 'A privacy-first, actively maintained alternative to the Mage Hover Zoom fork.',
+    image: 'https://ultrazoom.app/og/compare-mage.png',
     imageWidth: 1200,
     imageHeight: 630,
   }}
-  jsonLd={[breadcrumbSchema, softwareSchema, faqSchema]}
+  jsonLd={[breadcrumbSchema, faqSchema]}
 >
     <main class="main page-content" id="main-content">
-        <h1>Ultra Zoom vs. Hover Zoom Plus</h1>
+        <h1>Ultra Zoom vs. Mage</h1>
 
-        <p class="pricing-intro">Hover Zoom set the standard for image-zoom extensions, but its <a href="/blog/hover-zoom-privacy-scandal">history with user data</a> made many people walk away. Hover Zoom Plus picked up where it left off as a community fork &mdash; useful, but light on active development. Ultra Zoom is the modern alternative: same workflow, better Pro tier, and a privacy story those tools can&rsquo;t match.</p>
+        <p class="pricing-intro">Mage is one of many Hover Zoom forks that picked up users after <a href="/blog/hover-zoom-privacy-scandal">the original Hover Zoom privacy scandal</a>. The fork tree is messy, releases are sporadic, and Manifest V3 is putting pressure on every legacy hover-zoom extension. Ultra Zoom is the modern alternative: same workflow, current platform, real company behind it.</p>
 
         <section class="help-section" id="why-switch">
             <h2>Why people are switching</h2>
             <ul class="help-list">
+                <li><strong>Active development.</strong> Releases every few weeks with new site plugins &mdash; not the long silences typical of single-author forks.</li>
+                <li><strong>Manifest V3 native.</strong> Built for the current Chrome extension platform <a href="/blog/manifest-v3-trap">without the V3 trap</a>.</li>
                 <li><strong>Zero telemetry by design.</strong> No analytics endpoint, no remote code, no server that sees your browsing. <a href="/blog/zero-knowledge-architecture">Read the architecture</a>.</li>
-                <li><strong>Active development.</strong> New plugins and bug fixes ship every few weeks &mdash; you don&rsquo;t have to hope a fork stays maintained.</li>
-                <li><strong>Manifest V3 native.</strong> Built for the current Chrome extension platform <a href="/blog/manifest-v3-trap">without the V3 trap</a> that broke older hover-zoom forks.</li>
-                <li><strong>Real Pro tier.</strong> Power features (video controls, advanced gallery, history search, custom URL rules) are bundled in a transparent Stripe-managed plan with a 7-day free trial.</li>
+                <li><strong>Real Pro tier.</strong> Power features (AI upscaling, video controls, advanced gallery, hover history search) under a transparent Stripe-managed plan with a 7-day free trial.</li>
             </ul>
         </section>
 
@@ -100,7 +79,7 @@ const faqSchema = {
                     <thead>
                         <tr>
                             <th scope="col">Feature</th>
-                            <th scope="col">Hover Zoom Plus</th>
+                            <th scope="col">Mage</th>
                             <th scope="col">Ultra Zoom</th>
                         </tr>
                     </thead>
@@ -111,8 +90,8 @@ const faqSchema = {
                             <td aria-label="Included">&#10003;</td>
                         </tr>
                         <tr>
-                            <th scope="row">Site-specific plugins (Instagram, Amazon, etc.)</th>
-                            <td aria-label="Included">&#10003;</td>
+                            <th scope="row">Site-specific plugins</th>
+                            <td aria-label="Partial">Partial</td>
                             <td aria-label="Included">&#10003;</td>
                         </tr>
                         <tr>
@@ -126,22 +105,12 @@ const faqSchema = {
                             <td aria-label="Included">&#10003;</td>
                         </tr>
                         <tr>
-                            <th scope="row">Gallery navigation</th>
-                            <td aria-label="Partial">Partial</td>
-                            <td aria-label="Included">&#10003;</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">On-device AI upscaling (Real-ESRGAN)</th>
+                            <th scope="row">On-device AI upscaling</th>
                             <td aria-label="Not included">&ndash;</td>
                             <td aria-label="Included">&#10003; (Pro)</td>
                         </tr>
                         <tr>
                             <th scope="row">Video preview &amp; playback controls</th>
-                            <td aria-label="Not included">&ndash;</td>
-                            <td aria-label="Included">&#10003; (Pro)</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Advanced gallery (filmstrip, slideshow, batch download)</th>
                             <td aria-label="Not included">&ndash;</td>
                             <td aria-label="Included">&#10003; (Pro)</td>
                         </tr>
@@ -157,7 +126,7 @@ const faqSchema = {
                         </tr>
                         <tr>
                             <th scope="row">Active release cadence</th>
-                            <td aria-label="Not active">Limited</td>
+                            <td aria-label="Not active">Sporadic</td>
                             <td aria-label="Included">Every few weeks</td>
                         </tr>
                         <tr>
@@ -168,15 +137,6 @@ const faqSchema = {
                     </tbody>
                 </table>
             </div>
-        </section>
-
-        <section class="help-section" id="migration">
-            <h2>Coming over from Hover Zoom Plus</h2>
-            <ul class="help-list">
-                <li>Install Ultra Zoom and disable Hover Zoom Plus &mdash; running both at once will conflict on the hover overlay.</li>
-                <li>Open the popup and toggle the sites you want active. The default catalogue covers everything Hover Zoom Plus does, plus newer sources like Unsplash, Pexels, Wikimedia, Bilibili, and Avito.</li>
-                <li>If you used the Hover Zoom Plus blacklist heavily, Ultra Zoom&rsquo;s per-site toggle is one click away in the toolbar popup &mdash; same workflow.</li>
-            </ul>
         </section>
 
         <section class="help-section" id="cta">

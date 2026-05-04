@@ -1,0 +1,145 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ultrazoom.app/' },
+    { '@type': 'ListItem', position: 2, name: 'Compare', item: 'https://ultrazoom.app/compare' },
+    { '@type': 'ListItem', position: 3, name: 'Ultra Zoom vs. Magic Actions', item: 'https://ultrazoom.app/compare/magic-actions' },
+  ],
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Is Ultra Zoom a Magic Actions alternative?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Magic Actions for YouTube focuses on YouTube enhancements — auto-HD, screenshot capture, video controls. Ultra Zoom is broader: it covers hover-to-zoom across the whole web and includes video preview controls on every supported video host, not just YouTube.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can Ultra Zoom replace Magic Actions for video?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Ultra Zoom Pro adds inline video preview and playback controls — pause, scrub, mute, volume, frame-step — on every video plugin. If you used Magic Actions only for YouTube hover preview and quick controls, Ultra Zoom Pro covers that workflow plus images on every site.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What about privacy?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Ultra Zoom has zero telemetry by design — no analytics endpoint, no remote code, no server that sees your browsing. Magic Actions has historically prompted users to enable optional analytics; Ultra Zoom never asks because there is nothing to send.',
+      },
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title="Ultra Zoom vs. Magic Actions for YouTube — A Privacy-First Alternative"
+  description="Magic Actions adds video controls to YouTube. Ultra Zoom adds inline video preview and controls to every video host, plus hover-to-zoom on every image-heavy site — with zero telemetry."
+  currentPage="compare"
+  og={{
+    url: 'https://ultrazoom.app/compare/magic-actions',
+    title: 'Ultra Zoom vs. Magic Actions',
+    description: 'Hover-to-zoom and inline video preview controls on every site, not just YouTube.',
+    image: 'https://ultrazoom.app/og/compare-magic-actions.png',
+    imageWidth: 1200,
+    imageHeight: 630,
+  }}
+  jsonLd={[breadcrumbSchema, faqSchema]}
+>
+    <main class="main page-content" id="main-content">
+        <h1>Ultra Zoom vs. Magic Actions for YouTube</h1>
+
+        <p class="pricing-intro">Magic Actions is the long-running YouTube enhancement extension &mdash; auto-HD, screenshots, theater controls. Ultra Zoom isn&rsquo;t a YouTube-only tool, but if you came to Magic Actions for the hover preview and quick playback controls, Ultra Zoom Pro covers that workflow on YouTube plus every other supported video and image host.</p>
+
+        <section class="help-section" id="why-switch">
+            <h2>Why people are switching</h2>
+            <ul class="help-list">
+                <li><strong>Works everywhere, not just YouTube.</strong> Hover preview and playback controls on Vimeo, Twitter/X, Bluesky, Reddit, Imgur, Tumblr, Bilibili and dozens more &mdash; same shortcuts, same workflow.</li>
+                <li><strong>Zero telemetry by design.</strong> No analytics endpoint, no remote code, no &ldquo;help us improve&rdquo; opt-in prompts. <a href="/blog/zero-knowledge-architecture">Read the architecture</a>.</li>
+                <li><strong>Manifest V3 native.</strong> Built for current Chrome <a href="/blog/manifest-v3-trap">without the V3 trap</a>, and shipped as a current Firefox add-on.</li>
+                <li><strong>Bonus: image hover-zoom across the web.</strong> If you spend any time browsing image-heavy sites, hover-to-zoom is bundled in the same extension.</li>
+            </ul>
+        </section>
+
+        <section class="help-section" id="feature-parity">
+            <h2>Feature parity at a glance</h2>
+            <div class="pricing-compare-wrap">
+                <table class="pricing-compare">
+                    <thead>
+                        <tr>
+                            <th scope="col">Feature</th>
+                            <th scope="col">Magic Actions</th>
+                            <th scope="col">Ultra Zoom</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">YouTube playback controls</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003; (Pro)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Video controls on every video host</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003; (Pro)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Inline hover preview for video</th>
+                            <td aria-label="Partial">Partial</td>
+                            <td aria-label="Included">&#10003; (Pro)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Hover-to-zoom for images</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Reverse image search shortcuts</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">On-device AI upscaling</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003; (Pro)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Zero telemetry</th>
+                            <td aria-label="Unclear">Optional opt-in analytics</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Manifest V3 native</th>
+                            <td aria-label="Partial">Partial</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="help-section" id="cta">
+            <h2>Try it free</h2>
+            <p>The core extension is free forever, with the entire site catalogue. Pro &mdash; including video preview &amp; playback controls &mdash; is a 7-day free trial when you&rsquo;re ready. <a href="/pricing">See plans</a>.</p>
+            <ul class="install-links">
+                <li>
+                    <a href="https://chromewebstore.google.com/detail/ultra-zoom/jalclpdejbeamaamcpbolkclpnleagmg" class="install-button chrome" target="_blank" rel="noopener">Install for Chrome</a>
+                </li>
+                <li>
+                    <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/" class="install-button firefox" target="_blank" rel="noopener">Install for Firefox</a>
+                </li>
+            </ul>
+        </section>
+    </main>
+</BaseLayout>

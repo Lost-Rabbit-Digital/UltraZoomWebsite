@@ -1,0 +1,150 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ultrazoom.app/' },
+    { '@type': 'ListItem', position: 2, name: 'Compare', item: 'https://ultrazoom.app/compare' },
+    { '@type': 'ListItem', position: 3, name: 'Ultra Zoom vs. MLS photo viewers', item: 'https://ultrazoom.app/compare/mls-photo-viewers' },
+  ],
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Does Ultra Zoom work on MLS sites?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. Ultra Zoom is compatible with the major MLS-powered listing platforms — Bright MLS, Stellar MLS, CRMLS, MRED, MLSListings, Realtor.com, Zillow, Redfin, Compass, and most agent-site IDX feeds. Hover any listing photo to see the full-resolution source instead of the listing-page thumbnail.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Why are listing photos blurry when I use Ctrl+= zoom?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Listing pages serve compressed thumbnails to keep the page fast. Ctrl+= scales those thumbnails up, which looks blurry. The full-resolution gallery photo is one network request away — Ultra Zoom makes it one hover.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Is this useful for real estate agents?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes — agents use Ultra Zoom to quickly evaluate condition on comps, scan inspection photos, and spot details (cabinet hardware, flooring transitions, exterior trim) without opening every listing\'s photo gallery individually.',
+      },
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title="Ultra Zoom vs. MLS Photo Viewers — Full-Resolution Listing Photos on Hover"
+  description="Bright MLS, Stellar MLS, CRMLS, MRED, Realtor.com, Zillow, Redfin — Ultra Zoom shows full-resolution listing photos on hover, without opening every gallery."
+  currentPage="compare"
+  og={{
+    url: 'https://ultrazoom.app/compare/mls-photo-viewers',
+    title: 'Ultra Zoom vs. MLS photo viewers',
+    description: 'Full-resolution MLS listing photos on hover, on every major listing platform.',
+    image: 'https://ultrazoom.app/og/compare-mls-photo-viewers.png',
+    imageWidth: 1200,
+    imageHeight: 630,
+  }}
+  jsonLd={[breadcrumbSchema, faqSchema]}
+>
+    <main class="main page-content" id="main-content">
+        <h1>Ultra Zoom vs. MLS photo viewers</h1>
+
+        <p class="pricing-intro">Every MLS-powered listing platform has its own photo viewer &mdash; Bright MLS, Stellar MLS, CRMLS, MRED, MLSListings, plus the consumer overlays on Realtor.com, Zillow, Redfin, and Compass. They&rsquo;re fine when you want to look at one home. They&rsquo;re miserable when you&rsquo;re scanning twenty listings at 10pm trying to decide which to tour. Ultra Zoom adds full-resolution hover preview to all of them. <a href="/blog/mls-photo-viewer-compatibility">See the compatibility matrix</a>.</p>
+
+        <section class="help-section" id="why-switch">
+            <h2>Why agents and shoppers install it</h2>
+            <ul class="help-list">
+                <li><strong>Full-resolution source, not the thumbnail.</strong> Listing pages serve compressed previews. Ultra Zoom hits the gallery image directly, so you see flooring transitions, fixture finishes, and condition the way the listing photographer captured them.</li>
+                <li><strong>Works on every major MLS platform.</strong> Bright, Stellar, CRMLS, MRED, MLSListings &mdash; plus Realtor.com, Zillow, Redfin, Compass and most agent IDX sites.</li>
+                <li><strong>Gallery navigation without opening the modal.</strong> Hover, then arrow-key through the gallery in place. <a href="/blog/real-estate-listing-photo-zoom">Read the workflow guide</a>.</li>
+                <li><strong>Zero telemetry.</strong> Listing browsing is competitive intel. Nothing leaves your browser.</li>
+            </ul>
+        </section>
+
+        <section class="help-section" id="platforms">
+            <h2>Confirmed compatible platforms</h2>
+            <ul class="help-list">
+                <li><strong>National portals:</strong> Realtor.com, Zillow, Redfin, Trulia, Homes.com, Compass, Movoto.</li>
+                <li><strong>Regional MLS:</strong> Bright MLS (Mid-Atlantic), Stellar MLS (Florida), CRMLS (California), MRED (Chicago), MLSListings (Bay Area), NWMLS (Pacific Northwest), HAR (Houston), Georgia MLS.</li>
+                <li><strong>Agent / brokerage IDX:</strong> most Sierra Interactive, Real Geeks, BoomTown, kvCORE, Placester and Wix-based agent sites work via the standard listing-photo plugin.</li>
+            </ul>
+            <p>If your MLS isn&rsquo;t covered, the community URL-rules pack updates weekly &mdash; or <a href="/contact">drop us a note</a> and we&rsquo;ll add a plugin.</p>
+        </section>
+
+        <section class="help-section" id="feature-parity">
+            <h2>Side by side</h2>
+            <div class="pricing-compare-wrap">
+                <table class="pricing-compare">
+                    <thead>
+                        <tr>
+                            <th scope="col">Feature</th>
+                            <th scope="col">Native MLS viewer</th>
+                            <th scope="col">Ultra Zoom</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Loads full-resolution source photo</th>
+                            <td aria-label="Partial">Inside modal only</td>
+                            <td aria-label="Included">&#10003; on hover</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Browse without opening per-listing modal</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Gallery navigation (arrow keys)</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Works across multiple MLS platforms uniformly</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">On-device AI upscaling for low-res photos</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003; (Pro)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Reverse image search (find re-listings, stock photos)</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Zero telemetry</th>
+                            <td aria-label="Unclear">Varies</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="help-section" id="cta">
+            <h2>Try it free</h2>
+            <p>The core extension is free forever, with full MLS-platform coverage. Pro &mdash; including AI upscaling for older listings &mdash; is a 7-day free trial when you&rsquo;re ready. <a href="/realtors">Built for realtors</a>.</p>
+            <ul class="install-links">
+                <li>
+                    <a href="https://chromewebstore.google.com/detail/ultra-zoom/jalclpdejbeamaamcpbolkclpnleagmg" class="install-button chrome" target="_blank" rel="noopener">Install for Chrome</a>
+                </li>
+                <li>
+                    <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/" class="install-button firefox" target="_blank" rel="noopener">Install for Firefox</a>
+                </li>
+            </ul>
+        </section>
+    </main>
+</BaseLayout>

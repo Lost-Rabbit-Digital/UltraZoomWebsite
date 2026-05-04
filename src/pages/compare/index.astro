@@ -1,0 +1,146 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ultrazoom.app/' },
+    { '@type': 'ListItem', position: 2, name: 'Compare', item: 'https://ultrazoom.app/compare' },
+  ],
+};
+
+const compareLinks = [
+  {
+    href: '/compare/hover-zoom',
+    title: 'vs. Hover Zoom',
+    desc: 'The original — and the privacy scandal that started the migration.',
+  },
+  {
+    href: '/compare/hover-zoom-plus',
+    title: 'vs. Hover Zoom Plus',
+    desc: 'The community fork. Useful, but light on active development.',
+  },
+  {
+    href: '/compare/imagus',
+    title: 'vs. Imagus',
+    desc: 'Sieve rules, gallery navigation, theater mode — kept and improved.',
+  },
+  {
+    href: '/compare/thumbnail-zoom-plus',
+    title: 'vs. Thumbnail Zoom Plus',
+    desc: 'The classic Firefox extension that broke when legacy add-ons retired.',
+  },
+  {
+    href: '/compare/mage',
+    title: 'vs. Mage',
+    desc: 'Yet another Hover Zoom fork — minus the active maintenance.',
+  },
+  {
+    href: '/compare/magic-actions',
+    title: 'vs. Magic Actions',
+    desc: 'YouTube enhancements, broadened to every video and image host.',
+  },
+  {
+    href: '/compare/zoom-page-we',
+    title: 'vs. Zoom Page WE',
+    desc: 'Page-level zoom is a different problem — when do you need each?',
+  },
+  {
+    href: '/compare/image-search-options',
+    title: 'vs. Image Search Options',
+    desc: 'Reverse image search, built into the hover-zoom workflow.',
+  },
+  {
+    href: '/compare/chrome-built-in-zoom',
+    title: 'vs. Chrome built-in zoom',
+    desc: 'Why hover-zoom hits the source image and Ctrl+= can’t.',
+  },
+  {
+    href: '/compare/firefox-image-zoom',
+    title: 'vs. Firefox built-in zoom',
+    desc: 'The Firefox-native image zoom story, and what hover-zoom adds.',
+  },
+  {
+    href: '/compare/mls-photo-viewers',
+    title: 'vs. MLS photo viewers',
+    desc: 'Bright MLS, Stellar, CRMLS, MRED — full-resolution previews on every listing.',
+  },
+  {
+    href: '/compare/ai-image-upscalers',
+    title: 'vs. AI image upscalers',
+    desc: 'Upscayl, waifu2x, Let’s Enhance — and on-device upscaling in your browser.',
+  },
+  {
+    href: '/compare/hover-zoom-alternatives',
+    title: 'Best Hover Zoom alternatives',
+    desc: 'A roundup of every option, ranked by privacy, maintenance, and parity.',
+  },
+  {
+    href: '/compare/imagus-alternatives',
+    title: 'Best Imagus alternatives',
+    desc: 'Sieve-rule users moving on — what works, what doesn’t, what to expect.',
+  },
+];
+---
+
+<BaseLayout
+  title="Ultra Zoom Compared — Hover Zoom Alternatives, Imagus Replacements & More"
+  description="A side-by-side comparison of Ultra Zoom against every major hover-to-zoom and image-zoom extension — Hover Zoom, Hover Zoom Plus, Imagus, Thumbnail Zoom Plus, and more."
+  currentPage="compare"
+  og={{
+    url: 'https://ultrazoom.app/compare',
+    title: 'Ultra Zoom Compared',
+    description: 'A side-by-side comparison of Ultra Zoom against every major hover-to-zoom extension.',
+    image: 'https://ultrazoom.app/og/compare-index.png',
+    imageWidth: 1200,
+    imageHeight: 630,
+  }}
+  jsonLd={[breadcrumbSchema]}
+>
+    <main class="main page-content" id="main-content">
+        <h1>Ultra Zoom, compared</h1>
+
+        <p class="pricing-intro">If you came up with Hover Zoom, Imagus, or Thumbnail Zoom Plus, Ultra Zoom keeps the workflow you know &mdash; hover preview, gallery navigation, theater mode, reverse image search &mdash; and adds active development, native Manifest V3 builds, on-device AI upscaling, and zero telemetry. Pick the comparison that fits where you&rsquo;re coming from.</p>
+
+        <section class="help-section">
+            <h2>Direct alternatives</h2>
+            <ul class="help-list">
+                {compareLinks.slice(0, 6).map(link => (
+                    <li><strong><a href={link.href}>{link.title}</a></strong> &mdash; {link.desc}</li>
+                ))}
+            </ul>
+        </section>
+
+        <section class="help-section">
+            <h2>Adjacent tools</h2>
+            <ul class="help-list">
+                {compareLinks.slice(6, 10).map(link => (
+                    <li><strong><a href={link.href}>{link.title}</a></strong> &mdash; {link.desc}</li>
+                ))}
+            </ul>
+        </section>
+
+        <section class="help-section">
+            <h2>Vertical &amp; roundups</h2>
+            <ul class="help-list">
+                {compareLinks.slice(10).map(link => (
+                    <li><strong><a href={link.href}>{link.title}</a></strong> &mdash; {link.desc}</li>
+                ))}
+            </ul>
+        </section>
+
+        <section class="help-section" id="cta">
+            <h2>Try it free</h2>
+            <p>The core extension is free forever, with the entire site catalogue. Pro is a 7-day free trial when you&rsquo;re ready &mdash; <a href="/pricing">see plans</a>.</p>
+            <ul class="install-links">
+                <li>
+                    <a href="https://chromewebstore.google.com/detail/ultra-zoom/jalclpdejbeamaamcpbolkclpnleagmg" class="install-button chrome" target="_blank" rel="noopener">Install for Chrome</a>
+                </li>
+                <li>
+                    <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/" class="install-button firefox" target="_blank" rel="noopener">Install for Firefox</a>
+                </li>
+            </ul>
+        </section>
+    </main>
+</BaseLayout>
