@@ -1,0 +1,153 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ultrazoom.app/' },
+    { '@type': 'ListItem', position: 2, name: 'Compare', item: 'https://ultrazoom.app/compare' },
+    { '@type': 'ListItem', position: 3, name: 'Ultra Zoom vs. Firefox built-in zoom', item: 'https://ultrazoom.app/compare/firefox-image-zoom' },
+  ],
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Does Firefox have built-in image zoom?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Firefox has page-level zoom (Ctrl+=, with separate text-only and image-and-text modes) and a click-to-zoom behavior on standalone image URLs. It does not have hover-to-zoom for images embedded in pages — that is what hover-zoom extensions like Ultra Zoom add.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Is Ultra Zoom available for Firefox?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes — Ultra Zoom is a signed Firefox add-on, the same codebase that runs on Chrome, Edge and Brave. It is one of the few hover-zoom extensions still actively maintained on Firefox after the Manifest V3 transition.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can Firefox replace Ultra Zoom for image-heavy sites?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Firefox\'s built-in zoom scales the rendered page; it does not load the full-resolution source image. On modern responsive sites you are looking at an upscaled thumbnail, not the original photo. Ultra Zoom fetches the source directly.',
+      },
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title="Ultra Zoom vs. Firefox Built-in Zoom — A Modern Hover-to-Zoom Add-on"
+  description="Firefox has page-level zoom but no hover-to-zoom for embedded images. Ultra Zoom is the actively maintained, signed Firefox add-on that fills the gap — full-resolution source image previews on every site."
+  currentPage="compare"
+  og={{
+    url: 'https://ultrazoom.app/compare/firefox-image-zoom',
+    title: 'Ultra Zoom vs. Firefox built-in zoom',
+    description: 'A modern, signed hover-to-zoom add-on for Firefox.',
+    image: 'https://ultrazoom.app/og/compare-firefox-image-zoom.png',
+    imageWidth: 1200,
+    imageHeight: 630,
+  }}
+  jsonLd={[breadcrumbSchema, faqSchema]}
+>
+    <main class="main page-content" id="main-content">
+        <h1>Ultra Zoom vs. Firefox built-in zoom</h1>
+
+        <p class="pricing-intro">Firefox has the strongest built-in zoom of any major browser &mdash; per-site memory, separate text-only mode, accessible toolbar controls. What it doesn&rsquo;t have is hover-to-zoom on individual images. That&rsquo;s the gap Ultra Zoom fills, with a signed Firefox add-on built on the modern WebExtensions platform.</p>
+
+        <section class="help-section" id="how-each-works">
+            <h2>How each one actually works</h2>
+            <ul class="help-list">
+                <li><strong>Firefox built-in zoom</strong> &mdash; scales the whole page, with optional text-only mode. Per-site zoom levels persist. Useful for reading; doesn&rsquo;t reach the source image. <a href="/blog/native-browser-image-zoom">Deep dive on browser-native zoom</a>.</li>
+                <li><strong>Ultra Zoom for Firefox</strong> &mdash; hover an image, see the full-resolution source as an overlay. Theater mode, gallery navigation, reverse image search, and on-device AI upscaling. Same codebase as the Chrome build.</li>
+            </ul>
+        </section>
+
+        <section class="help-section" id="firefox-story">
+            <h2>The Firefox hover-zoom story</h2>
+            <p>Firefox users have had a rough decade with hover-zoom. Thumbnail Zoom Plus broke when legacy add-ons retired. Imagus has had Manifest V3 hiccups. Hover Zoom Plus and most forks are Chrome-first. Ultra Zoom is one of the few extensions still treating Firefox as a first-class target &mdash; signed, current, same release cadence as the Chrome build.</p>
+        </section>
+
+        <section class="help-section" id="feature-parity">
+            <h2>Side by side</h2>
+            <div class="pricing-compare-wrap">
+                <table class="pricing-compare">
+                    <thead>
+                        <tr>
+                            <th scope="col">Feature</th>
+                            <th scope="col">Firefox built-in</th>
+                            <th scope="col">Ultra Zoom for Firefox</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Per-site page zoom level</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Not included">&ndash;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Text-only zoom mode</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Not included">&ndash;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Hover-to-zoom on every site</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Loads full-resolution source image</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Site-specific plugins</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Theater mode &amp; gallery navigation</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Reverse image search shortcuts</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">On-device AI upscaling</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003; (Pro)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Zero telemetry</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="help-section" id="cta">
+            <h2>Install on Firefox</h2>
+            <p>The core extension is free forever. Pro is a 7-day free trial when you&rsquo;re ready &mdash; <a href="/pricing">see plans</a>.</p>
+            <ul class="install-links">
+                <li>
+                    <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/" class="install-button firefox" target="_blank" rel="noopener">Install for Firefox</a>
+                </li>
+                <li>
+                    <a href="https://chromewebstore.google.com/detail/ultra-zoom/jalclpdejbeamaamcpbolkclpnleagmg" class="install-button chrome" target="_blank" rel="noopener">Install for Chrome</a>
+                </li>
+            </ul>
+        </section>
+    </main>
+</BaseLayout>

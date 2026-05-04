@@ -1,0 +1,147 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ultrazoom.app/' },
+    { '@type': 'ListItem', position: 2, name: 'Compare', item: 'https://ultrazoom.app/compare' },
+    { '@type': 'ListItem', position: 3, name: 'Ultra Zoom vs. Zoom Page WE', item: 'https://ultrazoom.app/compare/zoom-page-we' },
+  ],
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'What is the difference between Zoom Page WE and Ultra Zoom?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Zoom Page WE adjusts the zoom level of the entire page (text, images, layout) per-site. Ultra Zoom previews individual images at full resolution when you hover them, without changing the rest of the page. They solve different problems — many users run both.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Do I need both Zoom Page WE and Ultra Zoom?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'They do not conflict. Zoom Page WE controls page-level zoom; Ultra Zoom shows hover previews of individual images. If you want larger text and larger images, run both. If you only want full-resolution image previews, Ultra Zoom alone is enough.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can Ultra Zoom replace Zoom Page WE for image-heavy sites?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'For image-heavy use cases — shopping, real estate, design moodboards, auctions, genealogy — Ultra Zoom usually replaces the need for Zoom Page WE because hover-zoom shows the full-resolution source image directly, no page-level zooming required.',
+      },
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title="Ultra Zoom vs. Zoom Page WE — Page-Level Zoom vs. Hover-to-Zoom"
+  description="Zoom Page WE zooms the whole page. Ultra Zoom previews individual images at full resolution on hover. Here is when to use each — and when one replaces the other."
+  currentPage="compare"
+  og={{
+    url: 'https://ultrazoom.app/compare/zoom-page-we',
+    title: 'Ultra Zoom vs. Zoom Page WE',
+    description: 'Page-level zoom vs. hover-to-zoom — what each tool does, and when to pick which.',
+    image: 'https://ultrazoom.app/og/compare-zoom-page-we.png',
+    imageWidth: 1200,
+    imageHeight: 630,
+  }}
+  jsonLd={[breadcrumbSchema, faqSchema]}
+>
+    <main class="main page-content" id="main-content">
+        <h1>Ultra Zoom vs. Zoom Page WE</h1>
+
+        <p class="pricing-intro">Zoom Page WE and Ultra Zoom both have &ldquo;zoom&rdquo; in the name, but they solve completely different problems. Zoom Page WE adjusts the zoom level of the whole page; Ultra Zoom shows the full-resolution source of an individual image when you hover it. Here&rsquo;s when to use each &mdash; and when one makes the other unnecessary.</p>
+
+        <section class="help-section" id="what-each-does">
+            <h2>What each tool actually does</h2>
+            <ul class="help-list">
+                <li><strong>Zoom Page WE</strong> &mdash; per-site page-level zoom. Like Ctrl+= but with finer control, separate text/image scaling, and per-domain memory. The whole layout reflows.</li>
+                <li><strong>Ultra Zoom</strong> &mdash; hover an image, see a full-resolution preview overlay. No layout reflow, no page-level zoom changes &mdash; the preview disappears when you move your cursor.</li>
+            </ul>
+        </section>
+
+        <section class="help-section" id="when-to-use">
+            <h2>When to use which</h2>
+            <ul class="help-list">
+                <li><strong>Reading-heavy sites where you want larger type</strong> &rarr; Zoom Page WE.</li>
+                <li><strong>Image-heavy browsing (shopping, real estate, design, auctions, genealogy)</strong> &rarr; Ultra Zoom. Hover-zoom hits the source image, so you see the full-resolution photo instead of a blurry upscale of the thumbnail.</li>
+                <li><strong>Both</strong> &rarr; They don&rsquo;t conflict. Run them together if you want larger text <em>and</em> full-resolution image previews.</li>
+            </ul>
+        </section>
+
+        <section class="help-section" id="feature-parity">
+            <h2>Feature parity at a glance</h2>
+            <div class="pricing-compare-wrap">
+                <table class="pricing-compare">
+                    <thead>
+                        <tr>
+                            <th scope="col">Feature</th>
+                            <th scope="col">Zoom Page WE</th>
+                            <th scope="col">Ultra Zoom</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Per-site page zoom level</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Not included">&ndash;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Hover-to-zoom (full-resolution image preview)</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Site-specific image plugins</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Reverse image search shortcuts</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">On-device AI upscaling</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003; (Pro)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Video preview &amp; playback controls</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003; (Pro)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Zero telemetry</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="help-section" id="cta">
+            <h2>Try it free</h2>
+            <p>The core Ultra Zoom extension is free forever, with the entire site catalogue. Pro is a 7-day free trial when you&rsquo;re ready &mdash; <a href="/pricing">see plans</a>.</p>
+            <ul class="install-links">
+                <li>
+                    <a href="https://chromewebstore.google.com/detail/ultra-zoom/jalclpdejbeamaamcpbolkclpnleagmg" class="install-button chrome" target="_blank" rel="noopener">Install for Chrome</a>
+                </li>
+                <li>
+                    <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/" class="install-button firefox" target="_blank" rel="noopener">Install for Firefox</a>
+                </li>
+            </ul>
+        </section>
+    </main>
+</BaseLayout>

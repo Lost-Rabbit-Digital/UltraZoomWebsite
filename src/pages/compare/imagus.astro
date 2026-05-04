@@ -6,9 +6,30 @@ const breadcrumbSchema = {
   '@type': 'BreadcrumbList',
   itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ultrazoom.app/' },
-    { '@type': 'ListItem', position: 2, name: 'Compare', item: 'https://ultrazoom.app/compare/imagus' },
+    { '@type': 'ListItem', position: 2, name: 'Compare', item: 'https://ultrazoom.app/compare' },
     { '@type': 'ListItem', position: 3, name: 'Ultra Zoom vs. Imagus', item: 'https://ultrazoom.app/compare/imagus' },
   ],
+};
+
+const softwareSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Ultra Zoom',
+  applicationCategory: 'BrowserApplication',
+  operatingSystem: 'Chrome, Firefox, Edge, Brave',
+  url: 'https://ultrazoom.app/',
+  publisher: { '@type': 'Organization', name: 'Lost Rabbit Digital LLC' },
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+    description: 'Free core extension with optional Pro tier (7-day free trial)',
+  },
+  comparedTo: {
+    '@type': 'SoftwareApplication',
+    name: 'Imagus',
+    applicationCategory: 'BrowserApplication',
+  },
 };
 
 const faqSchema = {
@@ -55,7 +76,7 @@ const faqSchema = {
     imageWidth: 1200,
     imageHeight: 630,
   }}
-  jsonLd={[breadcrumbSchema, faqSchema]}
+  jsonLd={[breadcrumbSchema, softwareSchema, faqSchema]}
 >
     <main class="main page-content" id="main-content">
         <h1>Ultra Zoom vs. Imagus</h1>

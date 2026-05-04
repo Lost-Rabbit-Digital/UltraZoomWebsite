@@ -1,0 +1,152 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ultrazoom.app/' },
+    { '@type': 'ListItem', position: 2, name: 'Compare', item: 'https://ultrazoom.app/compare' },
+    { '@type': 'ListItem', position: 3, name: 'Ultra Zoom vs. AI image upscalers', item: 'https://ultrazoom.app/compare/ai-image-upscalers' },
+  ],
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Does Ultra Zoom run AI upscaling locally?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. Ultra Zoom Pro ships an on-device Real-ESRGAN upscaler that runs in your browser via WebGPU/WebAssembly. The image you hover never leaves your machine — no upload, no cloud API, no per-image cost.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How does this compare to Upscayl or waifu2x?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Upscayl and waifu2x are excellent desktop apps for batch-upscaling files you have saved locally. Ultra Zoom is for the in-browser workflow — upscale a listing photo, an auction lot, or a research thumbnail in place, without saving the file or switching apps.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How does this compare to Let\'s Enhance or other web upscalers?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Cloud upscalers (Let\'s Enhance, Topaz online, etc.) upload your image to a server, charge per image, and create a privacy footprint. Ultra Zoom runs the model on your device — free with the Pro tier, no upload, no logs.',
+      },
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title="Ultra Zoom vs. AI Image Upscalers — Upscayl, waifu2x, Let's Enhance"
+  description="Upscayl and waifu2x are great desktop apps; cloud upscalers cost per-image and upload your photos. Ultra Zoom Pro runs Real-ESRGAN in your browser, on-device, zero upload."
+  currentPage="compare"
+  og={{
+    url: 'https://ultrazoom.app/compare/ai-image-upscalers',
+    title: 'Ultra Zoom vs. AI image upscalers',
+    description: 'On-device AI upscaling in your browser, no upload, no per-image cost.',
+    image: 'https://ultrazoom.app/og/compare-ai-image-upscalers.png',
+    imageWidth: 1200,
+    imageHeight: 630,
+  }}
+  jsonLd={[breadcrumbSchema, faqSchema]}
+>
+    <main class="main page-content" id="main-content">
+        <h1>Ultra Zoom vs. AI image upscalers</h1>
+
+        <p class="pricing-intro">Upscayl, waifu2x, Real-ESRGAN, Let&rsquo;s Enhance, Topaz Photo AI &mdash; the AI upscaler ecosystem is healthy. They&rsquo;re built for batch-upscaling files you&rsquo;ve already saved. Ultra Zoom Pro is built for a different workflow: hover any image in your browser and run Real-ESRGAN on-device, in place, without saving or uploading anything.</p>
+
+        <section class="help-section" id="when-each-fits">
+            <h2>When each one fits</h2>
+            <ul class="help-list">
+                <li><strong>Desktop upscalers (Upscayl, waifu2x, Topaz)</strong> &rarr; you have a folder of files you want to render at high quality, with full control over models, scale factor, and tile size.</li>
+                <li><strong>Cloud upscalers (Let&rsquo;s Enhance, Topaz online)</strong> &rarr; you don&rsquo;t want to install anything and you&rsquo;re fine with per-image pricing and uploading the file.</li>
+                <li><strong>Ultra Zoom Pro</strong> &rarr; you&rsquo;re browsing &mdash; real estate, auctions, research archives, design references &mdash; and you want to upscale a single image right now without leaving the page.</li>
+            </ul>
+        </section>
+
+        <section class="help-section" id="how-it-works">
+            <h2>How Ultra Zoom upscales locally</h2>
+            <p>Ultra Zoom Pro bundles a Real-ESRGAN model that runs in your browser via WebGPU when available, with a WebAssembly fallback. The image is fetched as bytes, run through the model, and rendered as the hover overlay &mdash; never uploaded. There&rsquo;s no Ultra Zoom server, no API key, no per-image cost. <a href="/blog/zero-knowledge-architecture">Read the architecture</a>.</p>
+        </section>
+
+        <section class="help-section" id="feature-parity">
+            <h2>Side by side</h2>
+            <div class="pricing-compare-wrap">
+                <table class="pricing-compare">
+                    <thead>
+                        <tr>
+                            <th scope="col">Feature</th>
+                            <th scope="col">Upscayl / waifu2x</th>
+                            <th scope="col">Let&rsquo;s Enhance / cloud</th>
+                            <th scope="col">Ultra Zoom Pro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Runs locally (no upload)</th>
+                            <td aria-label="Yes">&#10003;</td>
+                            <td aria-label="No">&ndash;</td>
+                            <td aria-label="Yes">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Works inside the browser</th>
+                            <td aria-label="No">&ndash;</td>
+                            <td aria-label="Yes">&#10003;</td>
+                            <td aria-label="Yes">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Hover any image, upscale in place</th>
+                            <td aria-label="No">&ndash;</td>
+                            <td aria-label="No">&ndash;</td>
+                            <td aria-label="Yes">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">No per-image cost</th>
+                            <td aria-label="Yes">&#10003;</td>
+                            <td aria-label="No">&ndash;</td>
+                            <td aria-label="Yes">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Batch upscaling of saved files</th>
+                            <td aria-label="Yes">&#10003;</td>
+                            <td aria-label="Yes">&#10003;</td>
+                            <td aria-label="No">&ndash;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Real-ESRGAN model</th>
+                            <td aria-label="Yes">&#10003;</td>
+                            <td>Varies</td>
+                            <td aria-label="Yes">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Zero telemetry</th>
+                            <td aria-label="Yes">&#10003;</td>
+                            <td>Varies</td>
+                            <td aria-label="Yes">&#10003;</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="help-section" id="cta">
+            <h2>Try it free</h2>
+            <p>The core extension is free forever. Pro &mdash; including on-device AI upscaling &mdash; is a 7-day free trial when you&rsquo;re ready. <a href="/pricing">See plans</a>.</p>
+            <ul class="install-links">
+                <li>
+                    <a href="https://chromewebstore.google.com/detail/ultra-zoom/jalclpdejbeamaamcpbolkclpnleagmg" class="install-button chrome" target="_blank" rel="noopener">Install for Chrome</a>
+                </li>
+                <li>
+                    <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/" class="install-button firefox" target="_blank" rel="noopener">Install for Firefox</a>
+                </li>
+            </ul>
+        </section>
+    </main>
+</BaseLayout>

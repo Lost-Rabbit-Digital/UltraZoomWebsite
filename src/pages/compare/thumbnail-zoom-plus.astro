@@ -1,0 +1,164 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ultrazoom.app/' },
+    { '@type': 'ListItem', position: 2, name: 'Compare', item: 'https://ultrazoom.app/compare' },
+    { '@type': 'ListItem', position: 3, name: 'Ultra Zoom vs. Thumbnail Zoom Plus', item: 'https://ultrazoom.app/compare/thumbnail-zoom-plus' },
+  ],
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Does Thumbnail Zoom Plus still work?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Thumbnail Zoom Plus was a popular Firefox extension that broke when Mozilla retired the legacy add-on system in 2017. Some forks exist, but development has been minimal and most stopped publishing updates years ago. Ultra Zoom is built on the modern WebExtensions/Manifest V3 platform and ships releases every few weeks.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Is Ultra Zoom a Thumbnail Zoom Plus replacement for Firefox?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. Ultra Zoom is a current, signed Firefox add-on that matches the Thumbnail Zoom Plus workflow — instant hover preview, gallery navigation, theater mode — and supports Chrome, Edge and Brave from the same codebase.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can Ultra Zoom show full-size images on Reddit, Tumblr, and Imgur?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. Reddit, Imgur, Tumblr, Twitter/X, Bluesky, Pinterest and dozens of other image-heavy hosts are first-class plugins. The community URL-rules pack auto-updates weekly to extend coverage to long-tail sites.',
+      },
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title="Ultra Zoom vs. Thumbnail Zoom Plus — A Modern TZP Replacement"
+  description="Thumbnail Zoom Plus stopped working when Firefox retired legacy add-ons. Ultra Zoom is the actively maintained, MV3-native replacement with the same workflow on Chrome and Firefox."
+  currentPage="compare"
+  og={{
+    url: 'https://ultrazoom.app/compare/thumbnail-zoom-plus',
+    title: 'Ultra Zoom vs. Thumbnail Zoom Plus',
+    description: 'A privacy-first, actively maintained Thumbnail Zoom Plus replacement for Chrome and Firefox.',
+    image: 'https://ultrazoom.app/og/compare-thumbnail-zoom-plus.png',
+    imageWidth: 1200,
+    imageHeight: 630,
+  }}
+  jsonLd={[breadcrumbSchema, faqSchema]}
+>
+    <main class="main page-content" id="main-content">
+        <h1>Ultra Zoom vs. Thumbnail Zoom Plus</h1>
+
+        <p class="pricing-intro">Thumbnail Zoom Plus (TZP) was the hover-zoom extension Firefox users swore by &mdash; until Firefox retired the legacy add-on system and most TZP forks went dark. Ultra Zoom is the modern replacement: same workflow, current platform, same codebase running on Chrome and Firefox alike.</p>
+
+        <section class="help-section" id="why-switch">
+            <h2>Why TZP users are switching</h2>
+            <ul class="help-list">
+                <li><strong>Built on the current add-on platform.</strong> Native WebExtensions / Manifest V3 &mdash; no XUL, no XPCOM, no waiting for a fork that won&rsquo;t come. <a href="/blog/manifest-v3-trap">Read about the V3 trap</a>.</li>
+                <li><strong>Active development.</strong> Releases every few weeks with new site plugins, not the years-long silence TZP users got used to.</li>
+                <li><strong>Same workflow, more sites.</strong> Reddit, Imgur, Tumblr, Twitter/X, Bluesky, Pinterest, Unsplash, Pexels, Wikimedia, Bilibili, Avito &mdash; first-class plugins on day one.</li>
+                <li><strong>Zero telemetry by design.</strong> No analytics endpoint, no remote code, no server that sees your browsing. <a href="/blog/zero-knowledge-architecture">Read the architecture</a>.</li>
+            </ul>
+        </section>
+
+        <section class="help-section" id="feature-parity">
+            <h2>Feature parity at a glance</h2>
+            <div class="pricing-compare-wrap">
+                <table class="pricing-compare">
+                    <thead>
+                        <tr>
+                            <th scope="col">Feature</th>
+                            <th scope="col">Thumbnail Zoom Plus</th>
+                            <th scope="col">Ultra Zoom</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Hover-to-zoom on every site</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Site-specific page handlers</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Works on current Firefox</th>
+                            <td aria-label="No">No (legacy add-on)</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Works on Chrome / Edge / Brave</th>
+                            <td aria-label="No">No</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Theater mode (Z)</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Gallery navigation (arrow keys)</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Reverse image search shortcuts</th>
+                            <td aria-label="Partial">Partial</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">On-device AI upscaling</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003; (Pro)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Active release cadence</th>
+                            <td aria-label="Not active">Dormant</td>
+                            <td aria-label="Included">Every few weeks</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Zero telemetry guarantee</th>
+                            <td aria-label="Unclear">Unclear</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="help-section" id="migration">
+            <h2>Coming over from Thumbnail Zoom Plus</h2>
+            <ul class="help-list">
+                <li>Install Ultra Zoom from the <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/" target="_blank" rel="noopener">Firefox Add-ons store</a> &mdash; signed and reviewed.</li>
+                <li>If you still have a TZP fork installed, disable it &mdash; running both at once will fight over the hover overlay.</li>
+                <li>Familiar shortcuts: hover to preview, arrow keys to navigate galleries, <kbd>Z</kbd> for theater mode, <kbd>Esc</kbd> to dismiss.</li>
+            </ul>
+        </section>
+
+        <section class="help-section" id="cta">
+            <h2>Try it free</h2>
+            <p>The core extension is free forever, with the entire site catalogue. Pro is a 7-day free trial when you&rsquo;re ready &mdash; <a href="/pricing">see plans</a>.</p>
+            <ul class="install-links">
+                <li>
+                    <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/" class="install-button firefox" target="_blank" rel="noopener">Install for Firefox</a>
+                </li>
+                <li>
+                    <a href="https://chromewebstore.google.com/detail/ultra-zoom/jalclpdejbeamaamcpbolkclpnleagmg" class="install-button chrome" target="_blank" rel="noopener">Install for Chrome</a>
+                </li>
+            </ul>
+        </section>
+    </main>
+</BaseLayout>

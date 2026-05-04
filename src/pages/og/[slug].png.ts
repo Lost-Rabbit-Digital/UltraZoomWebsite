@@ -70,6 +70,58 @@ const SITE_PAGES: Record<string, OgCard> = {
     eyebrow: 'Comparison',
     title: 'Ultra Zoom vs. Hover Zoom Plus — a modern, privacy-first alternative.',
   },
+  'compare-hover-zoom': {
+    eyebrow: 'Comparison',
+    title: 'Ultra Zoom vs. Hover Zoom — the privacy-first replacement for the original.',
+  },
+  'compare-thumbnail-zoom-plus': {
+    eyebrow: 'Comparison',
+    title: 'Ultra Zoom vs. Thumbnail Zoom Plus — a modern Firefox replacement.',
+  },
+  'compare-mage': {
+    eyebrow: 'Comparison',
+    title: 'Ultra Zoom vs. Mage — an actively maintained Hover Zoom fork alternative.',
+  },
+  'compare-magic-actions': {
+    eyebrow: 'Comparison',
+    title: 'Ultra Zoom vs. Magic Actions — hover preview and video controls everywhere.',
+  },
+  'compare-zoom-page-we': {
+    eyebrow: 'Comparison',
+    title: 'Ultra Zoom vs. Zoom Page WE — page zoom vs. hover-to-zoom.',
+  },
+  'compare-image-search-options': {
+    eyebrow: 'Comparison',
+    title: 'Ultra Zoom vs. Image Search Options — reverse image search, built in.',
+  },
+  'compare-chrome-built-in-zoom': {
+    eyebrow: 'Comparison',
+    title: 'Ultra Zoom vs. Chrome built-in zoom — full-resolution source on hover.',
+  },
+  'compare-firefox-image-zoom': {
+    eyebrow: 'Comparison',
+    title: 'Ultra Zoom vs. Firefox built-in zoom — a modern hover-to-zoom add-on.',
+  },
+  'compare-mls-photo-viewers': {
+    eyebrow: 'Comparison',
+    title: 'Ultra Zoom vs. MLS photo viewers — full-resolution listing photos on hover.',
+  },
+  'compare-ai-image-upscalers': {
+    eyebrow: 'Comparison',
+    title: 'Ultra Zoom vs. AI image upscalers — on-device Real-ESRGAN in your browser.',
+  },
+  'compare-hover-zoom-alternatives': {
+    eyebrow: 'Roundup',
+    title: 'The best Hover Zoom alternatives in 2026 — ranked by privacy and parity.',
+  },
+  'compare-imagus-alternatives': {
+    eyebrow: 'Roundup',
+    title: 'The best Imagus alternatives in 2026 — sieve-rule migration guide.',
+  },
+  'compare-index': {
+    eyebrow: 'Comparisons',
+    title: 'Ultra Zoom, compared — every hover-to-zoom alternative in one place.',
+  },
 };
 
 export async function getStaticPaths() {

@@ -1,0 +1,140 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ultrazoom.app/' },
+    { '@type': 'ListItem', position: 2, name: 'Compare', item: 'https://ultrazoom.app/compare' },
+    { '@type': 'ListItem', position: 3, name: 'Ultra Zoom vs. Image Search Options', item: 'https://ultrazoom.app/compare/image-search-options' },
+  ],
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Does Ultra Zoom do reverse image search?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. Hover any image and use the keyboard shortcut to search Google Images, Bing, Yandex, TinEye, SauceNAO, IQDB, or Lens — same workflow as Image Search Options.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can Ultra Zoom replace Image Search Options?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'For most users, yes. Ultra Zoom bundles reverse image search shortcuts into the same hover-zoom workflow you already use, so you do not need a second extension just for the right-click search menu.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What about privacy?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Ultra Zoom has zero telemetry by design. Reverse image search lookups go directly to the search engine you pick — there is no Ultra Zoom server in between, no logging, no analytics.',
+      },
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title="Ultra Zoom vs. Image Search Options — Reverse Image Search Built In"
+  description="Image Search Options adds reverse image search to your right-click menu. Ultra Zoom bundles the same shortcuts into a hover-zoom workflow — one extension, one keystroke."
+  currentPage="compare"
+  og={{
+    url: 'https://ultrazoom.app/compare/image-search-options',
+    title: 'Ultra Zoom vs. Image Search Options',
+    description: 'Reverse image search shortcuts built into hover-to-zoom — fewer extensions, same workflow.',
+    image: 'https://ultrazoom.app/og/compare-image-search-options.png',
+    imageWidth: 1200,
+    imageHeight: 630,
+  }}
+  jsonLd={[breadcrumbSchema, faqSchema]}
+>
+    <main class="main page-content" id="main-content">
+        <h1>Ultra Zoom vs. Image Search Options</h1>
+
+        <p class="pricing-intro">Image Search Options is the long-standing right-click menu for reverse image search &mdash; Google, Bing, Yandex, TinEye, SauceNAO, IQDB. Ultra Zoom bundles the same shortcuts into the hover-zoom workflow you already use, so you don&rsquo;t need a second extension just for the search menu.</p>
+
+        <section class="help-section" id="why-switch">
+            <h2>Why people are switching</h2>
+            <ul class="help-list">
+                <li><strong>One extension, two workflows.</strong> Hover-to-zoom and reverse image search in the same overlay &mdash; one keystroke instead of right-click, hover, click.</li>
+                <li><strong>All the major search engines.</strong> Google Images, Bing, Yandex, TinEye, SauceNAO, IQDB, and Google Lens &mdash; pick your default in settings.</li>
+                <li><strong>Zero telemetry by design.</strong> Lookups go directly to the engine you pick. No Ultra Zoom server in between. <a href="/blog/zero-knowledge-architecture">Read the architecture</a>.</li>
+                <li><strong>Active development.</strong> New search-engine integrations and bug fixes ship every few weeks.</li>
+            </ul>
+        </section>
+
+        <section class="help-section" id="feature-parity">
+            <h2>Feature parity at a glance</h2>
+            <div class="pricing-compare-wrap">
+                <table class="pricing-compare">
+                    <thead>
+                        <tr>
+                            <th scope="col">Feature</th>
+                            <th scope="col">Image Search Options</th>
+                            <th scope="col">Ultra Zoom</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Right-click reverse image search</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Keyboard shortcut from hover preview</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Google / Bing / Yandex / TinEye</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">SauceNAO / IQDB / Google Lens</th>
+                            <td aria-label="Partial">Partial</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Hover-to-zoom on every site</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">On-device AI upscaling</th>
+                            <td aria-label="Not included">&ndash;</td>
+                            <td aria-label="Included">&#10003; (Pro)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Zero telemetry</th>
+                            <td aria-label="Included">&#10003;</td>
+                            <td aria-label="Included">&#10003;</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="help-section" id="cta">
+            <h2>Try it free</h2>
+            <p>The core extension is free forever, with the entire site catalogue and reverse image search shortcuts. Pro is a 7-day free trial when you&rsquo;re ready &mdash; <a href="/pricing">see plans</a>.</p>
+            <ul class="install-links">
+                <li>
+                    <a href="https://chromewebstore.google.com/detail/ultra-zoom/jalclpdejbeamaamcpbolkclpnleagmg" class="install-button chrome" target="_blank" rel="noopener">Install for Chrome</a>
+                </li>
+                <li>
+                    <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/" class="install-button firefox" target="_blank" rel="noopener">Install for Firefox</a>
+                </li>
+            </ul>
+        </section>
+    </main>
+</BaseLayout>
