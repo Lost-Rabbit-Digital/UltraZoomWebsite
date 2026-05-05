@@ -9,7 +9,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   og={{
     url: 'https://ultrazoom.app/press',
     title: 'Ultra Zoom Press Kit',
-    description: 'Launch release, boilerplate, quick facts, and media contact for Ultra Zoom.',
+    description: 'Releases, boilerplate, quick facts, and media contact for Ultra Zoom.',
     image: 'https://ultrazoom.app/og/press.png',
     imageWidth: 1200,
     imageHeight: 630,
@@ -20,10 +20,113 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
         <p class="pricing-intro">
             Ultra Zoom is a hover-to-zoom browser extension built by Lost Rabbit Digital LLC.
-            This page mirrors the official launch release and collects everything a journalist
+            This page mirrors the official releases and collects everything a journalist
             or reviewer needs in one place. For interview requests, demo accounts, or
             higher-resolution screenshots, contact <a href="mailto:boden@lostrabbitdigital.com">boden@lostrabbitdigital.com</a>.
         </p>
+
+        <section class="help-section" id="release-ai-upscaling">
+            <h2>Latest release</h2>
+
+            <article class="press-release">
+                <p class="press-meta"><strong>FOR IMMEDIATE RELEASE</strong></p>
+
+                <h3 class="press-headline">Ultra Zoom Adds On-Device AI Upscaling and Listing-Aware Overlays for Real-Estate Pros</h3>
+                <p class="press-subhead">Privacy-first hover-to-zoom extension ships a locally bundled Real-ESRGAN model, Redfin/Zillow/Realtor.com listing captions, and a free tier that absorbs features once gated behind Pro.</p>
+
+                <p>
+                    <strong>May 5, 2026</strong> &mdash; Lost Rabbit Digital LLC today announced
+                    a major update to Ultra Zoom, its hover-to-zoom browser extension for
+                    Google Chrome and Mozilla Firefox. The release introduces on-device AI
+                    upscaling, listing-aware overlays for real-estate sites, and a rebalanced
+                    free tier that opens up several features previously reserved for paying
+                    subscribers.
+                </p>
+
+                <h4 class="press-section-heading">AI image upscaling that never leaves the browser</h4>
+                <p>
+                    Ultra Zoom now reconstructs detail in low-resolution images at hover time
+                    using <strong>Real-ESRGAN (general x4v3)</strong>, a neural upscaling model
+                    that runs entirely on the user&rsquo;s device. The model weights ship inside
+                    the extension package itself &mdash; there is no remote inference endpoint,
+                    no cloud GPU dependency, and no opt-in for cross-network image transmission
+                    because no image data is ever sent off the machine. When the model can&rsquo;t
+                    initialize on a particular device, Ultra Zoom falls back to high-quality
+                    Lanczos resampling automatically.
+                </p>
+                <p>
+                    The feature is targeted at workflows where users routinely encounter
+                    aggressively compressed images they need to inspect: MLS listing photos,
+                    e-commerce product thumbnails, archival scans, and auction-catalog
+                    imagery. Users can toggle AI upscaling on a per-domain basis from the
+                    extension popup.
+                </p>
+
+                <blockquote class="press-quote">
+                    &ldquo;Most AI features in browser extensions today work by uploading
+                    your data to a third-party server. We refused to ship that. The model
+                    is bundled with Ultra Zoom, runs locally on your CPU or GPU, and the
+                    image you&rsquo;re hovering over never leaves the browser. That&rsquo;s
+                    the only architecture that&rsquo;s consistent with the privacy promise
+                    we made at launch.&rdquo;
+                    <cite>&mdash; David McHale, founder, Lost Rabbit Digital</cite>
+                </blockquote>
+
+                <h4 class="press-section-heading">Listing-aware overlays for buyer agents and brokers</h4>
+                <p>
+                    Ultra Zoom&rsquo;s plugins for <strong>Redfin, Zillow, Realtor.com,
+                    and Crexi</strong> now extract structured listing data alongside the
+                    photo. The hover overlay surfaces the listing&rsquo;s status (NEW, OPEN,
+                    SOLD), price, full address, and the beds / baths / square-footage
+                    line as a caption. A new <code>Shift+L</code> shortcut opens the
+                    underlying listing page; <code>A</code> copies the address to the
+                    clipboard.
+                </p>
+                <p>
+                    On Redfin, the gallery enumeration logic now resolves <em>every</em>
+                    photo in a listing rather than only the thumbnails rendered in the
+                    page DOM, so a buyer&rsquo;s agent can arrow-key through a 40-photo
+                    listing without leaving the search-results view. Theater mode &mdash;
+                    which expands the active overlay to fill the browser window &mdash;
+                    no longer clips scroll-zoom past the original image bounds, removing
+                    a long-standing rough edge in detail-page review. A separate
+                    commercial-real-estate bundle covers Crexi listings for industrial,
+                    retail, multifamily, and office workflows.
+                </p>
+
+                <h4 class="press-section-heading">Free-tier expansion: democratizing premium features</h4>
+                <p>
+                    Several capabilities that previously required a Pro subscription
+                    are now available to all users, with Ultra Zoom attribution applied
+                    where the image leaves the browser:
+                </p>
+                <ul class="help-list">
+                    <li><strong>Region copy</strong> (<code>Shift+C</code>) and <strong>batch download</strong> (<code>Shift+D</code>, up to five images per session) ship to free users with a small attribution watermark composited into each export. Pro removes both the watermark and the cap.</li>
+                    <li>The <strong>EXIF panel</strong> (<code>I</code>), the <strong>color-palette tool</strong> (<code>P</code>), and a <strong>windowed gallery filmstrip</strong> are now free for everyone. Pro adds JSON / CSS / GPX export from those panels.</li>
+                    <li>A new <code>K</code> shortcut toggles the listing-detail caption strip on demand without changing the global setting.</li>
+                </ul>
+                <p>
+                    The change reflects feedback from buyer agents, researchers, and
+                    archivists who were hitting paywalls in the middle of routine
+                    workflows. &ldquo;The free tier should feel useful, not crippled,&rdquo;
+                    McHale said. &ldquo;Pro is for people who want export power and no
+                    branding on their captures &mdash; it&rsquo;s not a tax on basic
+                    review.&rdquo;
+                </p>
+
+                <h4 class="press-section-heading">Availability</h4>
+                <p>
+                    The update is rolling out now via the
+                    <a href="https://chromewebstore.google.com/detail/ultra-zoom/jalclpdejbeamaamcpbolkclpnleagmg" target="_blank" rel="noopener">Chrome Web Store</a>
+                    and the
+                    <a href="https://addons.mozilla.org/en-US/firefox/addon/ultra-zoom/" target="_blank" rel="noopener">Firefox Add-ons gallery</a>.
+                    Existing installations will receive it automatically through their
+                    browser&rsquo;s extension update channel. Documentation, release notes,
+                    and the full list of supported sites are published at
+                    <a href="https://ultrazoom.app">https://ultrazoom.app</a>.
+                </p>
+            </article>
+        </section>
 
         <section class="help-section" id="release">
             <h2>Launch release</h2>
@@ -103,9 +206,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 <li><strong>Founder:</strong> David McHale.</li>
                 <li><strong>Browsers:</strong> Google Chrome (Manifest V3) and Mozilla Firefox.</li>
                 <li><strong>Pricing:</strong> Free core extension. Optional Ultra Zoom Pro at $3.99 / month, $29.99 / year, or $59.99 lifetime, with a 7-day free trial.</li>
-                <li><strong>Privacy posture:</strong> Zero telemetry, zero analytics, no remote code, no server-side processing of browsing data.</li>
-                <li><strong>Coverage:</strong> 60+ optimized site plugins plus a generic engine and a community URL rules pack.</li>
-                <li><strong>Launched:</strong> April 2, 2026.</li>
+                <li><strong>Privacy posture:</strong> Zero telemetry, zero analytics, no remote code, no server-side processing of browsing data &mdash; including AI features.</li>
+                <li><strong>AI upscaling:</strong> Real-ESRGAN (general x4v3) bundled with the extension and run locally; Lanczos fallback. No image data is transmitted.</li>
+                <li><strong>Coverage:</strong> 60+ optimized site plugins plus a generic engine and a community URL rules pack. Listing-aware overlays for Redfin, Zillow, Realtor.com, and Crexi.</li>
+                <li><strong>Launched:</strong> April 2, 2026. Most recent major update: May 5, 2026.</li>
             </ul>
         </section>
 
