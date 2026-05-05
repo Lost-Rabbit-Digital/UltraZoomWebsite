@@ -4,12 +4,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout
   title="What's New | Ultra Zoom"
-  description="Recent Ultra Zoom releases, including on-device AI upscaling powered by Real-ESRGAN, theater mode, reverse image search, advanced gallery, and twelve new site plugins."
+  description="Recent Ultra Zoom releases, including listing-aware overlays for Redfin/Zillow/Realtor.com, on-device AI upscaling powered by Real-ESRGAN, theater mode, reverse image search, advanced gallery, and twelve new site plugins."
   currentPage="whats-new"
   og={{
     url: 'https://ultrazoom.app/whats-new',
     title: "What's New in Ultra Zoom",
-    description: 'Latest Ultra Zoom releases at a glance: on-device AI upscaling, theater mode, reverse image search, advanced gallery, and a dozen new free sites.',
+    description: 'Latest Ultra Zoom releases at a glance: listing-aware overlays for real-estate sites, on-device AI upscaling, free-tier expansion, and a dozen new free sites.',
     image: 'https://ultrazoom.app/og/whats-new.png',
     imageWidth: 1200,
     imageHeight: 630,
@@ -20,9 +20,53 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
         <p class="pricing-intro">A running log of Ultra Zoom releases. The TL;DR for power users coming from another hover-zoom tool: feature parity is here, and the basics that used to require Pro are now free.</p>
 
+        <article class="help-section" id="listing-overlays-release">
+            <h2>Listing overlays &amp; free-tier expansion <span class="badge-pro">Latest</span></h2>
+            <p>The late-April wave focused on two things: making Ultra Zoom genuinely useful for real-estate workflows, and removing paywalls from review surfaces that should never have had them.</p>
+
+            <h3>Listing-aware overlays for real estate</h3>
+            <ul class="help-list">
+                <li><strong>Redfin, Zillow, Realtor.com, Crexi</strong> &mdash; the hover overlay now renders a structured caption with the listing&rsquo;s status (NEW / OPEN / SOLD), price, address, and beds / baths / sqft line.</li>
+                <li><strong>Full gallery on Redfin</strong> &mdash; arrow-key navigation now resolves every photo in a listing, not just the thumbnails rendered in the page DOM. Walk a 40-photo listing without leaving the search-results view.</li>
+                <li><strong><kbd>Shift+L</kbd></strong> opens the underlying listing page from the overlay; <strong><kbd>A</kbd></strong> copies the address to the clipboard.</li>
+                <li><strong><kbd>K</kbd></strong> toggles the listing-detail caption strip on demand without changing the global setting.</li>
+                <li><strong>Theater-mode fix</strong> &mdash; scroll-zoom past the original image bounds no longer clips when theater mode is active.</li>
+            </ul>
+
+            <h3>Free for everyone (with a small Ultra Zoom watermark)</h3>
+            <ul class="help-list">
+                <li><strong>Region copy</strong> (<kbd>Shift+C</kbd>) &mdash; crop and copy any sub-region of the zoomed image; free exports carry an attribution watermark.</li>
+                <li><strong>Batch download</strong> (<kbd>Shift+D</kbd>) &mdash; pull up to five images per session as a zip, each watermarked, with a README pointing back to Ultra Zoom.</li>
+                <li><strong>EXIF panel</strong> (<kbd>I</kbd>) &mdash; camera, lens, ISO, shutter, and GPS for any image that carries the metadata.</li>
+                <li><strong>Color-palette tool</strong> (<kbd>P</kbd>) &mdash; click a swatch to copy hex to clipboard.</li>
+                <li><strong>Windowed gallery filmstrip</strong> &mdash; eight thumbnails centered on the active photo, plus a <em>+N Pro</em> tile that opens the full strip after upgrade.</li>
+            </ul>
+
+            <h3>Pro removes the watermark and the cap</h3>
+            <ul class="help-list">
+                <li>Region copy and batch download export without the Ultra Zoom watermark, with no per-session image cap.</li>
+                <li>EXIF panel adds <em>Copy as JSON</em> and <em>Export GPX</em>.</li>
+                <li>Color palette adds <em>Copy CSS</em> (<code>:root { --color-N }</code>) and <em>Export PNG</em>.</li>
+                <li>Filmstrip shows every gallery thumb, not a windowed view.</li>
+            </ul>
+
+            <h3>Quality-of-life</h3>
+            <ul class="help-list">
+                <li><kbd>[</kbd> / <kbd>]</kbd> cycle overlay size presets (small &rarr; medium &rarr; large &rarr; fullscreen) and persist the choice.</li>
+                <li><kbd>+</kbd> / <kbd>&minus;</kbd> nudge the active overlay 5&#37; without writing to settings.</li>
+                <li>New <em>Capture region</em> setting decides whether <em>Save</em> dumps the full image or just the visible viewport.</li>
+                <li>Logo-skip heuristic prevents the overlay from triggering on header / nav site logos.</li>
+                <li>Imgur thumbnail-suffix bug fixed so 7-character IDs ending in <em>s/m/t/b/l/h</em> no longer 404.</li>
+            </ul>
+
+            <p class="pro-cta">
+                <a href="/pricing" class="pro-cta-btn">See Pro plans</a>
+            </p>
+        </article>
+
         <article class="help-section" id="ai-upscaling-release">
-            <h2>AI upscaling release <span class="badge-pro">Latest</span></h2>
-            <p>Ultra Zoom now <em>enhances</em> the photo as you zoom &mdash; not just enlarge it. The model runs entirely on your device, so no image leaves the browser.</p>
+            <h2>AI upscaling release</h2>
+            <p>Ultra Zoom <em>enhances</em> the photo as you zoom &mdash; not just enlarge it. The model runs entirely on your device, so no image leaves the browser.</p>
 
             <h3>New Pro feature</h3>
             <ul class="help-list">
