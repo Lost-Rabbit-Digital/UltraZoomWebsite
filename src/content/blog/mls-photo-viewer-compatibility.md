@@ -36,7 +36,7 @@ Instead, the extension works on two layers:
 1. **Per-site plugins** for the high-volume sites (Zillow, Redfin, Realtor.com, the major MLS viewers above). These are tuned to the way each site lays out its image grid, so hover-zoom feels native — including in the lightbox modal and during arrow-key gallery navigation.
 2. **Generic image detection** for everything else. The extension finds image elements on the page, identifies which one your cursor is over, and pulls the highest-resolution version available. This is what makes Ultra Zoom work on most regional MLSs even when we haven't seen them — most viewers are using a small set of underlying frameworks under the hood.
 
-In practice, this means a regional MLS we've never tested usually works on first install. When it doesn't, it's almost always because the viewer is using an unusual lazy-loading pattern or a CSS background image instead of an `<img>` element. Both are fixable with a small selector update.
+In practice, this means a regional MLS we've never tested usually works on first install. When it doesn't, it's almost always because the viewer is using an unusual lazy-loading pattern or a CSS background image instead of an `img` element. Both are fixable with a small selector update.
 
 ## What "doesn't work" actually looks like
 
