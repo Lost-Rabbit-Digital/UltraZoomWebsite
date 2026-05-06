@@ -22,9 +22,9 @@ Discovery + triage tool for finding military/aerospace blog posts where Ultra Zo
 ## Setup
 
 ```bash
-cd ultrazoom_pipeline
+cd outreach/comments-discovery
 python -m venv .venv && source .venv/bin/activate
-pip install requests beautifulsoup4 anthropic flask
+pip install -r requirements.txt flask     # flask only needed for review_ui
 
 export EXA_API_KEY=...
 export ANTHROPIC_API_KEY=...
@@ -47,12 +47,37 @@ python pipeline.py --query "j-36 prototype photo analysis" --limit 20 --verbose
 
 Re-running is idempotent on URL — already-seen candidates are skipped.
 
+## Run discovery in CI
+
+The `Comments discovery` GitHub Actions workflow
+(`.github/workflows/comments-discovery.yml`) runs the same pipeline weekly
+(Mondays 14:00 UTC) and on `workflow_dispatch`. It reads `EXA_API_KEY` and
+`ANTHROPIC_API_KEY` from repo secrets, caches `candidates.db` between runs
+so URL-dedup keeps working, and uploads the database as a build artifact
+named `candidates-db-<run-id>`. To triage:
+
+1. Open the workflow run in the Actions tab.
+2. Download the `candidates-db-*` artifact and unzip it anywhere.
+3. Point the review UI at it: `python review_ui.py --db ~/Downloads/candidates.db`.
+
 ## Review
 
 ```bash
+# Triage the local DB (defaults to ./candidates.db)
 python review_ui.py
-# open http://localhost:5000
+
+# Triage a downloaded artifact without overwriting your local DB
+python review_ui.py --db ~/Downloads/candidates.db
+
+# Bind options
+python review_ui.py --port 5050 --host 0.0.0.0    # default port: 5050
 ```
+
+Then open the URL the command prints (defaults to `http://127.0.0.1:5050`).
+
+Keyboard shortcuts: `j`/`k` next/prev card · `enter` open article ·
+`p` mark posted · `a` archive · `s` skip · `e` edit draft · `/` search ·
+`?` help.
 
 Workflow per card:
 1. Glance at the header image and caption. If it doesn't look zoom-worthy, hit Archive.

@@ -1,0 +1,124 @@
+name: Comments discovery
+
+# Discovers military/aerospace blog posts where Ultra Zoom can contribute a
+# zoom-and-enhance comment, drafts a suggested comment with Claude, and
+# stores everything in candidates.db for human triage via review_ui.py.
+#
+# Run modes:
+#   workflow_dispatch  Operator runs ad-hoc (the normal path).
+#   schedule           Weekly cron sweep of the seed queries.
+#
+# The pipeline is idempotent on URL — already-seen candidates are skipped —
+# so we cache candidates.db across runs to keep that property useful in CI.
+# After each run the database is uploaded as an artifact; download it,
+# drop it next to review_ui.py, and `python review_ui.py` to triage locally.
+#
+# Required GitHub Secrets:
+#   EXA_API_KEY         Exa.ai search API key.
+#   ANTHROPIC_API_KEY   Claude API key for drafting suggestions.
+
+on:
+  workflow_dispatch:
+    inputs:
+      query:
+        description: 'Custom Exa query (blank = use seed queries from exa_search.py)'
+        required: false
+        default: ''
+      limit:
+        description: 'Max results per Exa query'
+        required: false
+        default: '15'
+      dry_run:
+        description: 'Skip Claude calls (discovery only, no spend)'
+        required: false
+        type: boolean
+        default: false
+      verbose:
+        description: 'Verbose logging'
+        required: false
+        type: boolean
+        default: true
+  schedule:
+    # Mondays 14:00 UTC — early morning Pacific.
+    - cron: '0 14 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: comments-discovery
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: outreach/comments-discovery/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r outreach/comments-discovery/requirements.txt
+
+      - name: Sanity-check secrets
+        env:
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          missing=()
+          [ -z "${EXA_API_KEY:-}" ] && missing+=("EXA_API_KEY")
+          if [ "${DRY_RUN:-false}" != "true" ]; then
+            [ -z "${ANTHROPIC_API_KEY:-}" ] && missing+=("ANTHROPIC_API_KEY")
+          fi
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::missing secrets: ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Restore candidates.db from cache
+        id: cache-db
+        uses: actions/cache@v4
+        with:
+          path: outreach/comments-discovery/candidates.db
+          key: comments-discovery-db-${{ github.run_id }}
+          restore-keys: |
+            comments-discovery-db-
+
+      - name: Run discovery pipeline
+        env:
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          QUERY: ${{ inputs.query }}
+          LIMIT: ${{ inputs.limit || '15' }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          VERBOSE: ${{ inputs.verbose }}
+        working-directory: outreach/comments-discovery
+        run: |
+          set -euo pipefail
+          ARGS=(--limit "$LIMIT")
+          if [ -n "${QUERY:-}" ]; then
+            ARGS+=(--query "$QUERY")
+          fi
+          if [ "${DRY_RUN:-false}" = "true" ]; then
+            ARGS+=(--dry-run)
+          fi
+          if [ "${VERBOSE:-true}" = "true" ]; then
+            ARGS+=(--verbose)
+          fi
+          python pipeline.py "${ARGS[@]}"
+
+      - name: Upload candidates.db artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidates-db-${{ github.run_id }}
+          path: outreach/comments-discovery/candidates.db
+          if-no-files-found: warn
+          retention-days: 30
