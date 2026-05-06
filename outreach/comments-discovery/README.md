@@ -22,9 +22,9 @@ Discovery + triage tool for finding military/aerospace blog posts where Ultra Zo
 ## Setup
 
 ```bash
-cd ultrazoom_pipeline
+cd outreach/comments-discovery
 python -m venv .venv && source .venv/bin/activate
-pip install requests beautifulsoup4 anthropic flask
+pip install -r requirements.txt flask     # flask only needed for review_ui
 
 export EXA_API_KEY=...
 export ANTHROPIC_API_KEY=...
@@ -46,6 +46,20 @@ python pipeline.py --query "j-36 prototype photo analysis" --limit 20 --verbose
 ```
 
 Re-running is idempotent on URL — already-seen candidates are skipped.
+
+## Run discovery in CI
+
+The `Comments discovery` GitHub Actions workflow
+(`.github/workflows/comments-discovery.yml`) runs the same pipeline weekly
+(Mondays 14:00 UTC) and on `workflow_dispatch`. It reads `EXA_API_KEY` and
+`ANTHROPIC_API_KEY` from repo secrets, caches `candidates.db` between runs
+so URL-dedup keeps working, and uploads the database as a build artifact
+named `candidates-db-<run-id>`. To triage:
+
+1. Open the workflow run in the Actions tab.
+2. Download the `candidates-db-*` artifact.
+3. Unzip into `outreach/comments-discovery/` next to `review_ui.py`.
+4. `python review_ui.py` and triage at http://localhost:5000.
 
 ## Review
 
