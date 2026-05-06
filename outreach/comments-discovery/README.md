@@ -57,16 +57,27 @@ so URL-dedup keeps working, and uploads the database as a build artifact
 named `candidates-db-<run-id>`. To triage:
 
 1. Open the workflow run in the Actions tab.
-2. Download the `candidates-db-*` artifact.
-3. Unzip into `outreach/comments-discovery/` next to `review_ui.py`.
-4. `python review_ui.py` and triage at http://localhost:5000.
+2. Download the `candidates-db-*` artifact and unzip it anywhere.
+3. Point the review UI at it: `python review_ui.py --db ~/Downloads/candidates.db`.
 
 ## Review
 
 ```bash
+# Triage the local DB (defaults to ./candidates.db)
 python review_ui.py
-# open http://localhost:5000
+
+# Triage a downloaded artifact without overwriting your local DB
+python review_ui.py --db ~/Downloads/candidates.db
+
+# Bind options
+python review_ui.py --port 5050 --host 0.0.0.0    # default port: 5050
 ```
+
+Then open the URL the command prints (defaults to `http://127.0.0.1:5050`).
+
+Keyboard shortcuts: `j`/`k` next/prev card · `enter` open article ·
+`p` mark posted · `a` archive · `s` skip · `e` edit draft · `/` search ·
+`?` help.
 
 Workflow per card:
 1. Glance at the header image and caption. If it doesn't look zoom-worthy, hit Archive.

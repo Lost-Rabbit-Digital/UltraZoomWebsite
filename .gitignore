@@ -7,3 +7,7 @@ _site/
 __pycache__/
 *.pyc
 .venv/
+
+# Comments-discovery local DB (CI-generated, downloaded as artifact for triage)
+outreach/comments-discovery/candidates.db
+outreach/comments-discovery/candidates.db-*
