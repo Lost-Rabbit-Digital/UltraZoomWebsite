@@ -12,11 +12,12 @@ __pycache__/
 outreach/comments-discovery/candidates.db
 outreach/comments-discovery/candidates.db-*
 
-# Image-gallery pipeline: keep gallery.db (state of record) but never
-# commit raw image bytes or the ONNX model.
+# Image-gallery pipeline: keep gallery.db (state of record) and the
+# committed ONNX, but never commit raw image bytes or intermediate .pth.
 outreach/image-gallery/candidates/
 outreach/image-gallery/enhanced/
 outreach/image-gallery/posted/
-outreach/image-gallery/models/
+outreach/image-gallery/models/*
+!outreach/image-gallery/models/realesr-general-x4v3.onnx
 outreach/image-gallery/gallery.db-*
 outreach/image-gallery/analytics-*.csv

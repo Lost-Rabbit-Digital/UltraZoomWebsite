@@ -13,9 +13,9 @@ name: Image gallery discovery + enhance
 #   5. Commit the updated `outreach/image-gallery/gallery.db` to the branch
 #      and push. The post workflow's cron picks up due rows from there.
 #
-# The ONNX model is fetched fresh on each run (cached) to keep the repo
-# small. Override REALESRGAN_ONNX_PATH in inputs to point at a different
-# variant.
+# The ONNX model (~5 MB realesr-general-x4v3) is committed under
+# outreach/image-gallery/models/ and used as-is. Regenerate via
+# convert_model.py if the upstream weights ever change.
 
 on:
   workflow_dispatch:
@@ -69,18 +69,6 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r outreach/image-gallery/requirements.txt
-
-      - name: Cache ONNX model
-        id: model-cache
-        uses: actions/cache@v4
-        with:
-          path: outreach/image-gallery/models
-          key: realesrgan-x4plus-v1
-
-      - name: Download model if not cached
-        if: steps.model-cache.outputs.cache-hit != 'true'
-        working-directory: outreach/image-gallery
-        run: python download_model.py
 
       - name: Run discovery
         env:

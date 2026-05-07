@@ -13,12 +13,13 @@ Pipeline per image:
   5. Write to enhanced/<hash>.jpg and update the DB.
 
 Run:
-    REALESRGAN_ONNX_PATH=models/Real-ESRGAN-x4plus.onnx python enhance.py
     python enhance.py --limit 5 --verbose
     python enhance.py --candidate-id 42 --verbose
+    REALESRGAN_ONNX_PATH=models/custom.onnx python enhance.py
 
-The ONNX model is not committed to the repo; download it once via
-``download_model.py`` or set ``REALESRGAN_ONNX_PATH`` to a local copy.
+The default ONNX (realesr-general-x4v3, ~5 MB) is committed to the repo
+under ``models/``. Override with ``REALESRGAN_ONNX_PATH`` to swap in a
+different variant; regenerate the default via ``convert_model.py``.
 """
 from __future__ import annotations
 
@@ -311,7 +312,7 @@ def main() -> None:
     if not model_path.exists():
         print(
             f"ONNX model not found at {model_path}. "
-            f"Run `python download_model.py` or set REALESRGAN_ONNX_PATH.",
+            f"Run `python convert_model.py` or set REALESRGAN_ONNX_PATH.",
             file=sys.stderr,
         )
         sys.exit(2)
