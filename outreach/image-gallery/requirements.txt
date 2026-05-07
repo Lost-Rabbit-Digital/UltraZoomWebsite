@@ -1,0 +1,10 @@
+# Image-gallery pipeline dependencies.
+#
+# `flask` is only needed for the local review_ui.py and is intentionally
+# omitted here so CI runs stay lean — install it manually when reviewing.
+anthropic>=0.40.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+Pillow>=10.0.0
+numpy>=1.26.0
+onnxruntime>=1.17.0
