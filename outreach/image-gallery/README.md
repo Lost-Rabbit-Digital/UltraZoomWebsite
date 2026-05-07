@@ -9,7 +9,7 @@ area.
 ```
   Reddit / Wikimedia Commons / NASA APOD / Exa.ai     ── Stage 1 ──▶ candidates/
                                                                      gallery.db
-  ONNX Real-ESRGAN x4plus  +  watermark  +  resize    ── Stage 2 ──▶ enhanced/
+  ONNX realesr-general-x4v3 + watermark + resize      ── Stage 2 ──▶ enhanced/
                                                                      (status='enhanced')
   Flask review UI: side-by-side compare, approve,     ── Stage 3 ──▶ queue rows
   edit title + tags                                                  (status='approved')
@@ -28,8 +28,9 @@ committed.
 
 - It does not auto-approve. Stage 3 is human-in-the-loop.
 - It does not run the model in your browser. The browser extension uses
-  the same `Real-ESRGAN-x4plus.onnx` weights, but here we run inference
-  via `onnxruntime` on the GH Actions runner (CPU).
+  Real-ESRGAN-x4plus; here we run a smaller-but-similar variant
+  (`realesr-general-x4v3`, ~5 MB ONNX, committed to the repo) via
+  `onnxruntime` on the GH Actions runner (CPU).
 - It does not handle Reddit OAuth. We use the public JSON listings, which
   is enough for top-of-day reads but Reddit may rate-limit if you turn
   the dial up.
@@ -44,7 +45,8 @@ cd outreach/image-gallery
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt flask         # flask only needed for review_ui
 
-python download_model.py                      # ~64 MB into models/
+# The default ONNX (realesr-general-x4v3, ~5 MB) is committed under
+# models/. Only run convert_model.py if you want to regenerate it.
 python db.py                                  # creates gallery.db
 
 # Source-specific keys (only what you'll use)
@@ -169,7 +171,7 @@ outreach/image-gallery/
 
   discover.py                   Stage 1 CLI orchestrator
   enhance.py                    Stage 2: ONNX upscale + watermark + compress
-  download_model.py             one-shot RealESRGAN downloader
+  convert_model.py              one-shot .pth → .onnx exporter (rerun if weights change)
 
   scheduler.py                  next-free-slot logic
   review_ui.py                  Stage 3 Flask UI (side-by-side compare)
@@ -181,7 +183,7 @@ outreach/image-gallery/
   candidates/                   downloaded sources (gitignored)
   enhanced/                     upscaled outputs (gitignored)
   posted/                       archive of what shipped (gitignored)
-  models/                       ONNX weights cache (gitignored)
+  models/                       ONNX weights (committed: realesr-general-x4v3.onnx)
   gallery.db                    SQLite (committed; binary diff is small)
 
 .github/workflows/

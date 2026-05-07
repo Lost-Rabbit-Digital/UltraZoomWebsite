@@ -18,14 +18,11 @@ DB_PATH = ROOT / "gallery.db"
 # re-encodes JPEG quality until it fits.
 IMGUR_MAX_BYTES = 20 * 1024 * 1024
 
-# Default upscaler. Override via REALESRGAN_ONNX_PATH if you've downloaded a
-# different variant (e.g. anime, x2 plus). The x4plus general model is what
-# the browser extension ships.
-DEFAULT_REALESRGAN_URL = (
-    "https://huggingface.co/qualcomm/Real-ESRGAN-x4plus/resolve/main/"
-    "Real-ESRGAN-x4plus.onnx"
-)
-DEFAULT_MODEL_PATH = MODELS_DIR / "Real-ESRGAN-x4plus.onnx"
+# Default upscaler. The realesr-general-x4v3 ONNX is committed to the repo
+# (~5 MB) and regenerated from xinntao's .pth via convert_model.py if the
+# weights ever change. Override via REALESRGAN_ONNX_PATH to use a different
+# variant locally.
+DEFAULT_MODEL_PATH = MODELS_DIR / "realesr-general-x4v3.onnx"
 
 # Posting window: 10am ET to midnight ET, every 2 hours = 8 slots/day.
 # Stored as UTC hours in the queue. ET is UTC-5 (EST) or UTC-4 (EDT); the
