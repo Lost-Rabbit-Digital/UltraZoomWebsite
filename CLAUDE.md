@@ -26,17 +26,23 @@ public/
   images/              Icons and assets
 wrangler.jsonc         Cloudflare Workers config (static assets from dist/)
 astro.config.mjs       Astro configuration
-outreach/                Cold-email pipeline (Python). See outreach/README.md.
-  run_ultrazoom.py       UZ pipeline (--campaign realtors)
+outreach/                Cold-email + growth pipelines (Python). See outreach/README.md.
+  run_ultrazoom.py       UZ Realtors cold email (--campaign realtors)
   inbox/                 Apollo CSV drop folders, one per campaign
   campaigns/             Campaign briefs (strategy + Apollo filters)
   prompts/               Per-touch reference templates for Claude
+  comments-discovery/    Blog-comment opportunity finder + Flask review UI
+  image-gallery/         Reddit/Wikimedia/NASA → upscale+watermark → Imgur gallery
   (HailBytes outreach lives in the hailbytes-static repo.)
 .github/
   workflows/
-    static.yml                 CI pipeline
-    record-scroll.yml          Promotional video recording (Playwright)
-    outreach-ultrazoom.yml     UZ outreach (workflow_dispatch + push:outreach/inbox/**)
+    static.yml                       CI pipeline
+    record-scroll.yml                Promotional video recording (Playwright)
+    outreach-ultrazoom.yml           UZ outreach (workflow_dispatch + push:outreach/inbox/**)
+    comments-discovery.yml           Weekly comment-opportunity discovery
+    image-gallery-discover.yml       Daily image discovery + Real-ESRGAN enhance
+    image-gallery-post.yml           Every-2h Imgur gallery posting from queue
+    image-gallery-analytics.yml      Daily Imgur view/upvote sampling
   lighthouse/
     lighthouserc.json  Lighthouse CI config
 docs/

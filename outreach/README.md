@@ -11,6 +11,16 @@ repo only owns the Ultra Zoom Realtors campaign. (UZ Press cold email
 was retired in favor of $75-tier press releases — see
 `docs/press/ultrazoom-launch-press-release.md`.)
 
+Sibling pipelines under `outreach/`:
+
+* `outreach/comments-discovery/` — surfaces military/aerospace blog posts
+  where a zoom-and-enhance contribution fits in the comments. See its
+  README.
+* `outreach/image-gallery/` — daily Reddit/Wikimedia/NASA discovery,
+  ONNX Real-ESRGAN upscale + watermark, side-by-side review UI, and
+  every-2-hours Imgur public-gallery posting via GH Actions cron. See
+  its README.
+
 ```
                   ┌──────────────────┐
    manual         │  Apollo people   │
