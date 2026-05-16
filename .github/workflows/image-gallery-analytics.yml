@@ -4,6 +4,10 @@ name: Image gallery analytics
 # on every post younger than --max-age-days, writes a fresh row per post
 # into `analytics`, and dumps a CSV summary as a workflow artifact.
 #
+# Manual-only until IMGUR_* secrets are provisioned and there are real
+# posts to sample.  Re-enable the schedule block below once the pipeline
+# is ready to ship on its own.
+#
 # Required GitHub Secrets:
 #   IMGUR_CLIENT_ID, IMGUR_CLIENT_SECRET, IMGUR_REFRESH_TOKEN
 
@@ -14,9 +18,6 @@ on:
         description: 'Skip posts older than N days'
         required: false
         default: '60'
-  schedule:
-    # Once a day, 09:30 UTC.
-    - cron: '30 9 * * *'
 
 permissions:
   contents: write

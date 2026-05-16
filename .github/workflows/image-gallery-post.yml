@@ -1,14 +1,18 @@
 name: Image gallery posting
 
-# Stage 4 of the image-gallery pipeline.  Runs every 2 hours; on each tick
-# claims at most one queue row whose scheduled_at <= now and posts it to
-# Imgur (upload + gallery submit).  If the enhanced JPEG is missing on the
-# runner (e.g. cache evicted) we re-fetch the source URL from the candidate
-# row and re-run enhance.py for that single candidate.
+# Stage 4 of the image-gallery pipeline.  On each invocation claims at most
+# one queue row whose scheduled_at <= now and posts it to Imgur (upload +
+# gallery submit).  If the enhanced JPEG is missing on the runner (e.g.
+# cache evicted) we re-fetch the source URL from the candidate row and
+# re-run enhance.py for that single candidate.
 #
 # The committed `outreach/image-gallery/gallery.db` is the source of truth
-# for the queue.  Approve items locally, push, and the next cron tick will
-# pick them up.
+# for the queue.  Approve items locally and push; then trigger this workflow
+# (workflow_dispatch) to drain due rows.
+#
+# Manual-only until IMGUR_* secrets are provisioned and gallery.db has real
+# approved rows.  Re-enable the schedule block below once the pipeline is
+# ready to ship on its own.
 #
 # Required GitHub Secrets:
 #   IMGUR_CLIENT_ID, IMGUR_CLIENT_SECRET, IMGUR_REFRESH_TOKEN
@@ -26,11 +30,6 @@ on:
         required: false
         type: boolean
         default: true
-  schedule:
-    # Every 2 hours, on the hour. Cron is in UTC; the queue's scheduled_at
-    # is also UTC, so the only effect of the time of day is whether any
-    # row is actually due. Most ticks will be no-ops.
-    - cron: '0 */2 * * *'
 
 permissions:
   contents: write
